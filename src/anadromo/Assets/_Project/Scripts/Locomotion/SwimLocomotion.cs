@@ -6,18 +6,20 @@ namespace Anadromo.Locomotion
     [RequireComponent(typeof(Rigidbody))]
     public class SwimLocomotion : MonoBehaviour
     {
-        [Header("Input Actions")]
-        [SerializeField] private InputActionReference leftHandVelocity;
-        [SerializeField] private InputActionReference rightHandVelocity;
-        [SerializeField] private InputActionReference headRotation; // Triggers orientation
+        [Header("Input Actions (Use Position)")]
+        [SerializeField] private InputActionReference leftHandPosition;
+        [SerializeField] private InputActionReference rightHandPosition;
 
         [Header("Locomotion Settings")]
         [SerializeField] private float swimForceMultiplier = 50f;
         [SerializeField] private float dragInWater = 3f;
-        [SerializeField] private float swimThreshold = 0.5f; // Min velocity to count as a stroke
+        [SerializeField] private float swimThreshold = 0.5f;
 
         private Rigidbody rb;
-        private Transform headTransform; // Reference to the VR Camera
+        [SerializeField] private Transform headTransform;
+
+        private Vector3 lastLeftPos;
+        private Vector3 lastRightPos;
 
         private void Awake()
         {
@@ -28,26 +30,38 @@ namespace Anadromo.Locomotion
 
         private void OnEnable()
         {
-            leftHandVelocity.action.Enable();
-            rightHandVelocity.action.Enable();
-            headRotation.action.Enable();
+            if (leftHandPosition != null && leftHandPosition.action != null) leftHandPosition.action.Enable();
+            if (rightHandPosition != null && rightHandPosition.action != null) rightHandPosition.action.Enable();
         }
 
         private void OnDisable()
         {
-            leftHandVelocity.action.Disable();
-            rightHandVelocity.action.Disable();
-            headRotation.action.Disable();
+            if (leftHandPosition != null && leftHandPosition.action != null) leftHandPosition.action.Disable();
+            if (rightHandPosition != null && rightHandPosition.action != null) rightHandPosition.action.Disable();
+        }
+
+        private void Start()
+        {
+            if (leftHandPosition != null && leftHandPosition.action != null)
+                lastLeftPos = leftHandPosition.action.ReadValue<Vector3>();
+            if (rightHandPosition != null && rightHandPosition.action != null)
+                lastRightPos = rightHandPosition.action.ReadValue<Vector3>();
         }
 
         private void FixedUpdate()
         {
-            // Get raw velocities from controllers
-            Vector3 leftVel = leftHandVelocity.action.ReadValue<Vector3>();
-            Vector3 rightVel = rightHandVelocity.action.ReadValue<Vector3>();
+            if (leftHandPosition == null || rightHandPosition == null || leftHandPosition.action == null || rightHandPosition.action == null)
+                return;
 
-            // Calculate the stroke intensity (moving hands backwards propels you forwards)
-            // Simplified calculation: we take the backward Z velocity relative to the player
+            Vector3 currentLeftPos = leftHandPosition.action.ReadValue<Vector3>();
+            Vector3 currentRightPos = rightHandPosition.action.ReadValue<Vector3>();
+
+            Vector3 leftVel = (currentLeftPos - lastLeftPos) / Time.fixedDeltaTime;
+            Vector3 rightVel = (currentRightPos - lastRightPos) / Time.fixedDeltaTime;
+
+            lastLeftPos = currentLeftPos;
+            lastRightPos = currentRightPos;
+
             float strokeIntensity = 0f;
             
             if (leftVel.z < -swimThreshold) strokeIntensity += Mathf.Abs(leftVel.z);
@@ -61,7 +75,6 @@ namespace Anadromo.Locomotion
 
         private void ApplySwimForce(float intensity)
         {
-            // Swim direction is dictated by the head/torso (VR Camera) forward vector
             if (headTransform != null)
             {
                 Vector3 swimDirection = headTransform.forward;
@@ -69,14 +82,8 @@ namespace Anadromo.Locomotion
             }
             else
             {
-                // Fallback to local forward if head is not set
                 rb.AddForce(transform.forward * intensity * swimForceMultiplier, ForceMode.Force);
             }
-        }
-
-        public void SetHeadTransform(Transform head)
-        {
-            headTransform = head;
         }
     }
 }
