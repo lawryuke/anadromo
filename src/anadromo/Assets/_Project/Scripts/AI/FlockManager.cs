@@ -9,6 +9,19 @@ namespace Anadromo.AI
         public int numFish = 50;
         public Vector3 swimLimits = new Vector3(15, 5, 15);
 
+        [Header("Game Flow")]
+        public bool isGameStarted = false;
+        public float migrationZTarget = 120f;
+        public MonoBehaviour playerMovementScript;
+
+        [Header("Menu Phase (Inicio)")]
+        [Tooltip("Velocidad a la que flotan en el menú")]
+        public float menuFloatSpeed = 1.5f;
+        [Tooltip("Qué tanto suben y bajan (amplitud)")]
+        public float menuFloatAmplitude = 0.5f;
+        [Tooltip("Qué tanto giran hacia los lados mientras flotan")]
+        public float menuRotationSway = 15f;
+
         [Header("Boid Rules")]
         [Range(0.0f, 5.0f)] public float minSpeed = 1f;
         [Range(0.0f, 10.0f)] public float maxSpeed = 3f;
@@ -16,13 +29,15 @@ namespace Anadromo.AI
         [Range(1.0f, 5.0f)] public float rotationSpeed = 2f;
 
         [Header("Player Avoidance")]
-        public Transform player; // El XR Origin para que huyan de ti
+        public Transform player; 
         public float fleeDistance = 5f;
 
         public GameObject[] allFish { get; private set; }
 
         private void Start()
         {
+            if (playerMovementScript != null) playerMovementScript.enabled = false; // Bloquear jugador al inicio
+
             allFish = new GameObject[numFish];
             for (int i = 0; i < numFish; i++)
             {
@@ -39,6 +54,18 @@ namespace Anadromo.AI
                 if (boid != null)
                 {
                     boid.Initialize(this);
+                }
+            }
+        }
+
+        private void Update()
+        {
+            if (!isGameStarted && UnityEngine.InputSystem.Keyboard.current != null)
+            {
+                if (UnityEngine.InputSystem.Keyboard.current.jKey.wasPressedThisFrame)
+                {
+                    isGameStarted = true;
+                    if (playerMovementScript != null) playerMovementScript.enabled = true; // Desbloqueamos al jugador
                 }
             }
         }

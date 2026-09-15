@@ -8,69 +8,101 @@ namespace Anadromo.AI
         public float speed;
         private Vector3 targetDirection;
         private bool isFleeing = false;
+        
+        // Animación de flotar en menú
+        private float floatOffset;
+        private Vector3 startPos; // Guardamos su posición inicial para que no se escapen al infinito
 
         public void Initialize(FlockManager flockManager)
         {
             manager = flockManager;
             speed = Random.Range(manager.minSpeed, manager.maxSpeed);
             targetDirection = transform.forward;
+            floatOffset = Random.Range(0f, Mathf.PI * 2f); 
+            startPos = transform.position; // Guardar donde nacieron
         }
 
         private void Update()
         {
             if (manager == null) return;
             
+            // FASE 1: MENÚ (Pantalla de inicio, esperando la tecla J)
+            if (!manager.isGameStarted)
+            {
+                // Flotan suavemente en Y y X sin alejarse de su StartPos
+                float newY = startPos.y + Mathf.Sin(Time.time * manager.menuFloatSpeed + floatOffset) * manager.menuFloatAmplitude;
+                float newX = startPos.x + Mathf.Cos(Time.time * (manager.menuFloatSpeed * 0.5f) + floatOffset) * (manager.menuFloatAmplitude * 0.3f);
+                
+                transform.position = new Vector3(newX, newY, startPos.z);
+
+                // Rotan un poco de izquierda a derecha para verse vivos
+                float rotY = Mathf.Sin(Time.time * manager.menuFloatSpeed + floatOffset) * manager.menuRotationSway;
+                transform.rotation = Quaternion.Euler(0, rotY, 0); 
+                
+                return; // Cortamos el código aquí. No avanzan.
+            }
+
+            // FASE 2: MIGRACIÓN (Ya le diste a J, pero aún no llegan al Z:120)
+            if (transform.position.z < manager.migrationZTarget)
+            {
+                // Nadan directo hacia adelante
+                targetDirection = Vector3.forward;
+                
+                // Rotar
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetDirection), manager.rotationSpeed * Time.deltaTime);
+                
+                // Moverse
+                transform.Translate(0, 0, Time.deltaTime * speed);
+                return; // Cortamos aquí. Aún no se aplican las reglas de cardumen
+            }
+
+            // FASE 3: ZONA DE CORALES / FEEDING (Llegaron al Z:120)
+            // A partir de aquí, aplican sus reglas normales de cardumen y huyen
             isFleeing = false;
             
-            // 1. EVASIÓN URGENTE (Sobrescribe todas las demás reglas, incluso los límites)
+            // A. Evasión del jugador
             if (manager.player != null)
             {
                 float distToPlayer = Vector3.Distance(transform.position, manager.player.position);
                 if (distToPlayer < manager.fleeDistance)
                 {
                     Vector3 fleeDir = transform.position - manager.player.position;
-                    // Agregar un poco de aleatoriedad hacia arriba/abajo para que se dispersen bien
                     fleeDir.y += Random.Range(-1f, 1f); 
-                    
                     targetDirection = fleeDir.normalized; 
-                    speed = manager.maxSpeed * 3f; // ¡El triple de rápido al huir!
+                    speed = manager.maxSpeed * 3f; 
                     isFleeing = true;
                 }
             }
 
-            // 2. Si NO huye, verifica los límites de la caja imaginaria
+            // B. Reglas de Banco
             if (!isFleeing)
             {
-                Bounds b = new Bounds(manager.transform.position, manager.swimLimits * 2);
+                // ¡CORRECCIÓN! Centramos la "pecera invisible" en la zona de corales (Z: 120), no en donde nacieron.
+                Vector3 coralZoneCenter = new Vector3(manager.transform.position.x, manager.transform.position.y, manager.migrationZTarget + 10f);
+                Bounds b = new Bounds(coralZoneCenter, manager.swimLimits * 2);
+                
                 if (!b.Contains(transform.position))
                 {
-                    // Volver al centro de la caja
-                    targetDirection = manager.transform.position - transform.position;
+                    targetDirection = coralZoneCenter - transform.position;
                 }
                 else
                 {
-                    // Si está dentro de la caja y a salvo, aplica reglas de cardumen
                     ApplyFlockingRules(); 
                 }
             }
 
-            // 3. Rotar (Gira 5 VECES MÁS RÁPIDO si está huyendo)
+            // Rotar y Moverse en Fase 3
             float currentRotSpeed = isFleeing ? manager.rotationSpeed * 5f : manager.rotationSpeed;
-            
             if (targetDirection != Vector3.zero)
             {
-                transform.rotation = Quaternion.Slerp(transform.rotation,
-                    Quaternion.LookRotation(targetDirection),
-                    currentRotSpeed * Time.deltaTime);
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetDirection), currentRotSpeed * Time.deltaTime);
             }
-
-            // 4. Moverse
             transform.Translate(0, 0, Time.deltaTime * speed);
         }
 
         private void ApplyFlockingRules()
         {
-            if (Random.Range(0, 100) > 15) return; // Solo el 15% del tiempo procesa esto
+            if (Random.Range(0, 100) > 15) return; 
 
             GameObject[] gos = manager.allFish;
             Vector3 vCenter = Vector3.zero; 
@@ -106,7 +138,6 @@ namespace Anadromo.AI
                 speed = gSpeed / groupSize;
                 if (speed > manager.maxSpeed) speed = manager.maxSpeed;
                 if (speed < manager.minSpeed) speed = manager.minSpeed;
-
                 targetDirection = (vCenter + vAvoid) - transform.position;
             }
         }
