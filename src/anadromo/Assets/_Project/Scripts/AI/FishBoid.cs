@@ -8,6 +8,7 @@ namespace Anadromo.AI
         public float speed;
         private Vector3 targetDirection;
         private bool isFleeing = false;
+        private bool hasArrived;
         
         // Animación de flotar en menú
         private float floatOffset;
@@ -16,6 +17,7 @@ namespace Anadromo.AI
         public void Initialize(FlockManager flockManager)
         {
             manager = flockManager;
+            hasArrived = false;
             speed = Random.Range(manager.minSpeed, manager.maxSpeed);
             targetDirection = transform.forward;
             floatOffset = Random.Range(0f, Mathf.PI * 2f); 
@@ -42,11 +44,16 @@ namespace Anadromo.AI
                 return; // Cortamos el código aquí. No avanzan.
             }
 
-            // FASE 2: MIGRACIÓN (Ya le diste a J, pero aún no llegan al Z:120)
-            if (transform.position.z < manager.migrationZTarget)
+            // FASE 2: MIGRACIÓN (Ya le diste a J, pero aún no llegan a la zona)
+            if (!hasArrived && manager.krillZoneTarget != null)
             {
-                // Nadan directo hacia adelante
-                targetDirection = Vector3.forward;
+                hasArrived = Vector3.Distance(transform.position, manager.krillZoneTarget.position) <= manager.migrationStopDistance;
+            }
+
+            if (!hasArrived && manager.krillZoneTarget != null)
+            {
+                // Nadan directo hacia el objetivo
+                targetDirection = (manager.krillZoneTarget.position - transform.position).normalized;
                 
                 // Rotar
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetDirection), manager.rotationSpeed * Time.deltaTime);
@@ -56,7 +63,7 @@ namespace Anadromo.AI
                 return; // Cortamos aquí. Aún no se aplican las reglas de cardumen
             }
 
-            // FASE 3: ZONA DE CORALES / FEEDING (Llegaron al Z:120)
+            // FASE 3: ZONA DE CORALES / FEEDING
             // A partir de aquí, aplican sus reglas normales de cardumen y huyen
             isFleeing = false;
             
@@ -77,8 +84,10 @@ namespace Anadromo.AI
             // B. Reglas de Banco
             if (!isFleeing)
             {
-                // ¡CORRECCIÓN! Centramos la "pecera invisible" en la zona de corales (Z: 120), no en donde nacieron.
-                Vector3 coralZoneCenter = new Vector3(manager.transform.position.x, manager.transform.position.y, manager.migrationZTarget + 10f);
+                // La velocidad de huida no debe persistir al perder al jugador.
+                speed = Mathf.Clamp(speed, manager.minSpeed, manager.maxSpeed);
+                // Centramos la "pecera invisible" en la zona de los krills
+                Vector3 coralZoneCenter = manager.krillZoneTarget != null ? manager.krillZoneTarget.position : manager.transform.position;
                 Bounds b = new Bounds(coralZoneCenter, manager.swimLimits * 2);
                 
                 if (!b.Contains(transform.position))

@@ -1,6 +1,5 @@
 using UnityEngine;
 using Anadromo.Systems;
-using Anadromo.AI;
 
 namespace Anadromo.Mechanics
 {
@@ -28,7 +27,7 @@ namespace Anadromo.Mechanics
         {
             // Verificamos si lo que chocó con la boca es una Presa (Prey) en lugar de un compañero
             Prey prey = other.GetComponent<Prey>();
-            if (prey != null)
+            if (prey != null && prey.isActiveAndEnabled && energySystem != null)
             {
                 EatPrey(prey);
             }
@@ -37,7 +36,8 @@ namespace Anadromo.Mechanics
         private void EatPrey(Prey prey)
         {
             float energyGained = prey.energyValue;
-            
+            // Destroy se completa al final del frame: impedir comer dos veces la misma presa.
+            prey.enabled = false;
             // Destruir la presa para que desaparezca
             Destroy(prey.gameObject);
 

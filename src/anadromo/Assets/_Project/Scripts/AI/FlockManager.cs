@@ -11,8 +11,10 @@ namespace Anadromo.AI
 
         [Header("Game Flow")]
         public bool isGameStarted = false;
-        public float migrationZTarget = 120f;
+        public Transform krillZoneTarget;
+        public float migrationStopDistance = 15f;
         public MonoBehaviour playerMovementScript;
+        [SerializeField] private MonoBehaviour[] additionalMovementScripts = new MonoBehaviour[0];
 
         [Header("Menu Phase (Inicio)")]
         [Tooltip("Velocidad a la que flotan en el menú")]
@@ -36,7 +38,7 @@ namespace Anadromo.AI
 
         private void Start()
         {
-            if (playerMovementScript != null) playerMovementScript.enabled = false; // Bloquear jugador al inicio
+            SetPlayerMovementEnabled(isGameStarted);
 
             allFish = new GameObject[numFish];
             for (int i = 0; i < numFish; i++)
@@ -64,9 +66,23 @@ namespace Anadromo.AI
             {
                 if (UnityEngine.InputSystem.Keyboard.current.jKey.wasPressedThisFrame)
                 {
-                    isGameStarted = true;
-                    if (playerMovementScript != null) playerMovementScript.enabled = true; // Desbloqueamos al jugador
+                    StartGame();
                 }
+            }
+        }
+
+        public void StartGame()
+        {
+            isGameStarted = true;
+            SetPlayerMovementEnabled(true);
+        }
+
+        private void SetPlayerMovementEnabled(bool value)
+        {
+            if (playerMovementScript != null) playerMovementScript.enabled = value;
+            foreach (MonoBehaviour movement in additionalMovementScripts)
+            {
+                if (movement != null) movement.enabled = value;
             }
         }
 
