@@ -48,7 +48,9 @@ namespace Anadromo.Mechanics
 
         private void PickNewTarget()
         {
-            targetPos = startPos + Random.insideUnitSphere * roamRadius;
+            Vector3 randomOffset = Random.insideUnitSphere * roamRadius;
+            randomOffset.y *= 0.1f; // Reducir la variación en el eje Y para que no floten mucho hacia arriba o abajo
+            targetPos = startPos + randomOffset;
         }
     }
 }
