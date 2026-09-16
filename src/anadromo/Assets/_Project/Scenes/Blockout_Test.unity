@@ -1188,7 +1188,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 133088351}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c2fadf230d1919748a9aa21d40f74619, type: 3}
   m_Name: 
@@ -21503,7 +21503,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1689466715}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d8384792367b1562fbad2ce3950d5d2c, type: 3}
   m_Name: 
@@ -21548,7 +21548,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1689466715}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2b830a78a28fa0a46b958a45ff6bf384, type: 3}
   m_Name: 
@@ -26081,7 +26081,7 @@ MonoBehaviour:
   fishPrefab: {fileID: 1275258449491632682, guid: 5ca732fe7869983478110e4f8bc337b5, type: 3}
   numFish: 40
   swimLimits: {x: 5, y: 1, z: 3}
-  isGameStarted: 0
+  isGameStarted: 1
   krillZoneTarget: {fileID: 1219681805}
   migrationStopDistance: 3
   playerMovementScript: {fileID: 0}
