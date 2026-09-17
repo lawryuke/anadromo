@@ -1,0 +1,13 @@
+{
+  "duration_seconds": 6,
+  "ascent_meters": 10,
+  "length_meters_approx": 6,
+  "frames": [
+    1,
+    181
+  ],
+  "fps": 30,
+  "bone_count": 106,
+  "source_pose_preservation_error_m": 1.3654229749284686e-05,
+  "root_motion_bone": "AscensoRoot"
+}
