@@ -44,6 +44,8 @@ namespace Anadromo.AI
                 return; // Cortamos el código aquí. No avanzan.
             }
 
+            transform.position += Anadromo.Act1.OceanEnvironment.CurrentAt(transform.position) * Time.deltaTime;
+
             // FASE 2: MIGRACIÓN (Ya le diste a J, pero aún no llegan a la zona)
             if (!hasArrived && manager.krillZoneTarget != null)
             {

@@ -9,6 +9,8 @@ namespace Anadromo.Mechanics
         [Header("Feeding Settings")]
         [SerializeField] private float mouthRadius = 1.0f; // Tamaño de la boca
 
+        public UnityEngine.Events.UnityEvent OnPreyConsumed = new UnityEngine.Events.UnityEvent();
+
         private EnergySystem energySystem;
         private SphereCollider mouthCollider;
 
@@ -45,6 +47,7 @@ namespace Anadromo.Mechanics
             if (energySystem != null)
             {
                 energySystem.RestoreEnergy(energyGained);
+                OnPreyConsumed.Invoke();
                 Debug.Log($"¡Presa comida! Recuperaste {energyGained} de energía.");
             }
         }

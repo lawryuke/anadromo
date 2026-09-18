@@ -50,6 +50,9 @@ namespace Anadromo.Locomotion
 
         private void FixedUpdate()
         {
+            if (!rb.isKinematic)
+                rb.AddForce(Anadromo.Act1.OceanEnvironment.PlayerCurrentAt(rb.position) * dragInWater, ForceMode.Acceleration);
+
             if (leftHandPosition == null || rightHandPosition == null || leftHandPosition.action == null || rightHandPosition.action == null)
                 return;
 

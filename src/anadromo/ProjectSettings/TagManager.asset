@@ -2,19 +2,28 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
-  tags: []
+  serializedVersion: 3
+  tags:
+  - Predator
+  - Food
+  - Forager
+  - Obstacle
+  - Seabed
+  - SeabedPrefab
+  - BoidBounds
+  - MeshHabitat
+  - Location
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Terrain
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
+  - Fauna
+  - WaterSurface
+  - CameraColliders
+  - Debris
   - 
   - 
   - 
@@ -43,34 +52,10 @@ TagManager:
     locked: 0
   m_RenderingLayers:
   - Default
-  - Light Layer 1
+  - Receive Decals
   - Light Layer 2
   - Light Layer 3
   - Light Layer 4
   - Light Layer 5
   - Light Layer 6
   - Light Layer 7
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 

@@ -29,6 +29,12 @@ namespace Anadromo.Systems
             ConsumeEnergy(decay);
         }
 
+        public void SetEnergy(float value)
+        {
+            currentEnergy = Mathf.Clamp(value, 0f, maxEnergy);
+            OnEnergyChanged?.Invoke(GetEnergyPercentage());
+        }
+
         public void SetSprinting(bool sprinting)
         {
             isSprinting = sprinting;

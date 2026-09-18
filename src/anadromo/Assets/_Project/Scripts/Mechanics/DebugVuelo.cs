@@ -64,13 +64,13 @@ namespace Anadromo.Mechanics
             if (Keyboard.current.qKey.isPressed) moveDir -= Vector3.up;
 
             movement = moveDir.normalized;
-            if (body == null) transform.position += movement * speed * Time.deltaTime;
+            if (body == null) transform.position += (movement * speed + Anadromo.Act1.OceanEnvironment.PlayerCurrentAt(transform.position)) * Time.deltaTime;
         }
 
         private void FixedUpdate()
         {
             if (body != null)
-                body.MovePosition(body.position + movement * speed * Time.fixedDeltaTime);
+                body.MovePosition(body.position + (movement * speed + Anadromo.Act1.OceanEnvironment.PlayerCurrentAt(body.position)) * Time.fixedDeltaTime);
         }
     }
 }
