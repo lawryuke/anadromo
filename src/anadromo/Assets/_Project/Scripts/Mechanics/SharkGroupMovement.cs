@@ -14,9 +14,6 @@ public class SharkGroupMovement : MonoBehaviour
     public float delayMinimo = 0f;
     [Tooltip("Tiempo máximo de espera antes de que salga el siguiente tiburón")]
     public float delayMaximo = 1.5f;
-    
-    [Tooltip("Si está marcado, los tiburones irán y regresarán repetidamente.")]
-    public bool regresarAutomaticamente = false;
 
     [Header("Control de Teclado")]
     [Tooltip("La tecla que debes presionar para que este grupo empiece a salir")]
@@ -31,7 +28,6 @@ public class SharkGroupMovement : MonoBehaviour
         public Vector3 posInicio;
         public Vector3 posFin;
         public bool isMoving;
-        public bool moviendoHaciaFin;
     }
 
     private List<SharkData> sharks = new List<SharkData>();
@@ -48,8 +44,7 @@ public class SharkGroupMovement : MonoBehaviour
                 transform = child, 
                 posInicio = child.position, // Guarda su posición original en la formación
                 posFin = child.position + desplazamiento, // Calcula hasta dónde debe llegar
-                isMoving = false, 
-                moviendoHaciaFin = true 
+                isMoving = false
             });
         }
     }
@@ -68,24 +63,14 @@ public class SharkGroupMovement : MonoBehaviour
         {
             if (shark.isMoving)
             {
-                // Decidir hacia dónde nos movemos
-                Vector3 objetivoActual = shark.moviendoHaciaFin ? shark.posFin : shark.posInicio;
-
-                // Mover el tiburón hacia el punto objetivo
-                shark.transform.position = Vector3.MoveTowards(shark.transform.position, objetivoActual, velocidad * Time.deltaTime);
+                // Mover el tiburón hacia el punto objetivo final (arriba)
+                shark.transform.position = Vector3.MoveTowards(shark.transform.position, shark.posFin, velocidad * Time.deltaTime);
 
                 // Comprobar si ya llegó al punto
-                if (Vector3.Distance(shark.transform.position, objetivoActual) < 0.01f)
+                if (Vector3.Distance(shark.transform.position, shark.posFin) < 0.01f)
                 {
-                    if (regresarAutomaticamente)
-                    {
-                        shark.moviendoHaciaFin = !shark.moviendoHaciaFin;
-                    }
-                    else
-                    {
-                        // Si no debe regresar, se detiene
-                        shark.isMoving = false; 
-                    }
+                    // Se detiene al llegar arriba
+                    shark.isMoving = false; 
                 }
             }
         }

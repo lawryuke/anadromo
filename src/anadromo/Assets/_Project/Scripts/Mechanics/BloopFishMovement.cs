@@ -14,7 +14,6 @@ public class BloopFishMovement : MonoBehaviour
     public float velocidad = 5f;
 
     private bool animacionIniciada = false;
-    private bool moviendoHaciaFin = true;
 
     void Start()
     {
@@ -33,14 +32,11 @@ public class BloopFishMovement : MonoBehaviour
         // Si ya presionaste 5, el pez se empieza a mover
         if (animacionIniciada)
         {
-            // Elegir el destino actual dependiendo de la dirección
-            Vector3 objetivoActual = moviendoHaciaFin ? puntoFin : puntoInicio;
-
-            // Mover progresivamente al pez a velocidad constante
-            transform.position = Vector3.MoveTowards(transform.position, objetivoActual, velocidad * Time.deltaTime);
+            // Mover progresivamente al pez a velocidad constante hacia el punto final
+            transform.position = Vector3.MoveTowards(transform.position, puntoFin, velocidad * Time.deltaTime);
 
             // Si el pez llega exactamente a su objetivo, se detiene
-            if (Vector3.Distance(transform.position, objetivoActual) < 0.01f)
+            if (Vector3.Distance(transform.position, puntoFin) < 0.01f)
             {
                 animacionIniciada = false;
             }

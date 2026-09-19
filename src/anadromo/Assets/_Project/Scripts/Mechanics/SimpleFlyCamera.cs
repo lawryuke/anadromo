@@ -10,6 +10,7 @@ public class SimpleFlyCamera : MonoBehaviour
 
     private float pitch = 0f;
     private float yaw = 0f;
+    private Rigidbody rb;
 
     private void Start()
     {
@@ -21,6 +22,8 @@ public class SimpleFlyCamera : MonoBehaviour
         // Bloquear el cursor en el centro y ocultarlo
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        rb = GetComponent<Rigidbody>();
     }
 
     private void Update()
@@ -61,6 +64,15 @@ public class SimpleFlyCamera : MonoBehaviour
         if (keyboard.eKey.isPressed) direction += transform.up;
         if (keyboard.qKey.isPressed) direction -= transform.up;
 
-        transform.position += direction * currentSpeed * Time.deltaTime;
+        direction.Normalize();
+
+        if (rb != null && !rb.isKinematic)
+        {
+            rb.linearVelocity = direction * currentSpeed;
+        }
+        else
+        {
+            transform.position += direction * currentSpeed * Time.deltaTime;
+        }
     }
 }
