@@ -13,6 +13,8 @@ TagManager:
   - BoidBounds
   - MeshHabitat
   - Location
+  - Depredator_Salmon
+  - Food_Krill
   layers:
   - Default
   - TransparentFX

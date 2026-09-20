@@ -13,8 +13,25 @@ namespace Anadromo.Mechanics
         public bool generateOnStart = true;
 
         [Header("Orientación inicial (opcional)")]
-        [Tooltip("Al generar, el eje local +Z de cada copia apunta a este objeto. Tiene prioridad sobre Random Yaw; no hay seguimiento posterior.")]
+        [Tooltip("Al generar, cada copia apunta a este objeto conservando la corrección del modelo. Tiene prioridad sobre Random Yaw; no hay seguimiento posterior.")]
         public Transform targetObject;
+
+        [Header("Orientación del modelo (compartida con el nado)")]
+        [Tooltip("Conservar la inclinación y el giro lateral del Source Object, quitando solo su rumbo Y. Por ejemplo, X=-90 en un modelo importado vertical.")]
+        public bool useSourceModelRotation = true;
+        [Tooltip("Corrección del modelo respecto a un rumbo +Z con arriba +Y. Se usa si Use Source Model Rotation está desactivado. Regenera tras cambiarla.")]
+        public Vector3 modelRotationOffset;
+
+        public Quaternion ModelRotationCorrection
+        {
+            get
+            {
+                if (!useSourceModelRotation || sourceObject == null)
+                    return Quaternion.Euler(modelRotationOffset);
+                Quaternion sourceRotation = sourceObject.transform.rotation;
+                return Quaternion.Inverse(Quaternion.Euler(0f, sourceRotation.eulerAngles.y, 0f)) * sourceRotation;
+            }
+        }
 
         [Header("Caja local (se mueve, rota y escala con este objeto)")]
         public Vector3 center;
@@ -36,6 +53,23 @@ namespace Anadromo.Mechanics
         [SerializeField, HideInInspector] private string lastGenerationMessage;
         public string LastGenerationMessage => lastGenerationMessage;
         public IReadOnlyList<GameObject> GeneratedObjects => generated;
+
+        public Quaternion GetInitialRotation(Vector3 position, Quaternion fallback)
+        {
+            Vector3 targetPosition;
+            if (targetObject != null) targetPosition = targetObject.position;
+            else
+            {
+                SwimGroupController controller = GetComponent<SwimGroupController>();
+                if (controller == null || !controller.isActiveAndEnabled ||
+                    !controller.TryGetSharkInitialTarget(out targetPosition)) return fallback;
+            }
+            Vector3 direction = targetPosition - position;
+            if (direction.sqrMagnitude < 0.00000001f) return fallback;
+            Vector3 forward = direction.normalized;
+            Vector3 up = Mathf.Abs(Vector3.Dot(forward, Vector3.up)) > 0.999f ? Vector3.forward : Vector3.up;
+            return Quaternion.LookRotation(forward, up) * ModelRotationCorrection;
+        }
 
         private void Start()
         {
@@ -68,6 +102,7 @@ namespace Anadromo.Mechanics
 
             ClearGenerated();
             var random = new System.Random(seed);
+            Quaternion baseRotation = Quaternion.Euler(0f, sourceObject.transform.eulerAngles.y, 0f) * ModelRotationCorrection;
             var placedColliders = new List<Collider>();
             var placedVisualBounds = new List<Bounds>();
             int outsideAttempts = 0;
@@ -101,19 +136,9 @@ namespace Anadromo.Mechanics
                         (float)random.NextDouble() - 0.5f));
                     Vector3 position = transform.TransformPoint(localPoint);
                     Quaternion rotation = randomYaw
-                        ? Quaternion.AngleAxis((float)random.NextDouble() * 360f, transform.up) * sourceObject.transform.rotation
-                        : sourceObject.transform.rotation;
-                    if (targetObject != null)
-                    {
-                        Vector3 direction = targetObject.position - position;
-                        if (direction.sqrMagnitude > 0.00000001f)
-                        {
-                            Vector3 forward = direction.normalized;
-                            Vector3 up = Mathf.Abs(Vector3.Dot(forward, Vector3.up)) > 0.999f
-                                ? Vector3.forward : Vector3.up;
-                            rotation = Quaternion.LookRotation(forward, up);
-                        }
-                    }
+                        ? Quaternion.AngleAxis((float)random.NextDouble() * 360f, transform.up) * baseRotation
+                        : baseRotation;
+                    rotation = GetInitialRotation(position, rotation);
                     // Validate containment and collisions with the final initial orientation.
                     candidate.transform.SetPositionAndRotation(position, rotation);
                     Physics.SyncTransforms();
