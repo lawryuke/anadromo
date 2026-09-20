@@ -6,13 +6,22 @@ using UnityEngine;
 [CustomEditor(typeof(BoxObjectSpawner))]
 public class BoxObjectSpawnerEditor : Editor
 {
+    private readonly UnityEditor.IMGUI.Controls.BoxBoundsHandle box =
+        new UnityEditor.IMGUI.Controls.BoxBoundsHandle();
+
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
         EditorGUILayout.HelpBox("Arrastra el objeto de Hierarchy a Source Object. La caja no necesita Collider. " +
+            "En Scene: W mueve el generador; R permite ajustar las caras de la caja. " +
             "Los MeshCollider no convexos se comprueban mediante sus bounds (más conservador). " +
             "La separación se comprueba solo al generar.", MessageType.Info);
         var spawner = (BoxObjectSpawner)target;
+        if (spawner.GetComponent<SwimGroupController>() == null && !EditorUtility.IsPersistent(spawner))
+            if (GUILayout.Button("Añadir controlador de nado al grupo"))
+                Undo.AddComponent<SwimGroupController>(spawner.gameObject);
+        if (!string.IsNullOrEmpty(spawner.LastGenerationMessage))
+            EditorGUILayout.HelpBox(spawner.LastGenerationMessage, MessageType.Info);
         using (new EditorGUI.DisabledScope(EditorUtility.IsPersistent(spawner)))
         {
             if (GUILayout.Button("Generar / regenerar")) Run(spawner, true);
@@ -39,8 +48,11 @@ public class BoxObjectSpawnerEditor : Editor
 
     private void OnSceneGUI()
     {
+        // Do not register bounds controls while moving or rotating: they can capture
+        // mouse input intended for Unity's standard Transform handles.
+        if (Tools.current != Tool.Scale || Tools.viewToolActive) return;
+
         var spawner = (BoxObjectSpawner)target;
-        var box = new UnityEditor.IMGUI.Controls.BoxBoundsHandle();
         using (new Handles.DrawingScope(Color.cyan, spawner.transform.localToWorldMatrix))
         {
             box.center = spawner.center;
@@ -54,6 +66,8 @@ public class BoxObjectSpawnerEditor : Editor
                 spawner.size = box.size;
                 PrefabUtility.RecordPrefabInstancePropertyModifications(spawner);
                 EditorUtility.SetDirty(spawner);
+                if (!Application.isPlaying)
+                    EditorSceneManager.MarkSceneDirty(spawner.gameObject.scene);
             }
         }
     }
