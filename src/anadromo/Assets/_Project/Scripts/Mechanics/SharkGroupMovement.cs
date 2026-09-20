@@ -10,6 +10,11 @@ public class SharkGroupMovement : MonoBehaviour
 
     [Header("Control de Velocidad y Retraso")]
     public float velocidad = 6f;
+    [Header("Nado natural")]
+    public Shader swimShader;
+    [Min(.1f)] public float aceleracion = 1.8f;
+    [Range(0, 1)] public float variacionVelocidad = .12f;
+    [Range(0, 1)] public float amplitudTrayectoria = .28f;
     [Tooltip("Tiempo mínimo de espera antes de que salga el siguiente tiburón")]
     public float delayMinimo = 0f;
     [Tooltip("Tiempo máximo de espera antes de que salga el siguiente tiburón")]
@@ -24,10 +29,9 @@ public class SharkGroupMovement : MonoBehaviour
     // Clase interna para guardar el estado individual de cada tiburón
     private class SharkData
     {
-        public Transform transform;
-        public Vector3 posInicio;
         public Vector3 posFin;
-        public bool isMoving;
+        public NaturalSwimPath movement;
+        public float speed;
     }
 
     private List<SharkData> sharks = new List<SharkData>();
@@ -40,40 +44,40 @@ public class SharkGroupMovement : MonoBehaviour
         // Recopilamos todos los tiburones hijos manteniendo su formación original
         foreach (Transform child in transform)
         {
+            var movement = child.GetComponent<NaturalSwimPath>();
+            if (!movement) movement = child.gameObject.AddComponent<NaturalSwimPath>();
+            movement.acceleration = aceleracion;
+            movement.courseWidth = amplitudTrayectoria;
+            movement.turnSpeed = 42f;
+            movement.maxBankAngle = 20f;
+            movement.orientToCourse = true;
+
+            var animation = child.GetComponent<SharkSwimAnimation>();
+            if (!animation) animation = child.gameObject.AddComponent<SharkSwimAnimation>();
+            animation.Configure(swimShader ? swimShader : Shader.Find("Anadromo/White Shark Natural Swim"));
+            
             sharks.Add(new SharkData { 
-                transform = child, 
-                posInicio = child.position, // Guarda su posición original en la formación
                 posFin = child.position + desplazamiento, // Calcula hasta dónde debe llegar
-                isMoving = false
+                movement = movement,
+                speed = velocidad * Random.Range(1 - variacionVelocidad, 1 + variacionVelocidad)
             });
         }
     }
 
     void Update()
     {
-        // Esperar a que se presione la tecla configurada
-        if (!animacionIniciada && Input.GetKeyDown(teclaParaIniciar))
+        // Esperar a que se presione la tecla configurada (Alfa o Teclado numérico)
+        if (!animacionIniciada && (Input.GetKeyDown(teclaParaIniciar) || (teclaParaIniciar == KeyCode.Alpha4 && Input.GetKeyDown(KeyCode.Keypad4))))
         {
-            animacionIniciada = true;
-            StartCoroutine(LanzarTiburonesAleatoriamente());
+            IniciarGrupo();
         }
+    }
 
-        // Mover individualmente a los tiburones que ya recibieron la orden de salir
-        foreach (var shark in sharks)
-        {
-            if (shark.isMoving)
-            {
-                // Mover el tiburón hacia el punto objetivo final (arriba)
-                shark.transform.position = Vector3.MoveTowards(shark.transform.position, shark.posFin, velocidad * Time.deltaTime);
-
-                // Comprobar si ya llegó al punto
-                if (Vector3.Distance(shark.transform.position, shark.posFin) < 0.01f)
-                {
-                    // Se detiene al llegar arriba
-                    shark.isMoving = false; 
-                }
-            }
-        }
+    public void IniciarGrupo()
+    {
+        if (animacionIniciada) return;
+        animacionIniciada = true;
+        StartCoroutine(LanzarTiburonesAleatoriamente());
     }
 
     IEnumerator LanzarTiburonesAleatoriamente()
@@ -93,12 +97,10 @@ public class SharkGroupMovement : MonoBehaviour
         // Lanzar uno por uno con un tiempo aleatorio de diferencia
         foreach (var shark in tiburonesPorLanzar)
         {
-            shark.isMoving = true; // Este tiburón en específico arranca
+            if (shark.movement) shark.movement.Begin(shark.posFin, shark.speed);
             
-            // Elegir un tiempo de espera aleatorio entre 0 y 1.5 segundos (configurable)
+            // Elegir un tiempo de espera aleatorio entre delayMinimo y delayMaximo
             float delay = Random.Range(delayMinimo, delayMaximo);
-            
-            // Esperar esos segundos antes de que el ciclo pase al siguiente tiburón
             yield return new WaitForSeconds(delay);
         }
     }

@@ -2020,7 +2020,7 @@
     "m_Group": {
         "m_Id": ""
     },
-    "m_Name": "_DECAL_NORMAL_BLEND_LOW",
+    "m_Name": "_WATER_CAUSTICS_DECAL_BLEND_LOW",
     "m_DrawState": {
         "m_Expanded": true,
         "m_Position": {
@@ -2312,10 +2312,10 @@
     "m_Guid": {
         "m_GuidSerialized": "a427a8cd-b94b-4820-b9a6-e32d4559bb92"
     },
-    "m_Name": "_DECAL_NORMAL_BLEND_LOW",
+    "m_Name": "_WATER_CAUSTICS_DECAL_BLEND_LOW",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "_DECAL_NORMAL_BLEND_LOW",
-    "m_DefaultReferenceName": "_DECAL_NORMAL_BLEND_LOW",
+    "m_RefNameGeneratedByDisplayName": "_WATER_CAUSTICS_DECAL_BLEND_LOW",
+    "m_DefaultReferenceName": "_WATER_CAUSTICS_DECAL_BLEND_LOW",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": false,
     "m_UseCustomSlotLabel": false,

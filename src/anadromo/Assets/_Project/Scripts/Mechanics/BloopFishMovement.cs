@@ -10,15 +10,23 @@ public class BloopFishMovement : MonoBehaviour
     public Vector3 puntoFin = new Vector3(12.9899998f, 80f, 19.0599995f);
 
     [Header("Configuración")]
-    [Tooltip("Velocidad constante de movimiento")]
-    public float velocidad = 5f;
+    [Tooltip("Velocidad constante de movimiento de ascenso vertical")]
+    public float velocidad = 5.0f;
 
     private bool animacionIniciada = false;
+    private NaturalSwimPath movimiento;
 
     void Start()
     {
         // Colocamos al pez en la posición de inicio al arrancar el juego
         transform.position = puntoInicio;
+        movimiento = GetComponent<NaturalSwimPath>();
+        if (!movimiento) movimiento = gameObject.AddComponent<NaturalSwimPath>();
+        movimiento.acceleration = 0.9f;
+        movimiento.courseWidth = .08f;
+        // Se mantiene orientToCourse en false para conservar la postura vertical natural del modelo al emerger hacia arriba
+        movimiento.orientToCourse = false;
+        if (!GetComponent<BloopSwimAnimation>()) gameObject.AddComponent<BloopSwimAnimation>();
     }
 
     void Update()
@@ -26,20 +34,16 @@ public class BloopFishMovement : MonoBehaviour
         // Detectar si el usuario presiona la tecla '5' (alfanumérica o del teclado numérico)
         if (Input.GetKeyDown(KeyCode.Alpha5) || Input.GetKeyDown(KeyCode.Keypad5))
         {
-            animacionIniciada = true; // Empieza el movimiento
+            IniciarMovimiento();
         }
 
-        // Si ya presionaste 5, el pez se empieza a mover
-        if (animacionIniciada)
-        {
-            // Mover progresivamente al pez a velocidad constante hacia el punto final
-            transform.position = Vector3.MoveTowards(transform.position, puntoFin, velocidad * Time.deltaTime);
+        if (animacionIniciada && !movimiento.IsSwimming) animacionIniciada = false;
+    }
 
-            // Si el pez llega exactamente a su objetivo, se detiene
-            if (Vector3.Distance(transform.position, puntoFin) < 0.01f)
-            {
-                animacionIniciada = false;
-            }
-        }
+    public void IniciarMovimiento()
+    {
+        if (animacionIniciada || !movimiento) return;
+        animacionIniciada = true;
+        movimiento.Begin(puntoFin, velocidad);
     }
 }

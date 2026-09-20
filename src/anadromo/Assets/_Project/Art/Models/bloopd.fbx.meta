@@ -3,7 +3,37 @@ guid: 74a42210367d8e84c9956abbd18b0305
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Bloopbody
+    second: {fileID: 2100000, guid: 33060efd46384f18a6096a81a464b1f1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mouth
+    second: {fileID: 2100000, guid: 506f400b090246119c6433ebe91d2059, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bloopfin
+    second: {fileID: 2100000, guid: 653c0922f11445d1ba3730cacfa5fd91, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bloopeye
+    second: {fileID: 2100000, guid: 5d8efc6b5e024d93a50884251835f5b2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: toothtop
+    second: {fileID: 2100000, guid: 02866d8b85f942f7841f50c2807579db, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: toothgum
+    second: {fileID: 2100000, guid: 10ea85da7c85403ca3736c4fde4da8fe, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
