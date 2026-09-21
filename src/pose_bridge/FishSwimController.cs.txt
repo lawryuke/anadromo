@@ -1,0 +1,87 @@
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+using UnityEngine;
+
+[Serializable]
+public class SwimAction
+{
+    public string action;
+    public float speed;
+}
+
+/// <summary>
+/// Recibe comandos UDP del servidor Python (pose_swim_server.py)
+/// y mueve/gira este GameObject en consecuencia.
+/// Formato esperado: {"action":"forward|turn_left|turn_right|idle","speed":float}
+/// </summary>
+public class FishSwimController : MonoBehaviour
+{
+    public int listenPort = 5065;
+    public float forwardMultiplier = 2f;
+    public float turnMultiplier = 1f;
+
+    private UdpClient udpClient;
+    private Thread receiveThread;
+    private volatile string latestJson = null;
+    private readonly object lockObj = new object();
+
+    void Start()
+    {
+        udpClient = new UdpClient(listenPort);
+        receiveThread = new Thread(ReceiveLoop) { IsBackground = true };
+        receiveThread.Start();
+    }
+
+    private void ReceiveLoop()
+    {
+        IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, listenPort);
+        while (true)
+        {
+            try
+            {
+                byte[] data = udpClient.Receive(ref remoteEP);
+                string json = Encoding.UTF8.GetString(data);
+                lock (lockObj) { latestJson = json; }
+            }
+            catch (Exception)
+            {
+                break; // socket cerrado al salir
+            }
+        }
+    }
+
+    void Update()
+    {
+        string json;
+        lock (lockObj) { json = latestJson; }
+        if (string.IsNullOrEmpty(json)) return;
+
+        SwimAction action = JsonUtility.FromJson<SwimAction>(json);
+        if (action == null) return;
+
+        switch (action.action)
+        {
+            case "forward":
+                transform.Translate(Vector3.forward * action.speed * forwardMultiplier * Time.deltaTime);
+                break;
+            case "turn_left":
+                transform.Rotate(Vector3.up, -action.speed * turnMultiplier * Time.deltaTime);
+                break;
+            case "turn_right":
+                transform.Rotate(Vector3.up, action.speed * turnMultiplier * Time.deltaTime);
+                break;
+            case "idle":
+            default:
+                break;
+        }
+    }
+
+    void OnApplicationQuit()
+    {
+        try { receiveThread?.Abort(); } catch { /* ignore */ }
+        udpClient?.Close();
+    }
+}
