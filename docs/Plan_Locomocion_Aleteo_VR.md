@@ -73,43 +73,31 @@ XR Origin (VR)               ← XR Origin component (Room Scale)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                   INPUT (cada frame)                        │
-│  - Posición Y mano izquierda (del controller VR)            │
-│  - Posición Y mano derecha (del controller VR)              │
-│  - Rotación headset (automática vía TrackedPoseDriver)      │
+│                 PYTHON SERVER (pose_swim_server.py)         │
+│  1. Captura de Webcam (OpenCV)                              │
+│  2. MediaPipe Pose: Extrae keypoints 2D (Cadera, Hombro, Codo)│
+│  3. Cálculo de Ángulos: Calcula el ángulo del brazo/hombro  │
+│  4. Máquina de Estados: Transiciones up->half-down->down    │
+│     (El "flap" se emite al llegar a 'down')                 │
+│  5. Sincronía: Si ambos bajan en ventana < 0.2s = 'forward' │
+│  6. UDP Socket: Envía JSON a Unity {"action":"...", "speed"}│
 └─────────┬───────────────────────────────────────────────────┘
-          │
+          │ (Red UDP 127.0.0.1:5065)
           ▼
 ┌─────────────────────────────────────────────────────────────┐
-│              DETECCIÓN DE ALETEO (FlapDetector)             │
-│  1. Calcular velocidad vertical (deltaY / deltaTime)        │
-│  2. Detectar "flap" cuando velocidad Y baja supera umbral   │
-│     (movimiento descendente = parte potente del aleteo)      │
-│  3. Anti-spam: cooldown mínimo entre flaps (~0.2s)          │
-│  4. Output: flapLeft (bool+intensidad),                     │
-│             flapRight (bool+intensidad)                     │
-└─────────┬───────────────────────────────────────────────────┘
-          │
-          ▼
-┌─────────────────────────────────────────────────────────────┐
-│           LÓGICA DE MOVIMIENTO (FlapSwimController)         │
+│           LÓGICA DE MOVIMIENTO (FlapSwimController.cs)      │
 │                                                             │
-│  SI flapLeft AND flapRight (simultáneo, ventana ~0.15s):    │
+│  SI recibe "forward":                                       │
 │    → Aplicar fuerza de AVANCE en salmonBody.forward         │
-│    → Intensidad = promedio de ambos flaps                   │
 │                                                             │
-│  SI solo flapLeft:                                          │
-│    → Aplicar torque de ROTACIÓN hacia la DERECHA (+yaw)     │
-│    → Magnitud proporcional a intensidad del flap            │
-│                                                             │
-│  SI solo flapRight:                                         │
+│  SI recibe "turn_left":                                     │
 │    → Aplicar torque de ROTACIÓN hacia la IZQUIERDA (-yaw)   │
-│    → Magnitud proporcional a intensidad del flap            │
+│                                                             │
+│  SI recibe "turn_right":                                    │
+│    → Aplicar torque de ROTACIÓN hacia la DERECHA (+yaw)     │
 │                                                             │
 │  PITCH del cuerpo:                                          │
-│    → Interpolar suavemente hacia el pitch de la cabeza      │
-│    → Esto permite avanzar en diagonal arriba/abajo          │
-│      mirando hacia arriba/abajo                             │
+│    → Interpolar suavemente hacia el pitch de la cabeza VR   │
 └─────────┬───────────────────────────────────────────────────┘
           │
           ▼
@@ -118,7 +106,6 @@ XR Origin (VR)               ← XR Origin component (Room Scale)
 │  - AddForce(salmonBody.forward * force, ForceMode.Force)    │
 │  - AddTorque(Vector3.up * torque, ForceMode.Force)          │
 │  - Drag lineal y angular para frenado natural               │
-│  - Sin gravedad (underwater)                                │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -147,34 +134,33 @@ XR Origin (VR)               ← XR Origin component (Room Scale)
 | F1.4 | Verificar Input Actions | Confirmar que las acciones de posición de controladores (`XRI LeftHand/Position`, `XRI RightHand/Position`) funcionan correctamente |
 | F1.5 | Probar en casco | Build rápido → verificar que la vista funciona correctamente con el headset en la escena TerrainTestCero |
 
-### Fase 2 — Detección de aleteo (`FlapDetector`) (Est: 3-4h)
+### Fase 2 — Detección de aleteo en Python (`pose_swim_server.py`) (Est: 3-4h)
 
-> **Objetivo:** Detectar de forma confiable cuándo el jugador realiza un movimiento de "aleteo" con cada brazo.
-
-| ID | Tarea | Detalle |
-|:---|:---|:---|
-| F2.1 | Crear `FlapDetector.cs` | Script que lee la posición Y de cada controller frame a frame |
-| F2.2 | Algoritmo de detección de flap | Detectar el movimiento **descendente** (velocidad Y negativa que supera un umbral). El "flap" se registra en el punto de máxima velocidad descendente o al cruzar un umbral |
-| F2.3 | Sistema de cooldown | Prevenir múltiples detecciones en un solo aleteo. Cooldown configurable (~0.15-0.3s) |
-| F2.4 | Cálculo de intensidad | La intensidad del flap = magnitud de la velocidad Y en el momento de detección. Normalizar entre 0 y 1 |
-| F2.5 | Eventos de salida | `UnityEvent<float> OnLeftFlap` y `UnityEvent<float> OnRightFlap` para desacoplar de la lógica de movimiento |
-| F2.6 | Debug visual | Gizmos y/o texto en el Inspector para ver en tiempo real: velocidad Y de cada mano, estado del flap, intensidad |
-| F2.7 | Tuning con ScriptableObject | Crear `FlapSettings.asset` (ScriptableObject) con: umbral de velocidad, cooldown, sensibilidad. Editable sin recompilar |
-
-### Fase 3 — Locomoción por aleteo (`FlapSwimController`) (Est: 4-5h)
-
-> **Objetivo:** Convertir los flaps detectados en movimiento y rotación del salmón.
+> **Objetivo:** Detectar de forma confiable cuándo el jugador realiza un movimiento de "aleteo" con cada brazo mediante Computer Vision.
 
 | ID | Tarea | Detalle |
 |:---|:---|:---|
-| F3.1 | Crear `FlapSwimController.cs` | Script principal de locomoción. Se subscribe a los eventos de `FlapDetector` |
-| F3.2 | Detección de simultaneidad | Ventana temporal configurable (~0.1-0.2s) para considerar que ambos brazos aletearon "a la vez". Si ambos flaps caen dentro de esta ventana → avance. Si no → rotación |
-| F3.3 | Avance frontal | `rb.AddForce(salmonBody.forward * intensity * forceMultiplier, ForceMode.Impulse)` en dirección del body, no de la cabeza |
-| F3.4 | Rotación diferencial | Flap izquierdo solo → rotar `salmonBody` a la derecha. Flap derecho solo → rotar a la izquierda. Usar `rb.AddTorque()` o rotación directa suavizada |
-| F3.5 | Pitch del cuerpo por cabeza | Interpolar suavemente el pitch del `SalmonBody` hacia el pitch de la cabeza VR. Esto permite que mirar arriba = nadar diagonal arriba. `Mathf.LerpAngle` con velocidad configurable |
-| F3.6 | Configuración de Rigidbody | `useGravity = false`, `linearDamping` y `angularDamping` apropiados para sensación submarina. Constraints: posiblemente freezar rotación en X y Z del rigidbody para evitar volcamientos |
-| F3.7 | Integración con corrientes oceánicas | Mantener compatibilidad con `OceanEnvironment.PlayerCurrentAt()` que ya existe |
-| F3.8 | Crear `SwimSettings.asset` | ScriptableObject con: fuerza de avance, fuerza de rotación, velocidad máxima, drag lineal, drag angular, velocidad de interpolación de pitch, ventana de simultaneidad |
+| F2.1 | Actualizar `pose_swim_server.py` | Configurar el script de Python para leer keypoints 2D (Cadera, Hombro, Codo) usando MediaPipe Pose |
+| F2.2 | Cálculo de ángulos trigonométricos | Reemplazar lógica de distancias absolutas por cálculo de ángulos (hombro) garantizando invarianza a escala del jugador |
+| F2.3 | Máquina de estados (State Machine) | Implementar transiciones de aleteo (`up` -> `half-down` -> `down` -> `half-up`). El aleteo se registra al entrar en estado `down` |
+| F2.4 | Ventana de Sincronía | Evaluar si ambos brazos completaron un aleteo (transición a `down`) en una ventana de ~0.2s |
+| F2.5 | Emisión por UDP | Enviar mensaje JSON continuo a Unity: `{"action": "forward"|"turn_left"|"turn_right"|"idle", "speed": 1.0}` |
+| F2.6 | Debug visual en Python | Dibujar los ángulos y el estado actual de cada brazo en la ventana de OpenCV para calibración |
+| F2.7 | Tuning de variables | Ajustar constantes `ANGLE_UP`, `ANGLE_DOWN` y `SYNC_WINDOW` para que se sientan naturales en VR |
+
+### Fase 3 — Locomoción en Unity (`FlapSwimController`) (Est: 3-4h)
+
+> **Objetivo:** Convertir los eventos JSON recibidos por UDP en movimiento físico del salmón en VR.
+
+| ID | Tarea | Detalle |
+|:---|:---|:---|
+| F3.1 | Crear `FlapSwimController.cs` | Script principal de locomoción que lee el puerto UDP 5065 o se conecta al manager de UDP existente |
+| F3.2 | Avance frontal | Si la acción recibida es `forward`: `rb.AddForce(salmonBody.forward * forceMultiplier, ForceMode.Force)` |
+| F3.3 | Rotación diferencial | Si la acción es `turn_left`: rotar `salmonBody` a la izquierda. Si es `turn_right`: rotar a la derecha |
+| F3.4 | Pitch del cuerpo por cabeza | Interpolar suavemente el pitch del `SalmonBody` hacia el pitch de la cabeza VR (`Mathf.LerpAngle`) |
+| F3.5 | Configuración de Rigidbody | `useGravity = false`, `linearDamping` y `angularDamping` apropiados para sensación submarina |
+| F3.6 | Compatibilidad con sistemas | Mantener compatibilidad con corrientes marinas (`OceanEnvironment`) y `EnergySystem` |
+| F3.7 | Crear `SwimSettings.asset` | ScriptableObject con: fuerza de avance, fuerza de rotación, drag, velocidad de pitch para tuning |
 
 ### Fase 4 — Cámara externa (Est: 2-3h)
 

@@ -1,107 +1,77 @@
-"""
-Servidor de deteccion de "nado" (brazada) usando MediaPipe Pose.
-Generaliza la logica que describiste para brazo izquierdo, espejada al derecho.
-Envia comandos de movimiento a Unity via UDP en formato JSON.
-
-Requisitos:
-    pip install mediapipe opencv-python numpy
-
-Uso:
-    python pose_swim_server.py
-    (ESC para salir de la ventana de preview)
-"""
-
 import time
 import json
 import socket
-from collections import deque
 
 import cv2
 import numpy as np
 import mediapipe as mp
 
-# ---------------- CONFIGURACION (calibrar con tu setup real) ----------------
+# ---------------- CONFIGURACION ----------------
 UNITY_IP = "127.0.0.1"
 UNITY_PORT = 5065
 
-D_EXTEND = 0.12       # umbral de extension muñeca-codo en x (coords normalizadas 0-1 de MediaPipe)
-V_Z_THRESHOLD = 0.05  # "error" de tu formula: |v_muñeca.z| <= este umbral
-DM_SYNC = 0.05        # diferencia maxima en z entre ambas muñecas para considerar brazada sincronizada
-TURN_SPEED = 30.0     # grados/seg de giro que se reporta a Unity
-FORWARD_SPEED = 1.0   # velocidad de avance normalizada (Unity la escala con su propio multiplicador)
-SMOOTH_WINDOW = 5     # frames para promediar la velocidad y reducir ruido
+# Umbrales de angulo para la maquina de estados (en grados)
+ANGLE_UP = 80       # Brazo levantado (horizontal o mas)
+ANGLE_DOWN = 30     # Brazo bajado (cerca del torso)
+
+SYNC_WINDOW = 0.2   # Segundos de ventana para considerar aleteo de ambos brazos
+FLAP_DURATION = 0.2 # Cuanto tiempo (segundos) se mantiene la accion activa para Unity
 
 mp_pose = mp.solutions.pose
 
 LM = {
+    "hip_l": mp_pose.PoseLandmark.LEFT_HIP,
+    "hip_r": mp_pose.PoseLandmark.RIGHT_HIP,
+    "shoulder_l": mp_pose.PoseLandmark.LEFT_SHOULDER,
+    "shoulder_r": mp_pose.PoseLandmark.RIGHT_SHOULDER,
     "elbow_l": mp_pose.PoseLandmark.LEFT_ELBOW,
     "elbow_r": mp_pose.PoseLandmark.RIGHT_ELBOW,
-    "wrist_l": mp_pose.PoseLandmark.LEFT_WRIST,
-    "wrist_r": mp_pose.PoseLandmark.RIGHT_WRIST,
 }
 
 
-class VelocityTracker:
-    """Calcula velocidad por diferencias finitas, suavizada con ventana movil."""
+def calculate_angle(a, b, c):
+    """Calcula el angulo 2D (plano frontal) entre 3 puntos."""
+    a = np.array([a.x, a.y])
+    b = np.array([b.x, b.y])
+    c = np.array([c.x, c.y])
 
-    def __init__(self, window=SMOOTH_WINDOW):
-        self.prev_pos = {}
-        self.prev_t = {}
-        self.history = {}
-        self.window = window
-
-    def update(self, name, pos, t):
-        vel = np.zeros(3)
-        if name in self.prev_pos:
-            dt = max(t - self.prev_t[name], 1e-3)
-            vel = (pos - self.prev_pos[name]) / dt
-        self.prev_pos[name] = pos
-        self.prev_t[name] = t
-
-        buf = self.history.setdefault(name, deque(maxlen=self.window))
-        buf.append(vel)
-        return np.mean(buf, axis=0)
+    radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - np.arctan2(a[1] - b[1], a[0] - b[0])
+    angle = np.abs(radians * 180.0 / np.pi)
+    if angle > 180.0:
+        angle = 360 - angle
+    return angle
 
 
-def get_point(landmarks, idx):
-    lm = landmarks[idx]
-    return np.array([lm.x, lm.y, lm.z])
+class ArmStateMachine:
+    """Maquina de estados para detectar aleteos basados en el angulo del hombro."""
+    def __init__(self):
+        self.stage = "up"
+        self.last_flap_time = 0
 
-
-def evaluate_arm(wrist, elbow, v_wrist):
-    """
-    Condicion 'externa' (tu E.i / E.d):
-    brazo extendido hacia adelante y muñeca estable en z.
-    """
-    extended = abs(wrist[0] - elbow[0]) >= D_EXTEND
-    stable_z = abs(v_wrist[2]) <= V_Z_THRESHOLD
-    return extended and stable_z
-
-
-def decide_action(wrist_l, wrist_r, elbow_l, elbow_r, v_wrist_l, v_wrist_r):
-    active_l = evaluate_arm(wrist_l, elbow_l, v_wrist_l)
-    active_r = evaluate_arm(wrist_r, elbow_r, v_wrist_r)
-
-    if active_l and active_r:
-        synced = abs(wrist_l[2] - wrist_r[2]) <= DM_SYNC
-        if synced:
-            return {"action": "forward", "speed": FORWARD_SPEED}
-        # ambos activos pero no sincronizados: gira hacia el lado con mayor extension
-        if abs(wrist_l[0] - elbow_l[0]) > abs(wrist_r[0] - elbow_r[0]):
-            return {"action": "turn_left", "speed": TURN_SPEED}
-        return {"action": "turn_right", "speed": TURN_SPEED}
-    elif active_l:
-        return {"action": "turn_left", "speed": TURN_SPEED}
-    elif active_r:
-        return {"action": "turn_right", "speed": TURN_SPEED}
-    else:
-        return {"action": "idle", "speed": 0.0}
+    def update(self, angle, current_time):
+        flapped = False
+        if angle < ANGLE_DOWN and self.stage == "half-down":
+            self.stage = "down"
+            flapped = True
+            self.last_flap_time = current_time
+        elif ANGLE_DOWN <= angle <= ANGLE_UP and self.stage == "down":
+            self.stage = "half-up"
+        elif ANGLE_DOWN <= angle <= ANGLE_UP and self.stage == "up":
+            self.stage = "half-down"
+        elif angle > ANGLE_UP and self.stage == "half-up":
+            self.stage = "up"
+        return flapped
 
 
 def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     cap = cv2.VideoCapture(0)
-    tracker = VelocityTracker()
+
+    left_arm = ArmStateMachine()
+    right_arm = ArmStateMachine()
+    
+    current_action = "idle"
+    action_expire_time = 0
 
     with mp_pose.Pose(min_detection_confidence=0.6, min_tracking_confidence=0.6) as pose:
         while cap.isOpened():
@@ -109,28 +79,51 @@ def main():
             if not ok:
                 break
 
-            t = time.time()
+            current_time = time.time()
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             results = pose.process(frame_rgb)
 
             if results.pose_landmarks:
                 lm = results.pose_landmarks.landmark
 
-                wrist_l = get_point(lm, LM["wrist_l"])
-                wrist_r = get_point(lm, LM["wrist_r"])
-                elbow_l = get_point(lm, LM["elbow_l"])
-                elbow_r = get_point(lm, LM["elbow_r"])
+                # Calcular angulo para brazo izquierdo (cadera -> hombro -> codo)
+                angle_l = calculate_angle(lm[LM["hip_l"]], lm[LM["shoulder_l"]], lm[LM["elbow_l"]])
+                flapped_l = left_arm.update(angle_l, current_time)
 
-                v_wrist_l = tracker.update("wrist_l", wrist_l, t)
-                v_wrist_r = tracker.update("wrist_r", wrist_r, t)
+                # Calcular angulo para brazo derecho
+                angle_r = calculate_angle(lm[LM["hip_r"]], lm[LM["shoulder_r"]], lm[LM["elbow_r"]])
+                flapped_r = right_arm.update(angle_r, current_time)
 
-                action = decide_action(wrist_l, wrist_r, elbow_l, elbow_r, v_wrist_l, v_wrist_r)
-                sock.sendto(json.dumps(action).encode("utf-8"), (UNITY_IP, UNITY_PORT))
+                # Logica de sincronia y accion
+                if flapped_l or flapped_r:
+                    # Chequear si el otro brazo tambien aleteo recientemente
+                    time_diff = abs(left_arm.last_flap_time - right_arm.last_flap_time)
+                    if time_diff <= SYNC_WINDOW and current_time - left_arm.last_flap_time <= SYNC_WINDOW and current_time - right_arm.last_flap_time <= SYNC_WINDOW:
+                        current_action = "forward"
+                    elif flapped_l:
+                        current_action = "turn_left"
+                    elif flapped_r:
+                        current_action = "turn_right"
+                    
+                    action_expire_time = current_time + FLAP_DURATION
 
-                cv2.putText(frame, action["action"], (20, 40),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                # Expirar la accion si ha pasado el tiempo
+                if current_time > action_expire_time:
+                    current_action = "idle"
 
-            cv2.imshow("Pose Swim Tracker", frame)
+                # Enviar accion a Unity
+                msg = {"action": current_action, "speed": 1.0 if current_action != "idle" else 0.0}
+                sock.sendto(json.dumps(msg).encode("utf-8"), (UNITY_IP, UNITY_PORT))
+
+                # Visualizacion en la ventana
+                cv2.putText(frame, f"L: {int(angle_l)} ({left_arm.stage})", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                cv2.putText(frame, f"R: {int(angle_r)} ({right_arm.stage})", (20, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                cv2.putText(frame, f"ACTION: {current_action}", (20, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+
+                # Dibujar esqueleto basico
+                mp.solutions.drawing_utils.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+
+            cv2.imshow("Pose Swim Tracker - Angle Based", frame)
             if cv2.waitKey(1) & 0xFF == 27:  # ESC
                 break
 
