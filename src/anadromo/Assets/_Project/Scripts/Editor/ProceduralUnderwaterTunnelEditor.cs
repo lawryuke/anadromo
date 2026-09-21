@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Anadromo.Environment
 {
     [CustomEditor(typeof(ProceduralUnderwaterTunnel))]
-    public class ProceduralUnderwaterTunnelEditor : Editor
+    public class ProceduralUnderwaterTunnelEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {
