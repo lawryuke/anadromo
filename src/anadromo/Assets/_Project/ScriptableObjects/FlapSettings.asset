@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f27fc678db3d47141a91bcf1959aa78f, type: 3}
   m_Name: FlapSettings
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.FlapSettings
-  flapVelocityThreshold: 0.98
+  flapVelocityThreshold: 1.595
   flapCooldown: 0.3
   minIntensity: 0.1
   maxIntensity: 1
