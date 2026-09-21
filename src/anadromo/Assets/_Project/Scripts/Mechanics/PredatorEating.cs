@@ -82,7 +82,7 @@ namespace Anadromo.Mechanics
 
         private void FixedUpdate() => TryEatNearby();
 
-        public Transform FindNearestNearbyPrey()
+        public Transform FindNearestNearbyPrey(Transform ignoredPrey = null)
         {
             if (IsFull || nearbyPreySearchRadius <= 0f) return null;
             Physics.SyncTransforms();
@@ -93,7 +93,7 @@ namespace Anadromo.Mechanics
                 preyLayers, QueryTriggerInteraction.Collide))
             {
                 Transform prey = ResolvePrey(collider.transform);
-                if (prey == null) continue;
+                if (prey == null || prey == ignoredPrey) continue;
                 float distance = (collider.ClosestPoint(origin) - origin).sqrMagnitude;
                 if (distance < nearestDistance) { nearestDistance = distance; nearest = prey; }
             }
@@ -129,6 +129,39 @@ namespace Anadromo.Mechanics
             // Claim immediately: another predator/collider cannot eat the same prey this frame.
             prey.gameObject.SetActive(false);
             mealsEaten++;
+            
+            // Si el krill devorado pertenecía a un grupo asustadizo (Scary)
+            var scaryGroup = prey.GetComponentInParent<Anadromo.AI.ScaredKrillBehavior>();
+            if (scaryGroup != null)
+            {
+                // Encontrar al SwimGroupController del depredador (los salmones)
+                var predatorGroup = Owner.GetComponentInParent<SwimGroupController>();
+                if (predatorGroup != null)
+                {
+                    // Forzar la "casa" del grupo al lugar donde están comiendo (en el abismo)
+                    // para que no vuelvan atrás.
+                    predatorGroup.UpdateHomePosition(Owner.position);
+
+                    // Revisar si quedan más krills vivos en ese grupo scary
+                    bool hasMoreKrills = false;
+                    foreach (Transform child in scaryGroup.GetComponentsInChildren<Transform>())
+                    {
+                        if (child != prey && child.gameObject.activeInHierarchy && child.CompareTag(preyTag))
+                        {
+                            hasMoreKrills = true;
+                            break;
+                        }
+                    }
+
+                    // Si ya no quedan krills en este grupo, desactivamos la caza para todo el cardumen
+                    // de salmones, obligándolos a pasar a modo normal definitivamente en el abismo.
+                    if (!hasMoreKrills)
+                    {
+                        predatorGroup.individualHunting = false;
+                    }
+                }
+            }
+
             Destroy(prey.gameObject);
             return true;
         }

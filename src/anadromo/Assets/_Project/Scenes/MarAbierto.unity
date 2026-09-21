@@ -212,7 +212,7 @@ Transform:
   m_GameObject: {fileID: 7510308}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 12.491, y: 5.425, z: 8.42}
+  m_LocalPosition: {x: 13.59, y: 6.1, z: 7.62}
   m_LocalScale: {x: 1, y: 0.47705594, z: 0.7046861}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -231,7 +231,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 1916994223}
-  count: 5
+  count: 2
   generateOnStart: 1
   targetObject: {fileID: 0}
   useSourceModelRotation: 0
@@ -268,6 +268,7 @@ MonoBehaviour:
   arrivalMode: 0
   arrivalDistance: 1
   individualHunting: 1
+  preyContentionDistance: 0
   normalWaypoints: []
   wanderRadius: 0.5
   wanderFrequency: 0.7
@@ -379,6 +380,7 @@ MonoBehaviour:
   arrivalMode: 0
   arrivalDistance: 1
   individualHunting: 1
+  preyContentionDistance: 0
   normalWaypoints: []
   wanderRadius: 0.5
   wanderFrequency: 0.7
@@ -531,117 +533,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1631879731339628706, guid: ffab090c1dfe4744eb1f8c9400b82452, type: 3}
   m_PrefabInstance: {fileID: 641884480}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &114825499
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 114825501}
-  - component: {fileID: 114825500}
-  - component: {fileID: 114825502}
-  m_Layer: 0
-  m_Name: Salmones_back
-  m_TagString: Depredator_Salmon
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &114825500
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 114825499}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1cb0d15da75a413689c2baf391a83d7f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
-  sourceObject: {fileID: 210964975}
-  count: 10
-  generateOnStart: 1
-  targetObject: {fileID: 1553677888}
-  useSourceModelRotation: 1
-  modelRotationOffset: {x: 0, y: 0, z: 0}
-  center: {x: 0, y: 0, z: -2}
-  size: {x: 3, y: 1, z: 1}
-  containWholeObject: 1
-  randomYaw: 1
-  seed: 12345
-  avoidOverlaps: 1
-  obstacleLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  includeTriggers: 0
-  attemptsPerObject: 100
-  generated: []
-  lastGenerationMessage: 
---- !u!4 &114825501
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 114825499}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 10, y: 6.158, z: -0.9599999}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1440731133}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114825502
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 114825499}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e65cb922f784beaa5acb373c40418fc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.SwimGroupController
-  state: 1
-  swimStyle: 0
-  movementTarget: {fileID: 7510309}
-  useTargetGroupCenter: 1
-  arrivalMode: 0
-  arrivalDistance: 1
-  individualHunting: 1
-  normalWaypoints: []
-  wanderRadius: 0.5
-  wanderFrequency: 0.7
-  swimSpeed: 2
-  acceleration: 2
-  fishTurnSpeed: 180
-  sharkTurnSpeed: 45
-  orbitRadius: 3
-  separationDistance: 0.6
-  separationStrength: 2
-  avoidBlockingOtherSwimmers: 1
-  startKeyForShark: 52
-  useFishStartSequence: 1
-  startKeyForFish: 49
-  fishOscillationTarget: {fileID: 895489815}
-  fishOscillationDuration: 5
-  fishOscillationAmplitude: 0.3
-  fishOscillationFrequency: 1
-  collideWithObstacles: 1
-  collisionLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  collideWithTriggers: 0
-  automaticCollisionRadius: 0
-  collisionRadius: 0.01
-  collisionSkin: 0.02
-  slideAlongObstacles: 1
-  overlapRecoveryIterations: 8
 --- !u!1001 &127182346
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1143,6 +1034,10 @@ MonoBehaviour:
   puntoInicio: {x: 0, y: 0, z: 0}
   puntoFin: {x: 0, y: 42, z: 0}
   velocidad: 4
+  swimShader: {fileID: 0}
+  aceleracion: 1.8
+  variacionVelocidad: 0.12
+  amplitudTrayectoria: 0.28
   delayMinimo: 0
   delayMaximo: 1.5
   teclaParaIniciar: 52
@@ -1186,8 +1081,9 @@ GameObject:
   - component: {fileID: 264734575}
   - component: {fileID: 264734576}
   - component: {fileID: 264734577}
+  - component: {fileID: 264734578}
   m_Layer: 0
-  m_Name: Kril_Group_Mid_Second
+  m_Name: Kril_Group_Scary_Mid
   m_TagString: Food_Krill
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1202,8 +1098,8 @@ Transform:
   m_GameObject: {fileID: 264734574}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 9.931, y: 5.61, z: 9.327}
-  m_LocalScale: {x: 1, y: 0.47705594, z: 0.9850807}
+  m_LocalPosition: {x: 10.594, y: 5.61, z: 9.327}
+  m_LocalScale: {x: 1.7826, y: 0.6600069, z: 1.4196512}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1986681602}
@@ -1258,6 +1154,7 @@ MonoBehaviour:
   arrivalMode: 0
   arrivalDistance: 1
   individualHunting: 1
+  preyContentionDistance: 0
   normalWaypoints: []
   wanderRadius: 0.5
   wanderFrequency: 0.7
@@ -1286,6 +1183,21 @@ MonoBehaviour:
   collisionSkin: 0.02
   slideAlongObstacles: 1
   overlapRecoveryIterations: 8
+--- !u!114 &264734578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 264734574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e2dce1b8d7f6954ca84e7591dd02ff2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.AI.ScaredKrillBehavior
+  scareDistance: 1
+  checkInterval: 0.5
+  fleeOffset: {x: 0, y: 0, z: 3}
 --- !u!1 &268340786
 GameObject:
   m_ObjectHideFlags: 0
@@ -1871,13 +1783,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 431974699}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0.38080978, y: 2.02, z: 12.15}
-  m_LocalScale: {x: 1, y: 1, z: 6}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.67, y: 6.38, z: 8.77}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &513172596
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2172,6 +2084,7 @@ MonoBehaviour:
   arrivalMode: 0
   arrivalDistance: 1
   individualHunting: 1
+  preyContentionDistance: 0
   normalWaypoints: []
   wanderRadius: 0.5
   wanderFrequency: 0.7
@@ -2775,6 +2688,10 @@ MonoBehaviour:
   puntoInicio: {x: 0, y: 0, z: 0}
   puntoFin: {x: 0, y: 42, z: 0}
   velocidad: 4
+  swimShader: {fileID: 0}
+  aceleracion: 1.8
+  variacionVelocidad: 0.12
+  amplitudTrayectoria: 0.28
   delayMinimo: 0
   delayMaximo: 1.5
   teclaParaIniciar: 51
@@ -3613,7 +3530,7 @@ Transform:
   m_GameObject: {fileID: 1131614113}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10.05, y: 6.35, z: -1.76}
+  m_LocalPosition: {x: 10.05, y: 6.21, z: -2.04}
   m_LocalScale: {x: 1.4, y: 1.4, z: 1.4}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3828,7 +3745,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 210964975}
-  count: 12
+  count: 7
   generateOnStart: 1
   targetObject: {fileID: 1553677888}
   useSourceModelRotation: 1
@@ -3855,8 +3772,8 @@ Transform:
   m_GameObject: {fileID: 1147752528}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 10, y: 6.158, z: -0.9599999}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 10, y: 6.284, z: -0.9599999}
+  m_LocalScale: {x: 0.7565, y: 0.6673, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1440731133}
@@ -3873,13 +3790,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e65cb922f784beaa5acb373c40418fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.SwimGroupController
-  state: 1
+  state: 0
   swimStyle: 0
   movementTarget: {fileID: 1349085148}
   useTargetGroupCenter: 1
   arrivalMode: 0
   arrivalDistance: 1
   individualHunting: 1
+  preyContentionDistance: 1
   normalWaypoints: []
   wanderRadius: 0.5
   wanderFrequency: 0.7
@@ -3919,6 +3837,7 @@ GameObject:
   - component: {fileID: 1152734859}
   - component: {fileID: 1152734861}
   - component: {fileID: 1152734860}
+  - component: {fileID: 1152734862}
   m_Layer: 0
   m_Name: Kril_Group_Scary_Right
   m_TagString: Food_Krill
@@ -3960,6 +3879,7 @@ MonoBehaviour:
   arrivalMode: 0
   arrivalDistance: 1
   individualHunting: 1
+  preyContentionDistance: 0
   normalWaypoints: []
   wanderRadius: 0.5
   wanderFrequency: 0.7
@@ -4019,6 +3939,21 @@ MonoBehaviour:
   attemptsPerObject: 100
   generated: []
   lastGenerationMessage: 
+--- !u!114 &1152734862
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1152734858}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e2dce1b8d7f6954ca84e7591dd02ff2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.AI.ScaredKrillBehavior
+  scareDistance: 1
+  checkInterval: 0.5
+  fleeOffset: {x: 0, y: 0, z: 3}
 --- !u!1 &1242409001
 GameObject:
   m_ObjectHideFlags: 0
@@ -4062,7 +3997,7 @@ GameObject:
   - component: {fileID: 1319148040}
   - component: {fileID: 1319148041}
   m_Layer: 0
-  m_Name: Kril_Group_Mid_First
+  m_Name: Kril_Group_Mid
   m_TagString: Food_Krill
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4076,13 +4011,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1319148038}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 10, y: 5.6, z: 6.673}
-  m_LocalScale: {x: 0.6281679, y: 0.3583501, z: 0.7046861}
+  m_LocalRotation: {x: -0, y: 0.11515971, z: -0, w: 0.99334705}
+  m_LocalPosition: {x: 10.077, y: 5.6, z: 6.51}
+  m_LocalScale: {x: 0.6281679, y: 0.3583501, z: 1.975517}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1986681602}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 13.226, z: 0}
 --- !u!114 &1319148040
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4133,6 +4068,7 @@ MonoBehaviour:
   arrivalMode: 0
   arrivalDistance: 1
   individualHunting: 1
+  preyContentionDistance: 0
   normalWaypoints: []
   wanderRadius: 0.5
   wanderFrequency: 0.7
@@ -4220,8 +4156,8 @@ Transform:
   m_GameObject: {fileID: 1349085147}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 13.574, y: 5.572, z: 5.068}
-  m_LocalScale: {x: 1, y: 0.76428, z: 1.218}
+  m_LocalPosition: {x: 13.574, y: 5.83, z: 5.35}
+  m_LocalScale: {x: 1.4115, y: 0.9040668, z: 1.218}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1986681602}
@@ -4239,7 +4175,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 1916994223}
-  count: 8
+  count: 3
   generateOnStart: 1
   targetObject: {fileID: 0}
   useSourceModelRotation: 0
@@ -4276,6 +4212,7 @@ MonoBehaviour:
   arrivalMode: 0
   arrivalDistance: 1
   individualHunting: 1
+  preyContentionDistance: 0
   normalWaypoints: []
   wanderRadius: 0.5
   wanderFrequency: 0.7
@@ -4504,7 +4441,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 1916994223}
-  count: 12
+  count: 4
   generateOnStart: 1
   targetObject: {fileID: 0}
   useSourceModelRotation: 0
@@ -4531,7 +4468,7 @@ Transform:
   m_GameObject: {fileID: 1432202835}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 6.086, y: 5.715, z: 6.729}
+  m_LocalPosition: {x: 6.86, y: 5.715, z: 7.04}
   m_LocalScale: {x: 1.5326, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4556,6 +4493,7 @@ MonoBehaviour:
   arrivalMode: 0
   arrivalDistance: 1
   individualHunting: 1
+  preyContentionDistance: 0
   normalWaypoints: []
   wanderRadius: 0.5
   wanderFrequency: 0.7
@@ -4609,14 +4547,13 @@ Transform:
   m_GameObject: {fileID: 1440731132}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.4939999}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1650558360}
   - {fileID: 1798280031}
   - {fileID: 1147752530}
-  - {fileID: 114825501}
   - {fileID: 210964980}
   - {fileID: 895489815}
   m_Father: {fileID: 0}
@@ -5488,7 +5425,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 210964975}
-  count: 8
+  count: 7
   generateOnStart: 1
   targetObject: {fileID: 1553677888}
   useSourceModelRotation: 1
@@ -5515,8 +5452,8 @@ Transform:
   m_GameObject: {fileID: 1650558358}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 10, y: 6.158, z: -0.96}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 9.788, y: 6.158, z: -0.724}
+  m_LocalScale: {x: 0.48849, y: 1, z: 0.83554}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1440731133}
@@ -5540,6 +5477,7 @@ MonoBehaviour:
   arrivalMode: 0
   arrivalDistance: 1
   individualHunting: 1
+  preyContentionDistance: 1
   normalWaypoints: []
   wanderRadius: 0.5
   wanderFrequency: 0.7
@@ -5696,7 +5634,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 210964975}
-  count: 10
+  count: 6
   generateOnStart: 1
   targetObject: {fileID: 1553677888}
   useSourceModelRotation: 1
@@ -5723,8 +5661,8 @@ Transform:
   m_GameObject: {fileID: 1798280029}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 10, y: 6.158, z: -0.9599999}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 10.23, y: 6.158, z: -0.951}
+  m_LocalScale: {x: 0.43899, y: 1, z: 0.73434}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1440731133}
@@ -5748,6 +5686,7 @@ MonoBehaviour:
   arrivalMode: 0
   arrivalDistance: 1
   individualHunting: 1
+  preyContentionDistance: 1
   normalWaypoints: []
   wanderRadius: 0.5
   wanderFrequency: 0.7
@@ -6024,7 +5963,7 @@ Transform:
   m_GameObject: {fileID: 1843962725}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.22741985, y: -0.92552996, z: 19.32}
+  m_LocalPosition: {x: 0.22741985, y: -1.12, z: 19.32}
   m_LocalScale: {x: 20, y: 1.4, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6041,8 +5980,9 @@ GameObject:
   - component: {fileID: 1854003037}
   - component: {fileID: 1854003039}
   - component: {fileID: 1854003038}
+  - component: {fileID: 1854003040}
   m_Layer: 0
-  m_Name: Kril_Group_Scary_Right
+  m_Name: Kril_Group_Scary_Left
   m_TagString: Food_Krill
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6057,7 +5997,7 @@ Transform:
   m_GameObject: {fileID: 1854003036}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 6.086, y: 5.85, z: 9.89}
+  m_LocalPosition: {x: 7.68, y: 5.85, z: 9.89}
   m_LocalScale: {x: 1.9733759, y: 1, z: 1.7655}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6082,6 +6022,7 @@ MonoBehaviour:
   arrivalMode: 0
   arrivalDistance: 1
   individualHunting: 1
+  preyContentionDistance: 0
   normalWaypoints: []
   wanderRadius: 0.5
   wanderFrequency: 0.7
@@ -6141,6 +6082,21 @@ MonoBehaviour:
   attemptsPerObject: 100
   generated: []
   lastGenerationMessage: 
+--- !u!114 &1854003040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1854003036}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e2dce1b8d7f6954ca84e7591dd02ff2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.AI.ScaredKrillBehavior
+  scareDistance: 1
+  checkInterval: 0.5
+  fleeOffset: {x: 0, y: 0, z: 3}
 --- !u!1 &1859686489
 GameObject:
   m_ObjectHideFlags: 0
@@ -6575,6 +6531,7 @@ MonoBehaviour:
   arrivalMode: 0
   arrivalDistance: 1
   individualHunting: 1
+  preyContentionDistance: 0
   normalWaypoints: []
   wanderRadius: 0.5
   wanderFrequency: 0.7
@@ -6711,7 +6668,7 @@ Transform:
   m_GameObject: {fileID: 1962208493}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.61, y: 2.88, z: 17.83}
+  m_LocalPosition: {x: -0.61, y: 2.88, z: 15.16}
   m_LocalScale: {x: 1, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6742,16 +6699,16 @@ Transform:
   m_GameObject: {fileID: 1986681601}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -2.81, y: 0.048045, z: 0}
+  m_LocalScale: {x: 1.2332, y: 0.99189, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1432202837}
   - {fileID: 1854003037}
   - {fileID: 1152734859}
+  - {fileID: 264734575}
+  - {fileID: 1432202837}
   - {fileID: 1349085148}
   - {fileID: 7510309}
-  - {fileID: 264734575}
   - {fileID: 1319148039}
   - {fileID: 568395553}
   m_Father: {fileID: 0}

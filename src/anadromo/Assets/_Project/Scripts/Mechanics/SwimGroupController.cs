@@ -24,6 +24,8 @@ namespace Anadromo.Mechanics
         [Header("Individual Hunting (Caza Individual)")]
         [Tooltip("Persigue presas con el tag de PredatorEating dentro de Movement Target (un spawner, un grupo o una presa). Activo en Move To Target y At Target.")]
         public bool individualHunting = true;
+        [Tooltip("Si dos peces persiguen el mismo objetivo y su distancia es menor a este valor ('q'), el más lejano cambiará de presa. 0 desactiva esta función.")]
+        [Min(0f)] public float preyContentionDistance = 0f;
 
         [Header("Nado normal")]
         [Tooltip("Vacío: permanecer alrededor de la zona inicial. Con puntos: patrullar en orden y repetir.")]
@@ -100,8 +102,8 @@ namespace Anadromo.Mechanics
             public bool oscillationInitialized;
             public Vector3 oscillationOrigin;
             public Vector3 oscillationAxis;
-            public float oscillationRate;
-            public float oscillationAmount;
+            public float waitTimer;
+            public Vector3 currentTargetPos;
         }
 
         private readonly Dictionary<GameObject, Member> members = new Dictionary<GameObject, Member>();
@@ -120,6 +122,13 @@ namespace Anadromo.Mechanics
 
         public int MemberCount => members.Count;
         public bool Controls(GameObject instance) => isActiveAndEnabled && members.ContainsKey(instance);
+
+        public void UpdateHomePosition(Vector3 newHome)
+        {
+            home = newHome;
+            // Al actualizar el home, acercamos el centro del grupo para que no vuelvan desde muy lejos
+            groupCenter = newHome;
+        }
 
         private void OnEnable()
         {
@@ -270,6 +279,34 @@ namespace Anadromo.Mechanics
                         (firstMeal && (movementTarget == null || !member.currentPrey.IsChildOf(movementTarget))) ||
                         member.stomach.ResolvePrey(member.currentPrey) == null)
                         member.currentPrey = FindBestPrey(member, movementTarget);
+
+                    // --- Lógica de contención de presas ---
+                    if (member.currentPrey != null && preyContentionDistance > 0f)
+                    {
+                        float myDistToPrey = (member.position - member.currentPrey.position).sqrMagnitude;
+                        float qSq = preyContentionDistance * preyContentionDistance;
+
+                        foreach (Member other in active)
+                        {
+                            if (other != member && other.currentPrey == member.currentPrey)
+                            {
+                                float otherDistToPrey = (other.position - member.currentPrey.position).sqrMagnitude;
+                                if (otherDistToPrey < myDistToPrey)
+                                {
+                                    float distToOther = (other.position - member.position).sqrMagnitude;
+                                    if (distToOther < qSq)
+                                    {
+                                        // El 'other' está más cerca de la presa y nosotros muy cerca de él.
+                                        // Buscamos otra presa, ignorando la actual.
+                                        member.currentPrey = FindBestPrey(member, movementTarget, member.currentPrey);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // --------------------------------------
+
                     hunting = !member.stomach.IsFull && member.currentPrey != null;
                     if (hunting)
                     {
@@ -358,33 +395,57 @@ namespace Anadromo.Mechanics
             float duration = Mathf.Max(0f, fishOscillationDuration);
             fishSequenceTime = Mathf.Min(fishSequenceTime + dt, duration);
             float progress = duration > 0f ? fishSequenceTime / duration : 1f;
-            // Fade in/out keeps the first step and the release into regular swimming continuous.
-            float envelope = progress >= 1f ? 0f : Mathf.Sin(progress * Mathf.PI);
+            
             foreach (Member member in active)
             {
                 if (!member.oscillationInitialized)
                 {
                     member.oscillationOrigin = member.position;
+                    member.currentTargetPos = member.oscillationOrigin;
+                    member.waitTimer = Random.Range(0.5f, 1.5f);
+                    
                     Vector3 targetPosition = fishOscillationTarget != null ? fishOscillationTarget.position :
                         movementTarget != null ? ResolveTargetPosition() :
                         spawner.targetObject != null ? spawner.targetObject.position : member.position;
                     Vector3 direction = targetPosition - member.position;
                     member.oscillationAxis = direction.sqrMagnitude > 0.000001f ? direction.normalized :
                         member.transform.rotation * Quaternion.Inverse(member.modelCorrection) * Vector3.forward;
-                    var random = new System.Random(member.transform.GetInstanceID());
-                    member.oscillationRate = Mathf.Lerp(0.7f, 1.4f, (float)random.NextDouble());
-                    member.oscillationAmount = Mathf.Lerp(0.5f, 1f, (float)random.NextDouble());
+                        
                     member.oscillationInitialized = true;
                 }
-                float offset = Mathf.Sin(fishSequenceTime * Mathf.Max(0f, fishOscillationFrequency) *
-                    member.oscillationRate * Mathf.PI * 2f) * Mathf.Max(0f, fishOscillationAmplitude) *
-                    member.oscillationAmount * envelope;
-                Vector3 position = member.oscillationOrigin + member.oscillationAxis * offset;
+
+                member.waitTimer -= dt;
+                if (member.waitTimer <= 0f)
+                {
+                    member.waitTimer = Random.Range(0.5f, 1.5f);
+
+                    float amp = Mathf.Max(0f, fishOscillationAmplitude);
+                    float[] choices = { -amp, 0f, amp };
+                    float zOffset = choices[Random.Range(0, choices.Length)];
+                    float yOffset = choices[Random.Range(0, choices.Length)];
+
+                    if (zOffset == 0f && yOffset == 0f)
+                    {
+                        zOffset = amp;
+                    }
+
+                    Vector3 forward = member.oscillationAxis;
+                    Vector3 up = Mathf.Abs(Vector3.Dot(forward, Vector3.up)) > 0.999f ? Vector3.forward : Vector3.up;
+                    Vector3 right = Vector3.Cross(up, forward).normalized;
+                    Vector3 realUp = Vector3.Cross(forward, right).normalized;
+
+                    member.currentTargetPos = member.oscillationOrigin + forward * zOffset + realUp * yOffset;
+                }
+
+                // Smoothly lerp towards target position
+                Vector3 position = Vector3.Lerp(member.position, member.currentTargetPos, dt * 2f);
                 if (collideWithObstacles) position = ResolveCollision(member, position - member.position, false);
-                Vector3 up = Mathf.Abs(Vector3.Dot(member.oscillationAxis, Vector3.up)) > 0.999f ? Vector3.forward : Vector3.up;
+
+                Vector3 faceUp = Mathf.Abs(Vector3.Dot(member.oscillationAxis, Vector3.up)) > 0.999f ? Vector3.forward : Vector3.up;
                 Quaternion rotation = Quaternion.RotateTowards(member.transform.rotation,
-                    Quaternion.LookRotation(member.oscillationAxis, up) * member.modelCorrection,
+                    Quaternion.LookRotation(member.oscillationAxis, faceUp) * member.modelCorrection,
                     Mathf.Max(1f, fishTurnSpeed) * dt);
+
                 if (member.body != null)
                 {
                     member.body.MovePosition(position);
@@ -550,10 +611,13 @@ namespace Anadromo.Mechanics
             return home;
         }
 
-        private Transform FindBestPrey(Member member, Transform target)
+        private Transform FindBestPrey(Member member, Transform target, Transform ignoredPrey = null)
         {
             if (member.stomach.IsFull) return null;
-            if (member.stomach.mealsEaten > 0) return member.stomach.FindNearestNearbyPrey();
+            if (member.stomach.mealsEaten > 0)
+            {
+                return member.stomach.FindNearestNearbyPrey(ignoredPrey);
+            }
             if (target == null) return null;
             var candidates = new List<Transform>();
             BoxObjectSpawner targetSpawner = target.GetComponent<BoxObjectSpawner>();
@@ -563,7 +627,7 @@ namespace Anadromo.Mechanics
                 {
                     if (instance == null) continue;
                     Transform prey = member.stomach.ResolvePrey(instance.transform);
-                    if (prey != null && !candidates.Contains(prey)) candidates.Add(prey);
+                    if (prey != null && prey != ignoredPrey && !candidates.Contains(prey)) candidates.Add(prey);
                 }
             }
             else
@@ -571,7 +635,7 @@ namespace Anadromo.Mechanics
                 foreach (Transform child in target.GetComponentsInChildren<Transform>())
                 {
                     Transform prey = member.stomach.ResolvePrey(child);
-                    if (prey != null && !candidates.Contains(prey)) candidates.Add(prey);
+                    if (prey != null && prey != ignoredPrey && !candidates.Contains(prey)) candidates.Add(prey);
                 }
             }
             if (candidates.Count == 0) return null;
