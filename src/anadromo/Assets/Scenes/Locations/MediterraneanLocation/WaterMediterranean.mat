@@ -60,9 +60,9 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Range: 10.58
-    - _SmoothnessClose: 1.02
+    - _SmoothnessClose: 0.10
     - _SmoothnessFar: -1.35
-    - _Strenght: -4.79
+    - _Strenght: 0.20
     - _Tiling: 0.25
     - _VertexWaveDisplacement: 0.61
     - _VertexWaveScale: 0.2

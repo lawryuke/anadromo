@@ -21,8 +21,10 @@ namespace Anadromo.Environment
         public Material rockMaterial;
         public GameObject layeredCliffPrefab;
         public GameObject boulderPrefab;
-        [Range(.05f, .4f)] public float edgeRoundness = .22f;
-        [Range(0, .25f)] public float rockRelief = .12f;
+        public bool closeFarEnd;
+        public bool naturalMassif;
+        [Range(.05f, 1.4f)] public float edgeRoundness = .22f;
+        [Range(0, .8f)] public float rockRelief = .12f;
         [Range(.35f, 1.5f)] public float spacing = .65f;
         readonly List<Mesh> meshes = new List<Mesh>();
         readonly List<GameObject> collisionShells = new List<GameObject>();
@@ -63,7 +65,7 @@ namespace Anadromo.Environment
                 collision.AddComponent<MeshCollider>().sharedMesh = mesh;
                 collisionShells.Add(collision);
             }
-            dressing = new GameObject("Salida - acantilados y rocas OceanViz");
+            dressing = new GameObject(closeFarEnd?"Cueva refugio - fondo cerrado y acantilados OceanViz":"Salida - acantilados y rocas OceanViz");
             dressing.hideFlags = HideFlags.DontSave;
             dressing.transform.SetParent(transform, false);
             float center = (xmin + xmax) * .5f;
@@ -84,6 +86,70 @@ namespace Anadromo.Environment
                 new Vector3(2.8f, 1.1f, 1.9f)), new Vector3(0, 37, 9));
             AddRock(boulderPrefab, new Bounds(new Vector3(center + 1.38f, ymin - .48f, back + .12f),
                 new Vector3(2.1f, .8f, 1.55f)), new Vector3(8, 123, -19));
+            if(closeFarEnd) BuildBackWall(xmin,xmax,ymin,ymax,back);
+            if(naturalMassif) DressMassif(xmin,xmax,ymin,ymax,zmin+2,zmax-2);
+        }
+
+        void BuildBackWall(float xmin,float xmax,float ymin,float ymax,float back)
+        {
+            const int nx=18,ny=22;
+            var v=new List<Vector3>();var indices=new List<int>();
+            // Two rough faces plus a sealed perimeter: an actual solid end wall,
+            // not a single-sided visual patch. It overlaps the original lining.
+            for(int side=0;side<2;side++)
+            for(int y=0;y<=ny;y++)
+            for(int x=0;x<=nx;x++)
+            {
+                float px=Mathf.Lerp(xmin-.6f,xmax+.6f,x/(float)nx);
+                float py=Mathf.Lerp(ymin-.6f,ymax+.6f,y/(float)ny);
+                float depth=.14f*Mathf.PerlinNoise(px*2.7f+19,py*2.7f+43);
+                Vector3 p=new Vector3(px,py,back-.55f+depth+side*1.35f);
+                v.Add(transform.InverseTransformPoint(p));
+                if(x==nx || y==ny) continue;
+                int a=side*(nx+1)*(ny+1)+y*(nx+1)+x;
+                if(side==0)indices.AddRange(new[]{a,a+nx+1,a+1,a+1,a+nx+1,a+nx+2});
+                else indices.AddRange(new[]{a,a+1,a+nx+1,a+1,a+nx+2,a+nx+1});
+            }
+            var border=new List<int>();
+            for(int x=0;x<nx;x++)border.Add(x);
+            for(int y=0;y<ny;y++)border.Add(y*(nx+1)+nx);
+            for(int x=nx;x>0;x--)border.Add(ny*(nx+1)+x);
+            for(int y=ny;y>0;y--)border.Add(y*(nx+1));
+            int stride=(nx+1)*(ny+1);
+            for(int i=0;i<border.Count;i++)
+            {int a=border[i],b=border[(i+1)%border.Count];indices.AddRange(new[]{a,b,b+stride,a,b+stride,a+stride});}
+            var mesh=new Mesh{name="Fondo cerrado de la cueva",hideFlags=HideFlags.DontSave};
+            mesh.SetVertices(v);mesh.SetTriangles(indices,0);mesh.RecalculateNormals();mesh.RecalculateBounds();meshes.Add(mesh);
+            var wall=new GameObject("Fondo de roca - sin salida");wall.transform.SetParent(dressing.transform,false);
+            wall.hideFlags=HideFlags.DontSave;
+            wall.AddComponent<MeshFilter>().sharedMesh=mesh;
+            wall.AddComponent<MeshRenderer>().sharedMaterial=rockMaterial;
+            wall.AddComponent<MeshCollider>().sharedMesh=mesh;
+        }
+
+        void DressMassif(float xmin,float xmax,float ymin,float ymax,float front,float back)
+        {
+            // Broad scanned rocks interrupt the original straight skyline and flat
+            // walls. Every front-facing outcrop stays outside the entrance collar.
+            Bounds total=passage.leftWall.bounds;
+            total.Encapsulate(passage.rightWall.bounds);total.Encapsulate(passage.floor.bounds);total.Encapsulate(passage.ceiling.bounds);
+            for(int face=0;face<2;face++)
+            for(int row=0;row<4;row++)
+            for(int col=0;col<7;col++)
+            {
+                float x=Mathf.Lerp(total.min.x-.25f,total.max.x+.25f,col/6f)+.38f*Mathf.Sin(col*2.7f+row);
+                float y=Mathf.Lerp(total.min.y+1,total.max.y+.3f,row/3f)+.45f*Mathf.Sin(col*1.8f+face);
+                float z=(face==0?front:back)+.3f*Mathf.Sin(col*3.4f+row);
+                Vector3 extent=new Vector3(3.8f+Mathf.Sin(col+row)*.5f,row==3?2.6f:6.8f,2.3f);
+                // Conservative bounds, so even rotated pieces cannot cover the mouth.
+                if(face==0 && x+extent.x*.5f>xmin-.45f && x-extent.x*.5f<xmax+.45f && y+extent.y*.5f>ymin-.4f && y-extent.y*.5f<ymax+.45f) continue;
+                AddRock((col+row)%3==0?boulderPrefab:layeredCliffPrefab,new Bounds(new Vector3(x,y,z),extent),
+                    new Vector3(7*Mathf.Sin(col),face==0?18+col*29:180+col*31,12*Mathf.Sin(row+col)));
+            }
+            // Uneven crown above the cave, no rectangular lintel silhouette.
+            for(int i=0;i<7;i++)
+                AddRock(boulderPrefab,new Bounds(new Vector3(Mathf.Lerp(total.min.x,total.max.x,i/6f),
+                    total.max.y+.1f+.5f*Mathf.Sin(i*1.7f),(front+back)*.5f),new Vector3(4.6f,2.3f,5.8f)),new Vector3(12,i*47,8));
         }
 
         Mesh BuildSurface(Surface surface, float xmin, float xmax, float ymin, float ymax, float zmin, float zmax)
@@ -98,7 +164,7 @@ namespace Anadromo.Environment
             // A plane becomes a low rocky shelf, with thickness below its original surface.
             if (size.y < .01f) { size.y = .3f; center.y -= .15f; }
             Vector3 half = size * .5f;
-            float radius = Mathf.Clamp(edgeRoundness, .05f, .4f);
+            float radius = Mathf.Clamp(edgeRoundness, .05f, 1.4f);
             var positions = new List<Vector3>();
             var triangles = new List<int>();
             var welded = new Dictionary<Vector3Int, int>();
@@ -126,7 +192,9 @@ namespace Anadromo.Environment
                         Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.12f, .95f, Mathf.Sqrt(dx * dx + dy * dy)));
                     float noise = .5f * (Mathf.PerlinNoise(baseWorld.x * .83f + baseWorld.z * .27f + 14,
                         baseWorld.y * .9f + 31) + Mathf.PerlinNoise(baseWorld.z * .71f + 9, baseWorld.x * .59f + 47));
-                    float height = Mathf.Clamp(rockRelief, 0, .25f) * (.2f + noise * .8f);
+                    float height = Mathf.Clamp(rockRelief, 0, .8f) * (.2f + noise * .8f);
+                    if(naturalMassif)
+                        height += .35f*(.5f+.5f*Mathf.Sin(baseWorld.x*1.7f+baseWorld.y*.7f+baseWorld.z));
                     Vector3 local = Divide(core + center + normal * (radius + height) * mask, scale);
                     var key = new Vector3Int(Mathf.RoundToInt(local.x * 100000),
                         Mathf.RoundToInt(local.y * 100000), Mathf.RoundToInt(local.z * 100000));
@@ -179,6 +247,9 @@ namespace Anadromo.Environment
             rock.transform.localScale *= factor;
             bounds = RendererBounds(rock);
             rock.transform.position += target.center - bounds.center;
+            foreach(var behaviour in rock.GetComponentsInChildren<MonoBehaviour>())if(behaviour)behaviour.enabled=false;
+            var colliders=rock.GetComponentsInChildren<MeshCollider>();
+            for(int i=0;i<colliders.Length;i++)colliders[i].enabled=i==0;
             // Keep the imported UVs, scanned textures and LODs from OceanViz intact.
         }
         static Bounds RendererBounds(GameObject rock)
