@@ -18,9 +18,16 @@ namespace Anadromo.Mechanics
 
         private Vector3 startPos;
         private Vector3 targetPos;
+        private SwimGroupController swimGroup;
+
+        private void OnTransformParentChanged()
+        {
+            swimGroup = GetComponentInParent<SwimGroupController>();
+        }
 
         private void Start()
         {
+            swimGroup = GetComponentInParent<SwimGroupController>();
             startPos = transform.position;
             
             // Hacer que sea un trigger para que el jugador se lo pueda comer
@@ -34,6 +41,7 @@ namespace Anadromo.Mechanics
 
         private void Update()
         {
+            if (swimGroup != null && swimGroup.Controls(gameObject)) return;
             if (isStatic) return;
 
             // Moverse lentamente hacia su objetivo
