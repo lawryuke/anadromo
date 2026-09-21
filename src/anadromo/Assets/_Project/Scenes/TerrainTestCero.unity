@@ -2440,6 +2440,7 @@ GameObject:
   - component: {fileID: 730081959}
   - component: {fileID: 730081958}
   - component: {fileID: 730081957}
+  - component: {fileID: 730081960}
   m_Layer: 0
   m_Name: XR Origin (VR)
   m_TagString: Untagged
@@ -2508,6 +2509,23 @@ Transform:
   - {fileID: 140943518}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &730081960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 730081956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1697b3de425527c4ea6be565a9cf085a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.FlapSwimController
+  flapDetector: {fileID: 1490347179}
+  settings: {fileID: 11400000, guid: a7bd6cda1687f6340854ea2d96a56823, type: 2}
+  headTransform: {fileID: 763598727}
+  salmonBody: {fileID: 140943518}
+  applyOceanCurrents: 1
 --- !u!1 &763598726
 GameObject:
   m_ObjectHideFlags: 0
@@ -4448,6 +4466,87 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -4836728335790134268, guid: 0921547dc92f1114abcb3441411fa5fd, type: 3}
   m_PrefabInstance: {fileID: 1487407997}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1490347178
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1490347181}
+  - component: {fileID: 1490347180}
+  - component: {fileID: 1490347179}
+  m_Layer: 0
+  m_Name: PoseBridge
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1490347179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1490347178}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfc56dc4e08e08f41986bde1d6a39216, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.FlapDetector
+  cameraReceiver: {fileID: 1490347180}
+  settings: {fileID: 11400000, guid: 952bcda9d3d099e48b1c4a44f3364b72, type: 2}
+  OnLeftFlap:
+    m_PersistentCalls:
+      m_Calls: []
+  OnRightFlap:
+    m_PersistentCalls:
+      m_Calls: []
+  leftWristRawY: 0
+  leftWristSmoothedY: 0
+  leftVelocityY: 0
+  leftInCooldown: 0
+  rightWristRawY: 0
+  rightWristSmoothedY: 0
+  rightVelocityY: 0
+  rightInCooldown: 0
+  totalLeftFlaps: 0
+  totalRightFlaps: 0
+--- !u!114 &1490347180
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1490347178}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81800ffb63e32ef438a4e0554670724d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Systems.ExternalCameraReceiver
+  udpPort: 5555
+  autoStart: 1
+  isReceiving: 0
+  lastPacketTime: 0
+  packetsPerSecond: 0
+  timeSinceLastPacket: 0
+--- !u!4 &1490347181
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1490347178}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1510758219
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6286,3 +6385,4 @@ SceneRoots:
   - {fileID: 595669376}
   - {fileID: 431974703}
   - {fileID: 730081959}
+  - {fileID: 1490347181}

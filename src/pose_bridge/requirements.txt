@@ -1,0 +1,5 @@
+# Dependencias para el MediaPipe Pose Bridge de Anádromo
+# Instalar con: pip install -r requirements.txt
+
+opencv-python>=4.8.0
+mediapipe>=0.10.0
