@@ -29,12 +29,6 @@ namespace Anadromo.Locomotion
 
         private Rigidbody rb;
 
-        // Estado de aleteos
-        private float lastLeftFlapTime = -10f;
-        private float lastRightFlapTime = -10f;
-        private float lastLeftFlapIntensity = 0f;
-        private float lastRightFlapIntensity = 0f;
-
         // ─── Variables de estado para retrasar la evaluación ───
         private float leftFlapTimer = 0f;
         private float rightFlapTimer = 0f;
