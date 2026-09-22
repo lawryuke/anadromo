@@ -15,14 +15,14 @@ El jugador **es** un salmón en primera persona. El movimiento se controla media
 | Acción del jugador | Resultado en el juego |
 |:---|:---|
 | Aleteo de **ambos brazos** simultáneamente | El salmón **avanza hacia adelante** (en la dirección a donde mira el jugador) |
-| Girar la cabeza (headset) | El salmón **rota** (yaw) suavemente para seguir la dirección de la mirada. La vista y la dirección de avance están acopladas |
+| Girar la cabeza (headset) | **Giro Continuo (Joystick de cabeza)**: Si se gira la cabeza a los lados superando un umbral, el cuerpo del salmón rota de forma constante en esa dirección. Para detener el giro, se mira de nuevo al frente. Esto permite giros de 360° sin darle la espalda a la cámara externa. |
 | Inclinar la cabeza (headset) | El salmón **inclina** su pitch (arriba/abajo) suavemente siguiendo la cabeza |
 | Aleteo de **un solo brazo** | **Sin efecto** — se ignora (solo ambos brazos generan avance) |
 | Quedarse quieto | El salmón se detiene gradualmente (frenado/drag) |
 
 ### Principios clave de diseño
 
-1. **La vista y el cuerpo están acoplados en yaw**: mirar a la derecha = el cuerpo del salmón rota a la derecha (con suavizado). El jugador avanza a donde mira.
+1. **Giro por Joystick de Cabeza**: Al girar la cabeza más allá de una "zona muerta", el mundo gira de forma continua. Esto mantiene al jugador apuntando físicamente hacia la cámara web externa en el mundo real, pero permite rotación completa en el mundo virtual.
 2. **El avance requiere ambos brazos**: solo el aleteo sincronizado de ambos brazos genera impulso frontal.
 3. **Para avanzar en diagonal arriba/abajo**: se determina por el pitch de la cabeza (headset), interpolado suavemente al cuerpo del salmón.
 4. **El jugador se queda en el mismo lugar físico**: no necesita moverse en el mundo real, todo es locomotion artificial guiada por gestos.
@@ -48,7 +48,7 @@ El jugador **es** un salmón en primera persona. El movimiento se controla media
 
 - [ ] **Detección de aleteo vertical**: el sistema actual detecta movimiento en eje Z, necesitamos detectar movimiento **vertical (eje Y)** de cada mano
 - [x] ~~**Rotación diferencial**: aleteo de un solo brazo → rotación del cuerpo del salmón~~ → **Eliminada**: el giro ahora lo controla el headset VR
-- [ ] **Seguimiento de yaw por headset**: el cuerpo del salmón rota (yaw) suavemente siguiendo la orientación del headset VR
+- [ ] **Rotación continua por Headset**: implementar lectura del 'yaw' local del casco para aplicar rotación constante (tipo joystick) fuera de una zona muerta.
 - [ ] **XR Origin en TerrainTestCero**: configurar escena de prototipado
 - [ ] **Cámara externa**: integración de webcam/cámara para tracking o supervisión
 - [ ] **Tuning de parámetros**: umbrales de aleteo, velocidad de yawLerpSpeed, fuerza de avance, drag
@@ -89,8 +89,8 @@ XR Origin (VR)               ← XR Origin component (Room Scale)
 │           LÓGICA DE MOVIMIENTO (FlapSwimController.cs)      │
 │                                                             │
 │  CADA FRAME:                                                │
-│    → salmonBody.yaw = Lerp → headTransform.yaw              │
-│      (el cuerpo SIEMPRE rota a donde mira el headset)       │
+│    → Leer yaw local de headTransform                        │
+│    → Si |yaw| > zona_muerta: aplicar rotación continua    │
 │                                                             │
 │  SI recibe "forward" (ambos brazos aletearon):              │
 │    → Aplicar fuerza de AVANCE en salmonBody.forward         │
@@ -211,7 +211,7 @@ Las siguientes decisiones necesitan confirmación antes o durante la implementac
 | D2 | ¿El **avance** debe ser por impulso o fuerza continua? | ✅ **A) Impulso por flap** — cada aleteo da un "golpe" de avance, más fiel a la natación real | Confirmado |
 | D3 | ¿La **rotación** por aleteo individual también genera avance? | ✅ → **Eliminada** — La rotación por aleteo individual fue reemplazada por giro vía headset VR. El jugador mira a donde quiere ir y aletea con ambos brazos para avanzar | Cambio v0.2: se eliminó la rotación diferencial por aleteo individual |
 | D4 | ¿Qué hace la **cámara externa**? | ✅ **Detección de avance** — La cámara externa (webcam + pose estimation) detecta el aleteo sincronizado de ambos brazos para generar avance. El giro lo controla el headset VR (Oculus) | **Cambio v0.2**: la cámara solo emite `forward` o `idle`, no `turn_left`/`turn_right` |
-| D5 | ¿Se permite **mirar completamente hacia atrás** (180° de yaw de cabeza)? | ✅ **A) Sin restricción** — el headset maneja esto naturalmente | Confirmado |
+| D5 | ¿Se permite **mirar completamente hacia atrás** (180° de yaw de cabeza)? | ✅ **Giro continuo** — No se necesita mirar hacia atrás físicamente; girar la cabeza a un lado inicia una rotación continua virtual. | Soluciona el problema de la cámara externa. |
 
 ---
 

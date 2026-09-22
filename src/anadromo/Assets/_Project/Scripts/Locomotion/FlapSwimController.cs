@@ -146,10 +146,32 @@ namespace Anadromo.Locomotion
 
         /// <summary>
         /// El cuerpo del salmón rota en yaw siguiendo la orientación del headset VR.
-        /// Esto reemplaza la rotación por aleteo individual: ahora a donde miras, giras.
+        /// Además, implementa el "Joystick de Cabeza": al girar la cabeza más allá de un umbral,
+        /// rota todo el jugador (XR Origin) de forma continua.
         /// </summary>
         private void UpdateBodyYaw()
         {
+            // 1. Head-Joystick: Rotar el XR Origin de forma continua si superamos la zona muerta
+            float localYaw = headTransform.localEulerAngles.y;
+            if (localYaw > 180f) localYaw -= 360f; // Normalizar a -180..180
+
+            float turnDeadzone = 15f; 
+            float turnSpeed = 60f; // grados por segundo (máximo)
+
+            if (localYaw > turnDeadzone)
+            {
+                float excess = localYaw - turnDeadzone;
+                float speedRatio = Mathf.Clamp01(excess / 30f);
+                transform.Rotate(0, speedRatio * turnSpeed * Time.fixedDeltaTime, 0);
+            }
+            else if (localYaw < -turnDeadzone)
+            {
+                float excess = Mathf.Abs(localYaw) - turnDeadzone;
+                float speedRatio = Mathf.Clamp01(excess / 30f);
+                transform.Rotate(0, -speedRatio * turnSpeed * Time.fixedDeltaTime, 0);
+            }
+
+            // 2. El cuerpo del salmón debe apuntar suavemente a donde mira el headset en yaw (para el avance)
             float headYaw = headTransform.eulerAngles.y;
             float currentYaw = salmonBody.eulerAngles.y;
 

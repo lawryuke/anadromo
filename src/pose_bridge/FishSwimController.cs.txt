@@ -23,6 +23,11 @@ public class FishSwimController : MonoBehaviour
     public int listenPort = 5065;
     public float forwardMultiplier = 2f;
 
+    [Header("Head-Joystick Rotation")]
+    public Transform headCamera; // Asignar la Main Camera del XR Origin
+    public float turnSpeed = 60f; // Grados por segundo al girar a tope
+    public float turnDeadzone = 15f; // Grados de tolerancia antes de empezar a girar
+
     private UdpClient udpClient;
     private Thread receiveThread;
     private volatile string latestJson = null;
@@ -55,6 +60,30 @@ public class FishSwimController : MonoBehaviour
 
     void Update()
     {
+        // 1. Manejar la rotación continua (Joystick de Cabeza)
+        if (headCamera != null)
+        {
+            // Obtener el Yaw local de la cabeza respecto al cuerpo
+            float localYaw = headCamera.localEulerAngles.y;
+            if (localYaw > 180f) localYaw -= 360f; // Normalizar a -180..180
+
+            if (localYaw > turnDeadzone)
+            {
+                // Girar derecha
+                float excess = localYaw - turnDeadzone;
+                float speedRatio = Mathf.Clamp01(excess / 30f); // Máxima velocidad a +30 grados del umbral
+                transform.Rotate(0, speedRatio * turnSpeed * Time.deltaTime, 0);
+            }
+            else if (localYaw < -turnDeadzone)
+            {
+                // Girar izquierda
+                float excess = Mathf.Abs(localYaw) - turnDeadzone;
+                float speedRatio = Mathf.Clamp01(excess / 30f);
+                transform.Rotate(0, -speedRatio * turnSpeed * Time.deltaTime, 0);
+            }
+        }
+
+        // 2. Manejar el movimiento frontal desde UDP
         string json;
         lock (lockObj) { json = latestJson; }
         if (string.IsNullOrEmpty(json)) return;
