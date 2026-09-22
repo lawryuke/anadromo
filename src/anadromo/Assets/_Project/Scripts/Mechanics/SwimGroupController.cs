@@ -180,18 +180,21 @@ namespace Anadromo.Mechanics
             return true;
         }
 
+        public void StartSharkMovement()
+        {
+            if (swimStyle == SwimStyle.Shark && !hasStartedMoving)
+            {
+                hasStartedMoving = true;
+                Debug.Log($"[{gameObject.name}] Estampida de tiburón iniciada automáticamente.");
+            }
+        }
+
         private void Update()
         {
             if (swimStyle == SwimStyle.Fish && useFishStartSequence && !fishSequenceStarted &&
                 Input.GetKeyDown(startKeyForFish)) StartFishSequence();
-            // Detectar la pulsación de la tecla solo si es perfil Shark y aún no se ha iniciado
-            if (swimStyle == SwimStyle.Shark && !hasStartedMoving)
-            {
-                if (Input.GetKeyDown(startKeyForShark))
-                {
-                    hasStartedMoving = true;
-                }
-            }
+            
+            // La estampida del tiburón ahora se inicia externamente usando StartSharkMovement()
         }
 
         private void FixedUpdate()
