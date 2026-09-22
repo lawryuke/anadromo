@@ -17,7 +17,7 @@ RenderSettings:
   m_Fog: 1
   m_FogColor: {r: 0.055, g: 0.22, b: 0.27, a: 1}
   m_FogMode: 3
-  m_FogDensity: 0.025
+  m_FogDensity: 0.151743
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
   m_AmbientSkyColor: {r: 0.18, g: 0.36, b: 0.42, a: 1}
@@ -759,9 +759,10 @@ GameObject:
   - component: {fileID: 210964979}
   - component: {fileID: 210964978}
   - component: {fileID: 210964981}
+  - component: {fileID: 210964982}
   m_Layer: 0
   m_Name: PezNPC
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -791,7 +792,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c375f7a2e0817d641bd80e53626b06b1, type: 2}
+  - {fileID: 2100000, guid: 8ad1300a738544acbea64f0fb6c0b686, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -822,7 +823,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 210964975}
-  m_Mesh: {fileID: 694107847439892949, guid: 27021f4e35f250840a30077d8eacaed9, type: 3}
+  m_Mesh: {fileID: 4300000, guid: 4cc0649e54f0838d93ee89f4adf26904, type: 2}
 --- !u!4 &210964980
 Transform:
   m_ObjectHideFlags: 0
@@ -853,14 +854,34 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.08
-  m_Height: 0.45
+  m_Height: 0.55
   m_Direction: 2
-  m_Center: {x: 0, y: 0, z: 0.01}
+  m_Center: {x: 0, y: 0.021, z: -0.086}
+--- !u!114 &210964982
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 210964975}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0559341469d64a21b410c7fef754b604, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  sourceMesh: {fileID: 4300000, guid: 4cc0649e54f0838d93ee89f4adf26904, type: 2}
+  subdivisions: 2
+  cruiseSpeed: 0.35
+  roamRadius: 2.5
+  turnSpeed: 45
+  tailAmplitude: 0.035
+  tailFrequency: 1.3
+  verticalWander: 0.15
 --- !u!4 &255508784 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2774220344278030320, guid: c558735b335fca64db1d98dcac25b2cc, type: 3}
@@ -4520,6 +4541,7 @@ MonoBehaviour:
   movementSpeed: 0.7
   fastMovementSpeed: 1.2
   mouseSensitivity: 0.05
+  waterExperience: {fileID: 11000000005}
 --- !u!54 &1131614120
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -12893,6 +12915,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 11000000001}
+  - component: {fileID: 11000000005}
   m_Layer: 0
   m_Name: OceanViz Water - TerrainTestCero
   m_TagString: Untagged
@@ -12944,6 +12967,51 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: f3667449c4c2d5f48b2796a4e8898a07, type: 3}
   m_PrefabInstance: {fileID: 10000000039}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &11000000005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 11000000000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41e1f13a5d7e48b7b0d789a14eeaf869, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  viewer: {fileID: 1859686491}
+  surface: {fileID: 11000000004}
+  visibility: 10
+  maximumDrift: 0.3
+  hapticStrength: 0.16
+  haptics: 1
+  bubbleMaterial: {fileID: 2100000, guid: beafe573f55c41d9b91be24a6c35cc07, type: 2}
+  snellMaterial: {fileID: 2100000, guid: aff0796d368d48ce8cc043d9311bfaed, type: 2}
+  zones:
+  - label: Corriente junto al arrecife
+    center: {x: 10, y: 6, z: 8}
+    radius: 7
+    agitation: 0.45
+    drift: {x: 0.1, y: 0, z: -0.12}
+    shelter: 0
+  - label: Remolinos entrada del tunel
+    center: {x: 12, y: 4, z: 23}
+    radius: 9
+    agitation: 0.85
+    drift: {x: -0.12, y: 0.02, z: -0.18}
+    shelter: 0
+  - label: Refugio plataforma inicial
+    center: {x: 10, y: 6, z: 0}
+    radius: 5
+    agitation: 0
+    drift: {x: 0, y: 0, z: 0}
+    shelter: 1
+  - label: Refugio lateral rocoso
+    center: {x: 17, y: 4, z: 19}
+    radius: 4
+    agitation: 0
+    drift: {x: 0, y: 0, z: 0}
+    shelter: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

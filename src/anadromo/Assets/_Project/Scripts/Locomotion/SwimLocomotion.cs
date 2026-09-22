@@ -17,6 +17,7 @@ namespace Anadromo.Locomotion
 
         private Rigidbody rb;
         [SerializeField] private Transform headTransform;
+        [SerializeField] private Anadromo.Environment.FishWaterExperience waterExperience;
 
         private Vector3 lastLeftPos;
         private Vector3 lastRightPos;
@@ -52,6 +53,8 @@ namespace Anadromo.Locomotion
         {
             if (!rb.isKinematic)
                 rb.AddForce(Anadromo.Act1.OceanEnvironment.PlayerCurrentAt(rb.position) * dragInWater, ForceMode.Acceleration);
+            if (!rb.isKinematic && waterExperience)
+                rb.AddForce(waterExperience.Drift * dragInWater, ForceMode.Acceleration);
 
             if (leftHandPosition == null || rightHandPosition == null || leftHandPosition.action == null || rightHandPosition.action == null)
                 return;

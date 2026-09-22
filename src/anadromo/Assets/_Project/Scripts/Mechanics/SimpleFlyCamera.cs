@@ -7,6 +7,7 @@ public class SimpleFlyCamera : MonoBehaviour
     public float movementSpeed = 10f;
     public float fastMovementSpeed = 25f;
     public float mouseSensitivity = 0.2f;
+    public Anadromo.Environment.FishWaterExperience waterExperience;
 
     private float pitch = 0f;
     private float yaw = 0f;
@@ -68,11 +69,11 @@ public class SimpleFlyCamera : MonoBehaviour
 
         if (rb != null && !rb.isKinematic)
         {
-            rb.linearVelocity = direction * currentSpeed;
+            rb.linearVelocity = direction * currentSpeed + (waterExperience ? waterExperience.Drift : Vector3.zero);
         }
         else
         {
-            transform.position += direction * currentSpeed * Time.deltaTime;
+            transform.position += (direction * currentSpeed + (waterExperience ? waterExperience.Drift : Vector3.zero)) * Time.deltaTime;
         }
     }
 }
