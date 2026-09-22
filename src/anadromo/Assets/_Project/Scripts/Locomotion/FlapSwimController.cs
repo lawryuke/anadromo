@@ -65,6 +65,7 @@ namespace Anadromo.Locomotion
             if (settings == null || salmonBody == null || headTransform == null) return;
 
             UpdateBodyPitch();
+            UpdateBodyYaw();
             LimitVelocities();
             ApplyCurrents();
             ProcessPendingFlaps();
@@ -121,21 +122,13 @@ namespace Anadromo.Locomotion
                 return;
             }
 
-            // CASO 2: Solo el izquierdo aleteó y ya pasó la ventana de espera
+            // Aleteo individual: se descarta al pasar la ventana de simultaneidad.
+            // El giro ahora lo controla el headset VR (UpdateBodyYaw).
             if (leftFlapPending && leftFlapTimer > settings.simultaneityWindow)
-            {
-                ApplyRotationTorque(storedLeftIntensity, 1f); // Rotar Derecha
-                ApplyForwardImpulse(storedLeftIntensity * settings.forwardOnSingleFlapRatio);
                 leftFlapPending = false;
-            }
 
-            // CASO 3: Solo el derecho aleteó y ya pasó la ventana de espera
             if (rightFlapPending && rightFlapTimer > settings.simultaneityWindow)
-            {
-                ApplyRotationTorque(storedRightIntensity, -1f); // Rotar Izquierda
-                ApplyForwardImpulse(storedRightIntensity * settings.forwardOnSingleFlapRatio);
                 rightFlapPending = false;
-            }
         }
 
         // ─── Aplicación de Fuerzas ───
@@ -149,20 +142,31 @@ namespace Anadromo.Locomotion
             rb.AddForce(force, ForceMode.Impulse);
         }
 
-        private void ApplyRotationTorque(float intensity, float direction)
-        {
-            // Rotar en el eje Y global (Yaw)
-            Vector3 torque = Vector3.up * (intensity * settings.rotationTorqueMultiplier * direction);
-            rb.AddTorque(torque, ForceMode.Impulse);
-        }
-
         // ─── Movimiento del Cuerpo ───
+
+        /// <summary>
+        /// El cuerpo del salmón rota en yaw siguiendo la orientación del headset VR.
+        /// Esto reemplaza la rotación por aleteo individual: ahora a donde miras, giras.
+        /// </summary>
+        private void UpdateBodyYaw()
+        {
+            float headYaw = headTransform.eulerAngles.y;
+            float currentYaw = salmonBody.eulerAngles.y;
+
+            float newYaw = Mathf.LerpAngle(currentYaw, headYaw,
+                                            Time.fixedDeltaTime * settings.yawLerpSpeed);
+
+            // Preservar el pitch interpolado (de UpdateBodyPitch) + el nuevo yaw
+            salmonBody.eulerAngles = new Vector3(
+                salmonBody.eulerAngles.x,   // pitch (manejado por UpdateBodyPitch)
+                newYaw,                      // yaw ← sigue la cabeza
+                0f                           // roll = 0
+            );
+        }
 
         private void UpdateBodyPitch()
         {
-            // Queremos que el SalmonBody siga el Yaw (eje Y) del propio SalmonBody
-            // (que es manejado por la rotación física del Rigidbody del XR Origin)
-            // pero que siga el Pitch (arriba/abajo) de la cabeza (headTransform).
+            // El pitch del cuerpo del salmón sigue suavemente el pitch de la cabeza (headset).
 
             // 1. Obtener el pitch del headset (convirtiéndolo a -180...180)
             float headPitch = headTransform.eulerAngles.x;
@@ -171,15 +175,15 @@ namespace Anadromo.Locomotion
             // Restringir el pitch máximo para que el salmón no se voltee por completo
             headPitch = Mathf.Clamp(headPitch, -settings.maxPitchAngle, settings.maxPitchAngle);
 
-            // 2. Obtener la rotación actual del cuerpo (su yaw viene del padre XR Origin, su pitch es local)
-            float currentBodyPitch = salmonBody.localEulerAngles.x;
+            // 2. Obtener la rotación actual del cuerpo
+            float currentBodyPitch = salmonBody.eulerAngles.x;
             if (currentBodyPitch > 180f) currentBodyPitch -= 360f;
 
             // 3. Interpolar suavemente
             float newPitch = Mathf.Lerp(currentBodyPitch, headPitch, Time.fixedDeltaTime * settings.pitchLerpSpeed);
 
-            // 4. Aplicar (mantenemos yaw y roll local en 0, ya que el Rigidbody del XR Origin controla el yaw)
-            salmonBody.localEulerAngles = new Vector3(newPitch, 0f, 0f);
+            // 4. Aplicar pitch (yaw se aplica en UpdateBodyYaw, roll = 0)
+            salmonBody.eulerAngles = new Vector3(newPitch, salmonBody.eulerAngles.y, 0f);
         }
 
         private void LimitVelocities()

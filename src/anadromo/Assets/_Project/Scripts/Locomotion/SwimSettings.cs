@@ -14,13 +14,23 @@ namespace Anadromo.Locomotion
         [Range(1f, 300f)]
         public float forwardForceMultiplier = 6f; // Reducido muchísimo de 80 a 6 para evitar "teletransporte"
 
-        [Tooltip("Multiplicador de torque para rotar cuando un solo brazo aletea.")]
+        [Tooltip("Multiplicador de torque para rotar cuando un solo brazo aletea. " +
+                 "OBSOLETO: el giro ahora lo controla el headset VR.")]
         [Range(1f, 50f)]
-        public float rotationTorqueMultiplier = 4f; // Reducido de 15 a 4
+        [System.Obsolete("El giro por aleteo individual fue reemplazado por giro via headset VR.")]
+        public float rotationTorqueMultiplier = 4f;
 
-        [Tooltip("Si es > 0, un aleteo individual también empuja levemente hacia adelante.")]
+        [Tooltip("Si es > 0, un aleteo individual también empuja levemente hacia adelante. " +
+                 "OBSOLETO: el aleteo individual ya no genera acción.")]
         [Range(0f, 1f)]
+        [System.Obsolete("El aleteo individual ya no genera acción de movimiento.")]
         public float forwardOnSingleFlapRatio = 0.1f;
+
+        [Header("Seguimiento de Yaw (Headset → Cuerpo)")]
+        [Tooltip("Velocidad a la que el yaw del cuerpo del salmón sigue la orientación del headset. " +
+                 "Valores altos = giro inmediato. Valores bajos = giro suave/orgánico.")]
+        [Range(1f, 20f)]
+        public float yawLerpSpeed = 8f;
 
         [Header("Velocidades Máximas")]
         [Tooltip("Velocidad lineal máxima permitida (m/s).")]

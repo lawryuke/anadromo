@@ -2,7 +2,7 @@
 
 **ANÁDROMO — Sistema de nado por aleteo con los brazos**
 
-v0.1 — Complementa al GDD v0.3 y al TDD v0.1
+v0.2 — Complementa al GDD v0.3 y al TDD v0.1 — **Cambio v0.2**: giro por headset VR (elimina rotación por aleteo individual)
 
 ---
 
@@ -14,17 +14,17 @@ El jugador **es** un salmón en primera persona. El movimiento se controla media
 
 | Acción del jugador | Resultado en el juego |
 |:---|:---|
-| Aleteo brazo **izquierdo** solamente | El salmón **rota hacia la derecha** (yaw +) |
-| Aleteo brazo **derecho** solamente | El salmón **rota hacia la izquierda** (yaw -) |
-| Aleteo de **ambos brazos** simultáneamente | El salmón **avanza hacia adelante** (en la dirección frontal del cuerpo) |
-| Girar la cabeza (headset) | La **vista/cámara** gira (mirar alrededor), pero NO cambia la dirección de avance del cuerpo |
+| Aleteo de **ambos brazos** simultáneamente | El salmón **avanza hacia adelante** (en la dirección a donde mira el jugador) |
+| Girar la cabeza (headset) | El salmón **rota** (yaw) suavemente para seguir la dirección de la mirada. La vista y la dirección de avance están acopladas |
+| Inclinar la cabeza (headset) | El salmón **inclina** su pitch (arriba/abajo) suavemente siguiendo la cabeza |
+| Aleteo de **un solo brazo** | **Sin efecto** — se ignora (solo ambos brazos generan avance) |
 | Quedarse quieto | El salmón se detiene gradualmente (frenado/drag) |
 
 ### Principios clave de diseño
 
-1. **La vista la controla el headset**: mirar a los lados, arriba, abajo — todo con la cabeza. Es la cámara VR estándar.
-2. **El avance es siempre frontal al cuerpo del salmón**, no a la cámara. Si miro a la derecha pero aleteo con ambos brazos, avanzo hacia donde apunta el cuerpo del salmón, no hacia donde miro.
-3. **Para avanzar en diagonal arriba/abajo**: se determina por el pitch del cuerpo del salmón. Esto se puede vincular al pitch de la cabeza con suavizado, o dejarse como resultado de aleteo asimétrico vertical.
+1. **La vista y el cuerpo están acoplados en yaw**: mirar a la derecha = el cuerpo del salmón rota a la derecha (con suavizado). El jugador avanza a donde mira.
+2. **El avance requiere ambos brazos**: solo el aleteo sincronizado de ambos brazos genera impulso frontal.
+3. **Para avanzar en diagonal arriba/abajo**: se determina por el pitch de la cabeza (headset), interpolado suavemente al cuerpo del salmón.
 4. **El jugador se queda en el mismo lugar físico**: no necesita moverse en el mundo real, todo es locomotion artificial guiada por gestos.
 
 ---
@@ -47,11 +47,11 @@ El jugador **es** un salmón en primera persona. El movimiento se controla media
 ### 1.2 Lo que falta
 
 - [ ] **Detección de aleteo vertical**: el sistema actual detecta movimiento en eje Z, necesitamos detectar movimiento **vertical (eje Y)** de cada mano
-- [ ] **Rotación diferencial**: aleteo de un solo brazo → rotación del cuerpo del salmón
-- [ ] **Separación cuerpo/cabeza**: el cuerpo del salmón (dirección de avance) debe ser independiente de la cabeza (dirección de vista)
+- [x] ~~**Rotación diferencial**: aleteo de un solo brazo → rotación del cuerpo del salmón~~ → **Eliminada**: el giro ahora lo controla el headset VR
+- [ ] **Seguimiento de yaw por headset**: el cuerpo del salmón rota (yaw) suavemente siguiendo la orientación del headset VR
 - [ ] **XR Origin en TerrainTestCero**: configurar escena de prototipado
 - [ ] **Cámara externa**: integración de webcam/cámara para tracking o supervisión
-- [ ] **Tuning de parámetros**: umbrales de aleteo, velocidad de rotación, fuerza de avance, drag
+- [ ] **Tuning de parámetros**: umbrales de aleteo, velocidad de yawLerpSpeed, fuerza de avance, drag
 
 ---
 
@@ -80,21 +80,20 @@ XR Origin (VR)               ← XR Origin component (Room Scale)
 │  4. Máquina de Estados: Transiciones up->half-down->down    │
 │     (El "flap" se emite al llegar a 'down')                 │
 │  5. Sincronía: Si ambos bajan en ventana < 0.2s = 'forward' │
-│  6. UDP Socket: Envía JSON a Unity {"action":"...", "speed"}│
+│     (Aleteo individual: se ignora, no genera acción)        │
+│  6. UDP Socket: Envía JSON a Unity {"action":"forward|idle"}│
 └─────────┬───────────────────────────────────────────────────┘
           │ (Red UDP 127.0.0.1:5065)
           ▼
 ┌─────────────────────────────────────────────────────────────┐
 │           LÓGICA DE MOVIMIENTO (FlapSwimController.cs)      │
 │                                                             │
-│  SI recibe "forward":                                       │
+│  CADA FRAME:                                                │
+│    → salmonBody.yaw = Lerp → headTransform.yaw              │
+│      (el cuerpo SIEMPRE rota a donde mira el headset)       │
+│                                                             │
+│  SI recibe "forward" (ambos brazos aletearon):              │
 │    → Aplicar fuerza de AVANCE en salmonBody.forward         │
-│                                                             │
-│  SI recibe "turn_left":                                     │
-│    → Aplicar torque de ROTACIÓN hacia la IZQUIERDA (-yaw)   │
-│                                                             │
-│  SI recibe "turn_right":                                    │
-│    → Aplicar torque de ROTACIÓN hacia la DERECHA (+yaw)     │
 │                                                             │
 │  PITCH del cuerpo:                                          │
 │    → Interpolar suavemente hacia el pitch de la cabeza VR   │
@@ -103,9 +102,9 @@ XR Origin (VR)               ← XR Origin component (Room Scale)
           ▼
 ┌─────────────────────────────────────────────────────────────┐
 │              APLICACIÓN FÍSICA (Rigidbody)                  │
-│  - AddForce(salmonBody.forward * force, ForceMode.Force)    │
-│  - AddTorque(Vector3.up * torque, ForceMode.Force)          │
+│  - AddForce(salmonBody.forward * force, ForceMode.Impulse)  │
 │  - Drag lineal y angular para frenado natural               │
+│  - (Ya no se aplica torque por aleteo individual)           │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -210,8 +209,8 @@ Las siguientes decisiones necesitan confirmación antes o durante la implementac
 |:---|:---|:---|:---|
 | D1 | ¿Cómo se determina el **pitch** (inclinación arriba/abajo) del cuerpo? | ✅ **A) Sigue el pitch de la cabeza suavizado** — mirar arriba con el headset = nadar diagonal arriba | Confirmado por el usuario |
 | D2 | ¿El **avance** debe ser por impulso o fuerza continua? | ✅ **A) Impulso por flap** — cada aleteo da un "golpe" de avance, más fiel a la natación real | Confirmado |
-| D3 | ¿La **rotación** por aleteo individual también genera avance? | ✅ **B) Rota + pequeño avance** — más natural, un pez que gira siempre se mueve un poco | Confirmado por el usuario |
-| D4 | ¿Qué hace la **cámara externa**? | ✅ **Input principal de aleteo** — La cámara externa (webcam + pose estimation) detecta el movimiento de brazos/aleteo del jugador. Es el dispositivo de input para la locomoción. Los Oculus solo controlan la vista/rotación de la cámara del jugador | **Cambio de arquitectura**: el flap detection se basa en computer vision (cámara), no en controllers VR |
+| D3 | ¿La **rotación** por aleteo individual también genera avance? | ✅ → **Eliminada** — La rotación por aleteo individual fue reemplazada por giro vía headset VR. El jugador mira a donde quiere ir y aletea con ambos brazos para avanzar | Cambio v0.2: se eliminó la rotación diferencial por aleteo individual |
+| D4 | ¿Qué hace la **cámara externa**? | ✅ **Detección de avance** — La cámara externa (webcam + pose estimation) detecta el aleteo sincronizado de ambos brazos para generar avance. El giro lo controla el headset VR (Oculus) | **Cambio v0.2**: la cámara solo emite `forward` o `idle`, no `turn_left`/`turn_right` |
 | D5 | ¿Se permite **mirar completamente hacia atrás** (180° de yaw de cabeza)? | ✅ **A) Sin restricción** — el headset maneja esto naturalmente | Confirmado |
 
 ---
@@ -264,11 +263,11 @@ Assets/_Project/
 | Riesgo | Probabilidad | Impacto | Mitigación |
 |:---|:---|:---|:---|
 | El gesto de aleteo se siente poco natural o cansado | Media | Alto | Umbrales bajos de detección, ScriptableObjects para tuning rápido sin recompilar. Sesión de playtest temprana (Fase 2, antes de construir Fase 3) |
-| Confusión entre "ambos brazos" y "uno solo" por timing | Media | Medio | Ventana de simultaneidad configurable. Feedback háptico diferente para rotación vs. avance |
-| Motion sickness por rotación artificial (yaw) | Alta | Alto | Rotación por pasos discretos (snap turn) como opción, drag angular alto, viñeta de confort activa durante rotación |
+| Motion sickness por rotación del cuerpo siguiendo la cabeza | Baja | Medio | El giro es controlado por la cabeza del jugador (movimiento natural, mucho menor riesgo que rotación artificial). Ajustar `yawLerpSpeed` para suavizar. Viñeta de confort como respaldo |
 | La cámara externa no se detecta o tiene latencia | Baja | Bajo | La cámara es módulo independiente; fallo no bloquea la locomoción |
 | Fatiga de brazos en sesiones largas (35-50 min del GDD) | Media | Alto | Permitir umbral de aleteo bajo (gestos suaves), considerar modo "crucero" donde el salmón mantiene velocidad mínima |
+| `yawLerpSpeed` mal calibrado: demasiado rápido (pegajoso) o lento (pesado) | Media | Medio | Tuning en ScriptableObject, rango configurable 1-20. Empezar en 8 e iterar en playtest |
 
 ---
 
-*Fin del documento — v0.1. Complementa al GDD v0.3 y al TDD v0.1 de Anádromo.*
+*Fin del documento — v0.2. Complementa al GDD v0.3 y al TDD v0.1 de Anádromo.*

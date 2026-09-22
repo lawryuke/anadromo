@@ -14,14 +14,14 @@ public class SwimAction
 
 /// <summary>
 /// Recibe comandos UDP del servidor Python (pose_swim_server.py)
-/// y mueve/gira este GameObject en consecuencia.
-/// Formato esperado: {"action":"forward|turn_left|turn_right|idle","speed":float}
+/// y mueve este GameObject en consecuencia.
+/// Formato esperado: {"action":"forward|idle","speed":float}
+/// Nota: El giro lo controla el headset VR (no se reciben turn_left/turn_right).
 /// </summary>
 public class FishSwimController : MonoBehaviour
 {
     public int listenPort = 5065;
     public float forwardMultiplier = 2f;
-    public float turnMultiplier = 1f;
 
     private UdpClient udpClient;
     private Thread receiveThread;
@@ -66,12 +66,6 @@ public class FishSwimController : MonoBehaviour
         {
             case "forward":
                 transform.Translate(Vector3.forward * action.speed * forwardMultiplier * Time.deltaTime);
-                break;
-            case "turn_left":
-                transform.Rotate(Vector3.up, -action.speed * turnMultiplier * Time.deltaTime);
-                break;
-            case "turn_right":
-                transform.Rotate(Vector3.up, action.speed * turnMultiplier * Time.deltaTime);
                 break;
             case "idle":
             default:

@@ -94,18 +94,15 @@ def main():
                 angle_r = calculate_angle(lm[LM["hip_r"]], lm[LM["shoulder_r"]], lm[LM["elbow_r"]])
                 flapped_r = right_arm.update(angle_r, current_time)
 
-                # Logica de sincronia y accion
+                # Logica de sincronia: solo ambos brazos = avance
+                # (El giro lo controla el headset VR en Unity)
                 if flapped_l or flapped_r:
                     # Chequear si el otro brazo tambien aleteo recientemente
                     time_diff = abs(left_arm.last_flap_time - right_arm.last_flap_time)
                     if time_diff <= SYNC_WINDOW and current_time - left_arm.last_flap_time <= SYNC_WINDOW and current_time - right_arm.last_flap_time <= SYNC_WINDOW:
                         current_action = "forward"
-                    elif flapped_l:
-                        current_action = "turn_left"
-                    elif flapped_r:
-                        current_action = "turn_right"
-                    
-                    action_expire_time = current_time + FLAP_DURATION
+                        action_expire_time = current_time + FLAP_DURATION
+                    # Aleteo individual: se ignora (no genera accion)
 
                 # Expirar la accion si ha pasado el tiempo
                 if current_time > action_expire_time:
