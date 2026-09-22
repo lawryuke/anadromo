@@ -28,7 +28,10 @@ namespace Anadromo.Mechanics
         [Min(0f)] public float preyContentionDistance = 0f;
 
         [Header("Nado normal")]
-        [Tooltip("Vacío: permanecer alrededor de la zona inicial. Con puntos: patrullar en orden y repetir.")]
+        [Tooltip("Si se asigna, los peces siempre regresarán a este objeto invisible cuando terminen de cazar (estado Normal).")]
+        public Transform customHome;
+
+        [Tooltip("Vacío: permanecer alrededor de la zona inicial (o customHome). Con puntos: patrullar en orden y repetir.")]
         public Transform[] normalWaypoints = new Transform[0];
         [Min(0f)] public float wanderRadius = 0.5f;
         [Min(0f)] public float wanderFrequency = 0.7f;
@@ -125,9 +128,10 @@ namespace Anadromo.Mechanics
 
         public void UpdateHomePosition(Vector3 newHome)
         {
+            if (customHome != null) return; // Si hay una caja final configurada, no la sobrescribimos
             home = newHome;
             // Al actualizar el home, acercamos el centro del grupo para que no vuelvan desde muy lejos
-            groupCenter = newHome;
+            groupCenter = Vector3.Lerp(groupCenter, home, 0.5f);
         }
 
         private void OnEnable()
@@ -616,7 +620,11 @@ namespace Anadromo.Mechanics
             if (member.stomach.IsFull) return null;
             if (member.stomach.mealsEaten > 0)
             {
-                return member.stomach.FindNearestNearbyPrey(ignoredPrey);
+                // Permitir búsqueda libre solo si no están ya enfocados en un grupo asustadizo
+                if (target == null || target.GetComponent<Anadromo.AI.ScaredKrillBehavior>() == null)
+                {
+                    return member.stomach.FindNearestNearbyPrey(ignoredPrey);
+                }
             }
             if (target == null) return null;
             var candidates = new List<Transform>();

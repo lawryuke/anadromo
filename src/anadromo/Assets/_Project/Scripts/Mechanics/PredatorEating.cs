@@ -64,6 +64,12 @@ namespace Anadromo.Mechanics
             hungerInitialized = true;
         }
 
+        public void ResetHunger()
+        {
+            mealsEaten = 0;
+            hungerInitialized = false;
+        }
+
         public Transform ResolvePrey(Transform candidate)
         {
             if (candidate == null || !candidate.gameObject.activeInHierarchy || string.IsNullOrEmpty(preyTag)) return null;
@@ -138,15 +144,19 @@ namespace Anadromo.Mechanics
                 var predatorGroup = Owner.GetComponentInParent<SwimGroupController>();
                 if (predatorGroup != null)
                 {
-                    // Forzar la "casa" del grupo al lugar donde están comiendo (en el abismo)
-                    // para que no vuelvan atrás.
-                    predatorGroup.UpdateHomePosition(Owner.position);
+                    // Asignar el grupo asustadizo como su objetivo principal para que no regresen a otros grupos
+                    predatorGroup.movementTarget = scaryGroup.transform;
+
+                    // Calcular la posición exacta del abismo (hacia donde huyen los krills)
+                    Vector3 abyssPosition = scaryGroup.transform.TransformPoint(scaryGroup.fleeOffset);
+                    // Forzar la "casa" del grupo al abismo para que no vuelvan atrás.
+                    predatorGroup.UpdateHomePosition(abyssPosition);
 
                     // Revisar si quedan más krills vivos en ese grupo scary
                     bool hasMoreKrills = false;
                     foreach (Transform child in scaryGroup.GetComponentsInChildren<Transform>())
                     {
-                        if (child != prey && child.gameObject.activeInHierarchy && child.CompareTag(preyTag))
+                        if (child != prey && child != scaryGroup.transform && child.gameObject.activeInHierarchy && child.CompareTag(preyTag))
                         {
                             hasMoreKrills = true;
                             break;
@@ -158,6 +168,7 @@ namespace Anadromo.Mechanics
                     if (!hasMoreKrills)
                     {
                         predatorGroup.individualHunting = false;
+                        predatorGroup.movementTarget = null;
                     }
                 }
             }

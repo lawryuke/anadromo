@@ -45,9 +45,12 @@ namespace Anadromo.AI
             Collider[] hits = Physics.OverlapSphere(transform.position, scareDistance);
             foreach (var hit in hits)
             {
-                // Identificamos al depredador si tiene el componente PredatorEating
-                // o si su nombre incluye "Salmon"
-                if (hit.GetComponentInParent<PredatorEating>() != null || hit.name.ToLower().Contains("salmon"))
+                // Identificamos al depredador si tiene el componente PredatorEating,
+                // PlayerFeeding, si tiene la etiqueta Player, o si su nombre incluye "Salmon"
+                if (hit.GetComponentInParent<PredatorEating>() != null || 
+                    hit.GetComponentInParent<Anadromo.Mechanics.PlayerFeeding>() != null ||
+                    hit.CompareTag("Player") || 
+                    hit.name.ToLower().Contains("salmon"))
                 {
                     TriggerFlee();
                     break; // Solo necesitamos detectar uno para huir
