@@ -29,17 +29,21 @@ LM = {
 }
 
 
-def calculate_angle(a, b, c):
-    """Calcula el angulo 2D (plano frontal) entre 3 puntos."""
-    a = np.array([a.x, a.y])
-    b = np.array([b.x, b.y])
-    c = np.array([c.x, c.y])
-
-    radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - np.arctan2(a[1] - b[1], a[0] - b[0])
-    angle = np.abs(radians * 180.0 / np.pi)
-    if angle > 180.0:
-        angle = 360 - angle
-    return angle
+def calculate_angle_3d(a, b, c):
+    """Calcula el angulo 3D entre 3 puntos (a-b-c, con vertice en b).
+    Usa coordenadas x, y, z para ser robusto a la rotacion del cuerpo."""
+    ba = np.array([a.x - b.x, a.y - b.y, a.z - b.z])
+    bc = np.array([c.x - b.x, c.y - b.y, c.z - b.z])
+    
+    # Prevenir division por cero
+    norm_ba = np.linalg.norm(ba)
+    norm_bc = np.linalg.norm(bc)
+    if norm_ba == 0 or norm_bc == 0:
+        return 0.0
+        
+    cosine_angle = np.dot(ba, bc) / (norm_ba * norm_bc)
+    angle = np.arccos(np.clip(cosine_angle, -1.0, 1.0))
+    return np.degrees(angle)
 
 
 class ArmStateMachine:
@@ -86,12 +90,12 @@ def main():
             if results.pose_landmarks:
                 lm = results.pose_landmarks.landmark
 
-                # Calcular angulo para brazo izquierdo (cadera -> hombro -> codo)
-                angle_l = calculate_angle(lm[LM["hip_l"]], lm[LM["shoulder_l"]], lm[LM["elbow_l"]])
+                # Calcular angulo para brazo izquierdo (cadera -> hombro -> codo) en 3D
+                angle_l = calculate_angle_3d(lm[LM["hip_l"]], lm[LM["shoulder_l"]], lm[LM["elbow_l"]])
                 flapped_l = left_arm.update(angle_l, current_time)
 
-                # Calcular angulo para brazo derecho
-                angle_r = calculate_angle(lm[LM["hip_r"]], lm[LM["shoulder_r"]], lm[LM["elbow_r"]])
+                # Calcular angulo para brazo derecho en 3D
+                angle_r = calculate_angle_3d(lm[LM["hip_r"]], lm[LM["shoulder_r"]], lm[LM["elbow_r"]])
                 flapped_r = right_arm.update(angle_r, current_time)
 
                 # Logica de sincronia: solo ambos brazos = avance

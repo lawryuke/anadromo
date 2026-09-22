@@ -75,8 +75,8 @@ XR Origin (VR)               ← XR Origin component (Room Scale)
 ┌─────────────────────────────────────────────────────────────┐
 │                 PYTHON SERVER (pose_swim_server.py)         │
 │  1. Captura de Webcam (OpenCV)                              │
-│  2. MediaPipe Pose: Extrae keypoints 2D (Cadera, Hombro, Codo)│
-│  3. Cálculo de Ángulos: Calcula el ángulo del brazo/hombro  │
+│  2. MediaPipe Pose: Extrae keypoints 3D (Cadera, Hombro, Codo) para resistir rotaciones│
+│  3. Cálculo de Ángulos 3D: Calcula el ángulo del brazo/hombro│
 │  4. Máquina de Estados: Transiciones up->half-down->down    │
 │     (El "flap" se emite al llegar a 'down')                 │
 │  5. Sincronía: Si ambos bajan en ventana < 0.2s = 'forward' │
@@ -139,8 +139,8 @@ XR Origin (VR)               ← XR Origin component (Room Scale)
 
 | ID | Tarea | Detalle |
 |:---|:---|:---|
-| F2.1 | Actualizar `pose_swim_server.py` | Configurar el script de Python para leer keypoints 2D (Cadera, Hombro, Codo) usando MediaPipe Pose |
-| F2.2 | Cálculo de ángulos trigonométricos | Reemplazar lógica de distancias absolutas por cálculo de ángulos (hombro) garantizando invarianza a escala del jugador |
+| F2.1 | Actualizar `pose_swim_server.py` | Configurar el script de Python para leer keypoints 3D (Cadera, Hombro, Codo) usando MediaPipe Pose, para resistir rotaciones en VR |
+| F2.2 | Cálculo de ángulos trigonométricos | Reemplazar lógica 2D por cálculo de ángulos 3D (hombro) garantizando invarianza a la orientación (yaw) del jugador respecto a la cámara |
 | F2.3 | Máquina de estados (State Machine) | Implementar transiciones de aleteo (`up` -> `half-down` -> `down` -> `half-up`). El aleteo se registra al entrar en estado `down` |
 | F2.4 | Ventana de Sincronía | Evaluar si ambos brazos completaron un aleteo (transición a `down`) en una ventana de ~0.2s |
 | F2.5 | Emisión por UDP | Enviar mensaje JSON continuo a Unity: `{"action": "forward"|"turn_left"|"turn_right"|"idle", "speed": 1.0}` |
