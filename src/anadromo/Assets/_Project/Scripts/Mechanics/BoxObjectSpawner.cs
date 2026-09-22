@@ -73,7 +73,16 @@ namespace Anadromo.Mechanics
 
         private void Start()
         {
-            if (generateOnStart && generated.Count == 0) Generate();
+            if (generateOnStart && generated.Count == 0 && count > 0) Generate();
+
+            // Si no se generó nada, asume los objetos hijos precreados manualmente
+            if (generated.Count == 0)
+            {
+                foreach (Transform child in transform)
+                {
+                    generated.Add(child.gameObject);
+                }
+            }
         }
 
         public void Generate()

@@ -27,6 +27,9 @@ namespace Anadromo.Mechanics
         [Tooltip("Si dos peces persiguen el mismo objetivo y su distancia es menor a este valor ('q'), el más lejano cambiará de presa. 0 desactiva esta función.")]
         [Min(0f)] public float preyContentionDistance = 0f;
 
+        [Header("Debug")]
+        public bool showDebugLines = true;
+
         [Header("Nado normal")]
         [Tooltip("Si se asigna, los peces siempre regresarán a este objeto invisible cuando terminen de cazar (estado Normal).")]
         public Transform customHome;
@@ -337,6 +340,19 @@ namespace Anadromo.Mechanics
                             Mathf.Cos(phase * 0.9f)) * Mathf.Max(0f, wanderRadius);
                     }
                 }
+
+                #if UNITY_EDITOR
+                if (showDebugLines)
+                {
+                    if (hunting && member.currentPrey != null)
+                        Debug.DrawLine(member.position, member.currentPrey.position, Color.red);
+                    else if (state != SwimState.Normal)
+                        Debug.DrawLine(member.position, goal, Color.yellow);
+                    else
+                        Debug.DrawLine(member.position, goal, Color.gray);
+                }
+                #endif
+
                 Vector3 direction = goal - member.position;
                 Vector3 separation = Vector3.zero;
                 float separationRange = Mathf.Max(0f, separationDistance);
