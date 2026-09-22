@@ -1,4 +1,4 @@
-# Relleno del túnel actual — TerrainTestCero
+# Relleno del túnel actual — TerrainTestVisuales
 
 Se añadió `Relleno_Entre_Tunel_Curvo_Y_Terreno` a la escena, con el componente
 `TunnelGapInfill`. Lee el contorno real del submesh interior del LOD0 original
@@ -16,7 +16,7 @@ mundial y el extremo posterior del submesh se encuentra en su Z local mínima.
 Si se reorganizan los objetos o se gira todo el conjunto hay que adaptar esa
 convención; no es un reparador booleano genérico de cualquier malla.
 
-Material interior: `TerrainTestCero_TunnelInterior.mat`, con el nuevo shader
+Material interior: `TerrainTestVisuales_TunnelInterior.mat`, con el nuevo shader
 `Anadromo/Tunnel Continuous Rock`. Usa color mineral, vetas, grano y relieve
 procedurales en coordenadas mundiales. Se mantiene continuo entre las paredes
 y el relleno sin estirar las islas de un atlas UV. Responde a la iluminación

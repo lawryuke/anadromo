@@ -1,6 +1,6 @@
-# Agua y paso del túnel — TerrainTestCero
+# Agua y paso del túnel — TerrainTestVisuales
 
-Se aplicó el agua en TerrainTestCero, la escena abierta con el túnel. No existe
+Se aplicó el agua en TerrainTestVisuales, la escena abierta con el túnel. No existe
 una escena llamada oceanViz en este proyecto.
 
 La referencia es `ihc/oceanVizForke/OceanViz3/Assets/Scenes/Main/Main.unity` y
@@ -43,8 +43,8 @@ El resultado está en `ValidacionPasoTunel.txt`.
 
 Se comprobó que las referencias locales de la escena resuelven. Los scripts
 de generación se compilaron y ejecutaron en la prueba de Unity. Para repetir
-la prueba en el proyecto completo: abrir TerrainTestCero fuera de Play Mode y
-usar `Anadromo > Validate TerrainTestCero Tunnel`.
+la prueba en el proyecto completo: abrir TerrainTestVisuales fuera de Play Mode y
+usar `Anadromo > Validate TerrainTestVisuales Shelter Cave`.
 
 Pendiente: inspección visual del agua y efectos en el editor con GPU; la
 conexión de control de ventanas no estuvo disponible y la prueba física se

@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: TerrainTestCero_RockMassif
+  m_Name: TerrainTestVisuales_RockMassif
   m_Shader: {fileID: 4800000, guid: 2ceafe2e95e848fa9ff3e5f87c17647c, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0

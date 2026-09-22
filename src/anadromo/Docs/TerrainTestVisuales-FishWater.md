@@ -1,6 +1,6 @@
-# Percepcion submarina de TerrainTestCero
+# Percepcion submarina de TerrainTestVisuales
 
-La escena guarda `FishWaterExperience` en `OceanViz Water - TerrainTestCero`, con referencias explicitas a Main Camera, WaterSurface y sus materiales. Se activa al entrar en Play. Los objetos auxiliares y el Volume se crean en memoria y se eliminan al desactivar el componente; se restauran los ajustes ambientales anteriores.
+La escena guarda `FishWaterExperience` en `OceanViz Water - TerrainTestVisuales`, con referencias explicitas a Main Camera, WaterSurface y sus materiales. Se activa al entrar en Play. Los objetos auxiliares y el Volume se crean en memoria y se eliminan al desactivar el componente; se restauran los ajustes ambientales anteriores.
 
 - Alcance nominal: 10 m. Niebla exponencial cuadratica con aproximadamente 10% de contraste residual a esa distancia; sin recorte brusco del plano lejano. Es niebla de materiales URP, no scattering volumetrico fisico.
 - Profundidad: distancia vertical hasta WaterSurface. La superficie actual esta a Y=30.7 y la camara inicial cerca de Y=6. El filtro reduce el canal rojo al 12% a partir de 10 m y atenua luz/color con la profundidad. Estos valores son direccion artistica ajustable, no una simulacion biologica.
@@ -11,9 +11,9 @@ La escena guarda `FishWaterExperience` en `OceanViz Water - TerrainTestCero`, co
 
 ## Prueba
 
-Abrir TerrainTestCero y entrar en Play. Avanzar desde (10,6,0) hacia (10,6,8), luego hacia (12,4,23); buscar el refugio (17,4,19). Comprobar que el empuje y las burbujas aumentan gradualmente y disminuyen en el refugio. Mirar hacia la superficie desde una zona abierta. Acercarse a una presa para ver el destello frontal.
+Abrir TerrainTestVisuales y entrar en Play. Avanzar desde (10,6,0) hacia (10,6,8), luego hacia (12,4,23); buscar el refugio (17,4,19). Comprobar que el empuje y las burbujas aumentan gradualmente y disminuyen en el refugio. Mirar hacia la superficie desde una zona abierta. Acercarse a una presa para ver el destello frontal.
 
-`Anadromo > Validate TerrainTestCero Fish Water` comprueba conexiones, zonas calmas, refugio superpuesto, corriente activa, limites de velocidad, ruido y compilacion de materiales. Escribe el resultado en `Temp/fish-water-validation.txt`.
+`Anadromo > Validate TerrainTestVisuales Fish Water` comprueba conexiones, zonas calmas, refugio superpuesto, corriente activa, limites de velocidad, ruido y compilacion de materiales. Escribe el resultado en `Temp/fish-water-validation.txt`.
 
 La escena mantiene su controlador de escritorio. Para usar un rig XR, asignar su camara a `viewer` y este componente al campo `waterExperience` de `SwimLocomotion`, usando un solo controlador de locomocion. El componente envia impulsos solamente a dispositivos XR con soporte haptico. No se fuerza un FOV panoramico sobre las lentes del visor.
 

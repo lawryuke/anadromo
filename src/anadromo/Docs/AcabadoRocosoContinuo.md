@@ -1,6 +1,6 @@
 # Acabado rocoso continuo del paso existente
 
-La escena TerrainTestCero conserva las posiciones, dimensiones y superficies
+La escena TerrainTestVisuales conserva las posiciones, dimensiones y superficies
 del paso existente. El techo, suelo y los dos laterales TerrainCube2 (2), (3),
 (4) y (5) ahora utilizan el mismo acabado rocoso que el relleno y el interior.
 La fachada de roca de la entrada conserva su geometría y material originales.

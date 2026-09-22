@@ -1,4 +1,4 @@
-# Orcas de TerrainTestCero
+# Orcas de TerrainTestVisuales
 
 La escena contiene 28 instancias de `Assets/_Project/Art/Models/Orca/Orca.prefab`, repartidas entre `Orca_Group_First` y `Orca_Group_Second`. Se conservaron las posiciones, rotaciones, escalas, destinos y la tecla 4 (tambien teclado numerico) del encuentro anterior.
 
@@ -12,5 +12,5 @@ Los materiales conservan los mapas de manchas originales, usan normales y rugosi
 
 - Comprobado: compilacion C# de los controladores y del validador con Roslyn y referencias de Unity 6000.3.10f1; buffers e indices de malla; referencias de prefab; posiciones, rotaciones y escalas originales conservadas; ausencia de referencias a tiburones en la escena.
 - Pendiente: importacion y compilacion del shader en Unity, revision visual en Play y rendimiento en el dispositivo objetivo. El intento de Unity batch termino por falta de licencia activa (codigo 198).
-- Con una licencia activa, abrir TerrainTestCero y ejecutar `Anadromo > Validate TerrainTestCero Orcas`. Comprueba modelos, materiales, shader y llegada a 30/60/120 FPS. El resultado se guarda en `Temp/orca-validation.txt` solo si pasa.
+- Con una licencia activa, abrir TerrainTestVisuales y ejecutar `Anadromo > Validate TerrainTestVisuales Orcas`. Comprueba modelos, materiales, shader y llegada a 30/60/120 FPS. El resultado se guarda en `Temp/orca-validation.txt` solo si pasa.
 - En Play, pulsar 4 y observar ambos grupos: cola arriba/abajo, cabeza estable, transiciones suaves, manchas oculares y ventrales visibles y ausencia de recortes de las aletas durante el movimiento.

@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 7032143422112495556}
   - component: {fileID: 1951311674727304288}
   m_Layer: 0
-  m_Name: TerrainTestCero_TunnelCliff
+  m_Name: TerrainTestVisuales_TunnelCliff
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -19,10 +19,10 @@ public static class FishWaterValidation
         Run();
     }
 
-    [MenuItem("Anadromo/Validate TerrainTestCero Fish Water")]
+    [MenuItem("Anadromo/Validate TerrainTestVisuales Fish Water")]
     public static void Run()
     {
-        var scene = EditorSceneManager.OpenPreviewScene("Assets/_Project/Scenes/TerrainTestCero.unity");
+        var scene = EditorSceneManager.OpenPreviewScene("Assets/_Project/Scenes/TerrainTestVisuales.unity");
         string report;
         try
         {

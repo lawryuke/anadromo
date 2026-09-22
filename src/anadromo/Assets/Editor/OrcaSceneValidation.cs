@@ -7,10 +7,10 @@ using UnityEngine;
 
 public static class OrcaSceneValidation
 {
-    [MenuItem("Anadromo/Validate TerrainTestCero Orcas")]
+    [MenuItem("Anadromo/Validate TerrainTestVisuales Orcas")]
     public static void Run()
     {
-        const string scenePath = "Assets/_Project/Scenes/TerrainTestCero.unity";
+        const string scenePath = "Assets/_Project/Scenes/TerrainTestVisuales.unity";
         var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(scenePath);
         bool opened = !scene.isLoaded;
         if (opened) scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
@@ -54,7 +54,7 @@ public static class OrcaSceneValidation
             }
             Directory.CreateDirectory("Temp");
             File.WriteAllText("Temp/orca-validation.txt", "PASS: 28 orcas, 2 groups, mesh/UV/materials/shader, cadence, arrival at 30/60/120 FPS.");
-            Debug.Log("PASS: TerrainTestCero orcas");
+            Debug.Log("PASS: TerrainTestVisuales orcas");
         }
         finally
         {

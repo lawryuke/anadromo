@@ -1,4 +1,4 @@
-# PezNPC en TerrainTestCero
+# PezNPC en TerrainTestVisuales
 
 El objeto conservaba una malla de lubina con un material de caballa. Ahora utiliza `OceanViz_SeaBass` con sus texturas correspondientes de color y normales, en un material URP Lit independiente (`PezNPC_RealisticSeaBass`). El relieve de escamas, acabado humedo y sombreado utilizan la iluminacion real de la escena.
 
@@ -20,4 +20,4 @@ La malla refinada es transitoria y se reconstruye desde **Source Mesh** al abrir
 
 Runtime y validador compilan con el compilador y referencias del proyecto Unity 6000.3.10f1. La revision visual en Unity y la medicion de rendimiento VR estan pendientes.
 
-El menu **Anadromo > Validate and Preview PezNPC** verifica refinamiento, UV, tangentes, limites, animacion de cola, mapa normal, shader y restauracion de la malla. Genera `Temp/PezNPC-preview.png` y `Temp/realistic-fish-validation.txt`. La vista previa es un estudio del pez; probar tambien Play en TerrainTestCero para evaluar niebla, escala, trayectoria y obstaculos con la iluminacion final.
+El menu **Anadromo > Validate and Preview PezNPC** verifica refinamiento, UV, tangentes, limites, animacion de cola, mapa normal, shader y restauracion de la malla. Genera `Temp/PezNPC-preview.png` y `Temp/realistic-fish-validation.txt`. La vista previa es un estudio del pez; probar tambien Play en TerrainTestVisuales para evaluar niebla, escala, trayectoria y obstaculos con la iluminacion final.

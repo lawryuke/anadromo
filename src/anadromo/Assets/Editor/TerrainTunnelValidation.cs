@@ -8,12 +8,12 @@ using UnityEngine.SceneManagement;
 
 public static class TerrainTunnelValidation
 {
-    [MenuItem("Anadromo/Validate TerrainTestCero Shelter Cave")]
+    [MenuItem("Anadromo/Validate TerrainTestVisuales Shelter Cave")]
     public static void Validate()
     {
         var scene = SceneManager.GetActiveScene();
-        if (scene.path != "Assets/_Project/Scenes/TerrainTestCero.unity" || Application.isPlaying)
-            throw new InvalidOperationException("Abre TerrainTestCero fuera de Play Mode para validar el paso.");
+        if (scene.path != "Assets/_Project/Scenes/TerrainTestVisuales.unity" || Application.isPlaying)
+            throw new InvalidOperationException("Abre TerrainTestVisuales fuera de Play Mode para validar el paso.");
 
         foreach (var root in scene.GetRootGameObjects())
         {

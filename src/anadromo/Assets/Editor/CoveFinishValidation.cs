@@ -17,7 +17,7 @@ public static class CoveFinishValidation
             throw new InvalidOperationException("Use only the isolated Library/CoveReview project.");
         foreach(string path in Directory.GetFiles("Assets","*.shadersubgraph",SearchOption.AllDirectories))
             AssetDatabase.ImportAsset(path,ImportAssetOptions.ForceUpdate|ImportAssetOptions.ForceSynchronousImport);
-        var scene=EditorSceneManager.OpenScene("Assets/_Project/Scenes/TerrainTestCero.unity");
+        var scene=EditorSceneManager.OpenScene("Assets/_Project/Scenes/TerrainTestVisuales.unity");
         var roots=scene.GetRootGameObjects();
         foreach(var root in roots)
         {

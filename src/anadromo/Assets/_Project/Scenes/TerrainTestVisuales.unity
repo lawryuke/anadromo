@@ -12915,7 +12915,7 @@ GameObject:
   - component: {fileID: 11000000001}
   - component: {fileID: 11000000005}
   m_Layer: 0
-  m_Name: OceanViz Water - TerrainTestCero
+  m_Name: OceanViz Water - TerrainTestVisuales
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
