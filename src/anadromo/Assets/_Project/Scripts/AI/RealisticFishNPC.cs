@@ -3,36 +3,42 @@ using UnityEngine;
 
 namespace Anadromo.AI
 {
-    /// <summary>Close-up sea bass: UV-preserving curved subdivision and speed-coupled swimming.</summary>
+    /// <summary>Sea bass mesh refinement and animation. Movement belongs to the swim controller.</summary>
     [ExecuteAlways, DisallowMultipleComponent, RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public sealed class RealisticFishNPC : MonoBehaviour
     {
         public Mesh sourceMesh;
         [Range(0, 2)] public int subdivisions = 2;
-        [Header("Nado (metros y segundos)")]
+        [Header("Animación de nado (sin desplazamiento)")]
+        [Tooltip("Velocidad de referencia para alcanzar la intensidad máxima de la cola; no mueve el pez.")]
         [Min(.05f)] public float cruiseSpeed = .35f;
-        [Min(.5f)] public float roamRadius = 2.5f;
-        [Range(10, 120)] public float turnSpeed = 45;
         [Range(.01f, .08f)] public float tailAmplitude = .035f;
         [Range(.5f, 3)] public float tailFrequency = 1.3f;
-        [Range(0, .5f)] public float verticalWander = .15f;
         Mesh mesh, previousMesh;
         MeshFilter filter;
         Vector3[] rest, vertices, normals, restNormals;
         Vector4[] tangents, restTangents;
-        Vector3 home;
-        float phase, elapsed, speed, bank;
+        Vector3 previousPosition;
+        float phase, speed;
         bool rebuild;
 
-        void OnEnable() { rebuild = true; home = transform.position; elapsed = phase = speed = bank = 0; }
+        void OnEnable()
+        {
+            rebuild = true;
+            previousPosition = transform.position;
+            phase = (GetInstanceID() & 0xFFFF) * 2.399963f;
+            speed = 0;
+        }
         void OnValidate() { rebuild = true; }
-        void Update()
+        void LateUpdate()
         {
             if (rebuild) { rebuild = false; BuildMesh(); }
             if (!Application.isPlaying || !mesh) return;
-            float dt = Mathf.Min(Time.deltaTime, .05f);
-            elapsed += dt;
-            Move(dt);
+            float frameTime = Time.deltaTime;
+            float measuredSpeed = frameTime > 0 ? Vector3.Distance(previousPosition, transform.position) / frameTime : 0;
+            previousPosition = transform.position;
+            float dt = Mathf.Min(frameTime, .05f);
+            speed = Mathf.Lerp(speed, measuredSpeed, 1 - Mathf.Exp(-dt * 8));
             Animate(dt);
         }
 
@@ -87,38 +93,6 @@ namespace Anadromo.AI
             filter.sharedMesh = mesh;
         }
 
-        void Move(float dt)
-        {
-            float orbit = elapsed * cruiseSpeed / Mathf.Max(.5f, roamRadius);
-            // The target travels continuously; no random target jumps or teleporting at loop boundaries.
-            Vector3 target = home + new Vector3(Mathf.Sin(orbit) * roamRadius,
-                Mathf.Sin(elapsed * .31f) * verticalWander, Mathf.Cos(orbit) * roamRadius);
-            Vector3 desired = (target - transform.position).normalized;
-            Vector3 forward = transform.forward;
-            float probe = .7f + speed;
-            bool blocked = Physics.SphereCast(transform.position, .16f, forward, out var hit,
-                probe, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
-            if (blocked)
-            {
-                desired = Vector3.ProjectOnPlane(desired, hit.normal) + hit.normal * .8f;
-                if (desired.sqrMagnitude < .01f) desired = transform.right;
-                desired.Normalize();
-            }
-            float yaw = Vector3.Dot(transform.right, desired);
-            bank = Mathf.Lerp(bank, Mathf.Clamp(-yaw * 18, -12, 12), 1 - Mathf.Exp(-dt * 3));
-            Quaternion heading = Quaternion.LookRotation(desired, Vector3.up) * Quaternion.Euler(0, 0, bank);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, heading, turnSpeed * dt);
-            float alignment = Mathf.Clamp01(Vector3.Dot(transform.forward, desired));
-            float desiredSpeed = cruiseSpeed * (.85f + .15f * Mathf.Sin(elapsed * .7f)) * alignment;
-            if (blocked) desiredSpeed *= Mathf.Clamp01((hit.distance - .18f) / probe);
-            speed = Mathf.MoveTowards(speed, desiredSpeed, dt * .25f);
-            Vector3 step = transform.forward * speed * dt;
-            // Sweep the actual displacement as well as looking ahead; do not swim through walls.
-            if (step.sqrMagnitude > 0 && !Physics.SphereCast(transform.position, .16f, step.normalized,
-                    out _, step.magnitude + .04f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
-                transform.position += step;
-        }
-
         void Animate(float dt)
         {
             float effort = Mathf.Clamp01(speed / Mathf.Max(.05f, cruiseSpeed));
@@ -157,10 +131,5 @@ namespace Anadromo.AI
             mesh = null;
         }
         void OnDisable() { ReleaseMesh(); }
-        void OnDrawGizmosSelected()
-        {
-            Gizmos.color = new Color(.2f, .8f, 1, .6f);
-            Gizmos.DrawWireSphere(Application.isPlaying ? home : transform.position, roamRadius);
-        }
     }
 }

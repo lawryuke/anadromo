@@ -19,6 +19,12 @@ public sealed class OrcaGroupMovement : MonoBehaviour
 
     void Start()
     {
+        CollectPod();
+    }
+
+    void CollectPod()
+    {
+        pod.Clear();
         foreach (Transform child in transform)
         {
             var path = child.GetComponent<NaturalSwimPath>();
@@ -42,6 +48,8 @@ public sealed class OrcaGroupMovement : MonoBehaviour
     public void IniciarGrupo()
     {
         if (started) return;
+        if (pod.Count == 0) CollectPod();
+        if (pod.Count == 0) { Debug.LogWarning("No se encontraron orcas hijas para mover.", this); return; }
         started = true;
         StartCoroutine(Launch());
     }

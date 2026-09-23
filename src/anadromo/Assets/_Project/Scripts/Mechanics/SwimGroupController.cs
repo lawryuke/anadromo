@@ -369,9 +369,17 @@ namespace Anadromo.Mechanics
                 heading = Quaternion.RotateTowards(heading, Quaternion.LookRotation(forward, up), turnSpeed * dt);
                 Quaternion rotation = heading * member.modelCorrection;
                 float desiredSpeed = Mathf.Max(0f, swimSpeed);
-                if (swimStyle == SwimStyle.Fish) desiredSpeed *= Mathf.Clamp01(remaining);
+                if (swimStyle == SwimStyle.Fish)
+                {
+                    // Slow down through tight turns and propel along the fish's heading,
+                    // including while hunting, instead of sliding sideways toward prey.
+                    float alignment = Mathf.Clamp01(Vector3.Dot(heading * Vector3.forward, forward));
+                    float stroke = .85f + .15f * Mathf.Sin(swimTime * .7f + member.phase);
+                    desiredSpeed *= Mathf.Clamp01(remaining) * alignment * stroke;
+                }
                 member.speed = Mathf.MoveTowards(member.speed, desiredSpeed, Mathf.Max(0.01f, acceleration) * dt);
-                Vector3 travelDirection = linearShark || hunting ? forward : heading * Vector3.forward;
+                Vector3 travelDirection = linearShark || (hunting && swimStyle == SwimStyle.Shark)
+                    ? forward : heading * Vector3.forward;
                 Vector3 position = member.position + travelDirection * Mathf.Min(member.speed * dt, remaining);
                 if (collideWithObstacles)
                     position = ResolveCollision(member, position - member.position, !linearShark);
