@@ -41,6 +41,13 @@ public class SimpleFlyCamera : MonoBehaviour
             Cursor.visible = true;
         }
 
+        // Volver a bloquear al dar clic izquierdo en la pantalla
+        if (mouse.leftButton.wasPressedThisFrame && Cursor.lockState != CursorLockMode.Locked)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
         // Camera Rotation (Siempre activa si el cursor está bloqueado)
         if (Cursor.lockState == CursorLockMode.Locked)
         {
