@@ -61,7 +61,7 @@ namespace Anadromo.Environment
             loop.Sort((a, b) => Mathf.Atan2(a.y - center.y, a.x - center.x)
                 .CompareTo(Mathf.Atan2(b.y - center.y, b.x - center.x)));
 
-            // These references describe the existing axis-aligned opening in TerrainTestVisuales.
+            // These references describe the existing axis-aligned opening in TerrainTestCero.
             Vector2 boxMin = new Vector2(leftWall.bounds.max.x - overlap, floor.bounds.max.y - overlap);
             Vector2 boxMax = new Vector2(rightWall.bounds.min.x + overlap, ceiling.bounds.min.y + overlap);
             if (min.x <= boxMin.x || min.y <= boxMin.y || max.x >= boxMax.x || max.y >= boxMax.y)

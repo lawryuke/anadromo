@@ -11,8 +11,8 @@ Shader "Anadromo/Underwater Tunnel Cinematic"
         _MacroScale                 ("Rock Macro Scale",   Float)  = 1.5
         _MicroScale                 ("Pore Micro Scale",   Float)  = 8.0
         _CreviceDarkness            ("Crevice Occlusion",  Range(0,1)) = 0.85
-        _AlgaeCoverage              ("Algae Amount",       Range(0,1)) = 0.45
-        _Smoothness                 ("Wet Smoothness",     Range(0,1)) = 0.08
+        _AlgaeCoverage              ("Algae Amount",       Range(0,1)) = 0.32
+        _Smoothness                 ("Wet Smoothness",     Range(0,1)) = 0.28
         _NormalStrength             ("Relief Strength",    Range(0,2)) = 1.35
 
         // ── Distance Fog & Misterioso Dark Veil ────────────────────
@@ -185,7 +185,7 @@ Shader "Anadromo/Underwater Tunnel Cinematic"
                 float smoothness = _Smoothness * (1.0 - crevice * 0.5);
                 float3 H = normalize(mainLight.direction + viewDirWS);
                 float NdotH = saturate(dot(N, H));
-                half3 specular = mainLight.color * pow(NdotH, exp2(smoothness * 9.0 + 1.0)) * smoothness * 0.45 * saturate(1.0 - N.y * 0.85);
+                half3 specular = mainLight.color * pow(NdotH, exp2(smoothness * 9.0 + 1.0)) * smoothness * 0.45;
 
                 half3 color = diffuse + ambient + specular;
 

@@ -7,7 +7,6 @@ public class SimpleFlyCamera : MonoBehaviour
     public float movementSpeed = 10f;
     public float fastMovementSpeed = 25f;
     public float mouseSensitivity = 0.2f;
-    public Anadromo.Environment.FishWaterExperience waterExperience;
 
     private float pitch = 0f;
     private float yaw = 0f;
@@ -41,13 +40,6 @@ public class SimpleFlyCamera : MonoBehaviour
             Cursor.visible = true;
         }
 
-        // Volver a bloquear al dar clic izquierdo en la pantalla
-        if (mouse.leftButton.wasPressedThisFrame && Cursor.lockState != CursorLockMode.Locked)
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
-
         // Camera Rotation (Siempre activa si el cursor está bloqueado)
         if (Cursor.lockState == CursorLockMode.Locked)
         {
@@ -76,11 +68,11 @@ public class SimpleFlyCamera : MonoBehaviour
 
         if (rb != null && !rb.isKinematic)
         {
-            rb.linearVelocity = direction * currentSpeed + (waterExperience ? waterExperience.Drift : Vector3.zero);
+            rb.linearVelocity = direction * currentSpeed;
         }
         else
         {
-            transform.position += (direction * currentSpeed + (waterExperience ? waterExperience.Drift : Vector3.zero)) * Time.deltaTime;
+            transform.position += direction * currentSpeed * Time.deltaTime;
         }
     }
 }

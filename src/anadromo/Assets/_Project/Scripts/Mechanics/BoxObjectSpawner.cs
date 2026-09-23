@@ -3,12 +3,6 @@ using UnityEngine;
 
 namespace Anadromo.Mechanics
 {
-    public enum InitialOrientationMode
-    {
-        Target,
-        FixedView
-    }
-
     [AddComponentMenu("Anadromo/Box Object Spawner")]
     public class BoxObjectSpawner : MonoBehaviour
     {
@@ -18,12 +12,9 @@ namespace Anadromo.Mechanics
         [Min(0)] public int count = 20;
         public bool generateOnStart = true;
 
-        [Header("Orientación inicial")]
-        public InitialOrientationMode orientationMode = InitialOrientationMode.Target;
-        [Tooltip("Al generar, cada copia apunta a este objeto conservando la corrección del modelo. Aplica si el modo es Target.")]
+        [Header("Orientación inicial (opcional)")]
+        [Tooltip("Al generar, cada copia apunta a este objeto conservando la corrección del modelo. Tiene prioridad sobre Random Yaw; no hay seguimiento posterior.")]
         public Transform targetObject;
-        [Tooltip("Ángulos fijos (X,Y,Z) que tendrán todas las copias. Aplica si el modo es FixedView.")]
-        public Vector3 fixedViewAngles = new Vector3(-90f, 180f, 0f);
 
         [Header("Orientación del modelo (compartida con el nado)")]
         [Tooltip("Conservar la inclinación y el giro lateral del Source Object, quitando solo su rumbo Y. Por ejemplo, X=-90 en un modelo importado vertical.")]
@@ -82,7 +73,16 @@ namespace Anadromo.Mechanics
 
         private void Start()
         {
-            if (generateOnStart && generated.Count == 0) Generate();
+            if (generateOnStart && generated.Count == 0 && count > 0) Generate();
+
+            // Si no se generó nada, asume los objetos hijos precreados manualmente
+            if (generated.Count == 0)
+            {
+                foreach (Transform child in transform)
+                {
+                    generated.Add(child.gameObject);
+                }
+            }
         }
 
         public void Generate()
@@ -144,18 +144,10 @@ namespace Anadromo.Mechanics
                         (float)random.NextDouble() - 0.5f, (float)random.NextDouble() - 0.5f,
                         (float)random.NextDouble() - 0.5f));
                     Vector3 position = transform.TransformPoint(localPoint);
-                    Quaternion rotation;
-                    if (orientationMode == InitialOrientationMode.FixedView)
-                    {
-                        rotation = Quaternion.Euler(fixedViewAngles);
-                    }
-                    else
-                    {
-                        rotation = randomYaw
-                            ? Quaternion.AngleAxis((float)random.NextDouble() * 360f, transform.up) * baseRotation
-                            : baseRotation;
-                        rotation = GetInitialRotation(position, rotation);
-                    }
+                    Quaternion rotation = randomYaw
+                        ? Quaternion.AngleAxis((float)random.NextDouble() * 360f, transform.up) * baseRotation
+                        : baseRotation;
+                    rotation = GetInitialRotation(position, rotation);
                     // Validate containment and collisions with the final initial orientation.
                     candidate.transform.SetPositionAndRotation(position, rotation);
                     Physics.SyncTransforms();
@@ -171,140 +163,6 @@ namespace Anadromo.Mechanics
                     }
                     accepted = true;
                     break;
-                }
-                // Fallback: grid-based systematic search when random attempts fail
-                if (!accepted)
-                {
-                    int gridRes = Mathf.Max(3, Mathf.CeilToInt(Mathf.Pow(count * 3, 1f / 3f)));
-                    var gridCells = new List<Vector3Int>(gridRes * gridRes * gridRes);
-                    for (int gx = 0; gx < gridRes; gx++)
-                        for (int gy = 0; gy < gridRes; gy++)
-                            for (int gz = 0; gz < gridRes; gz++)
-                                gridCells.Add(new Vector3Int(gx, gy, gz));
-                    // Shuffle grid cells for variety
-                    for (int g = gridCells.Count - 1; g > 0; g--)
-                    {
-                        int k = random.Next(g + 1);
-                        var tmp = gridCells[g]; gridCells[g] = gridCells[k]; gridCells[k] = tmp;
-                    }
-                    foreach (var cell in gridCells)
-                    {
-                        Vector3 localPoint = center + new Vector3(
-                            ((cell.x + 0.5f) / gridRes - 0.5f) * size.x,
-                            ((cell.y + 0.5f) / gridRes - 0.5f) * size.y,
-                            ((cell.z + 0.5f) / gridRes - 0.5f) * size.z);
-                        Vector3 position = transform.TransformPoint(localPoint);
-                        Quaternion rotation;
-                        if (orientationMode == InitialOrientationMode.FixedView)
-                        {
-                            rotation = Quaternion.Euler(fixedViewAngles);
-                        }
-                        else
-                        {
-                            rotation = randomYaw
-                                ? Quaternion.AngleAxis((float)random.NextDouble() * 360f, transform.up) * baseRotation
-                                : baseRotation;
-                            rotation = GetInitialRotation(position, rotation);
-                        }
-                        candidate.transform.SetPositionAndRotation(position, rotation);
-                        Physics.SyncTransforms();
-                        if (containWholeObject && !FitsInside(colliders, renderers)) continue;
-                        if (avoidOverlaps && HasOverlap(candidate.transform, colliders, renderers, placedColliders, placedVisualBounds)) continue;
-                        accepted = true;
-                        break;
-                    }
-                }
-                // Third fallback: compact neighbors to free space
-                if (!accepted && generated.Count > 1)
-                {
-                    for (int ni = 0; ni < generated.Count && !accepted; ni++)
-                    {
-                        GameObject neighbor = generated[ni];
-                        if (neighbor == null) continue;
-                        Vector3 originalNeighborPos = neighbor.transform.position;
-
-                        // Find nearest sibling to nudge toward
-                        float nearestDist = float.MaxValue;
-                        Vector3 nearestSiblingPos = originalNeighborPos;
-                        for (int nj = 0; nj < generated.Count; nj++)
-                        {
-                            if (ni == nj || generated[nj] == null) continue;
-                            float d = Vector3.Distance(originalNeighborPos, generated[nj].transform.position);
-                            if (d < nearestDist) { nearestDist = d; nearestSiblingPos = generated[nj].transform.position; }
-                        }
-                        if (nearestDist >= float.MaxValue) continue;
-
-                        Vector3 nudgeDir = (nearestSiblingPos - originalNeighborPos).normalized;
-                        Collider[] neighborColliders = neighbor.GetComponentsInChildren<Collider>();
-
-                        // Build a placed list excluding this neighbor's own colliders
-                        var placedWithoutNeighbor = new List<Collider>(placedColliders.Count);
-                        foreach (var pc in placedColliders)
-                        {
-                            bool isSelf = false;
-                            foreach (var nc in neighborColliders)
-                                if (pc == nc) { isSelf = true; break; }
-                            if (!isSelf) placedWithoutNeighbor.Add(pc);
-                        }
-
-                        for (float frac = 0.15f; frac <= 0.5f; frac += 0.1f)
-                        {
-                            Vector3 nudgedPos = originalNeighborPos + nudgeDir * (nearestDist * frac);
-                            // Verify nudged pos is inside the box
-                            Vector3 nudgedLocal = transform.InverseTransformPoint(nudgedPos) - center;
-                            Vector3 hs = size * 0.5f;
-                            if (Mathf.Abs(nudgedLocal.x) > hs.x || Mathf.Abs(nudgedLocal.y) > hs.y || Mathf.Abs(nudgedLocal.z) > hs.z) continue;
-
-                            neighbor.transform.position = nudgedPos;
-                            Physics.SyncTransforms();
-
-                            // Check nudged neighbor doesn't now overlap with others
-                            Renderer[] neighborRenderers = neighbor.GetComponentsInChildren<Renderer>();
-                            if (avoidOverlaps && HasOverlap(neighbor.transform, neighborColliders, neighborRenderers, placedWithoutNeighbor, placedVisualBounds))
-                            {
-                                neighbor.transform.position = originalNeighborPos;
-                                Physics.SyncTransforms();
-                                continue;
-                            }
-
-                            // Try placing candidate at the freed position
-                            Vector3 candidatePos = originalNeighborPos;
-                            Quaternion rotation;
-                            if (orientationMode == InitialOrientationMode.FixedView)
-                            {
-                                rotation = Quaternion.Euler(fixedViewAngles);
-                            }
-                            else
-                            {
-                                rotation = randomYaw
-                                    ? Quaternion.AngleAxis((float)random.NextDouble() * 360f, transform.up) * baseRotation
-                                    : baseRotation;
-                                rotation = GetInitialRotation(candidatePos, rotation);
-                            }
-                            candidate.transform.SetPositionAndRotation(candidatePos, rotation);
-                            Physics.SyncTransforms();
-
-                            if (containWholeObject && !FitsInside(colliders, renderers))
-                            {
-                                neighbor.transform.position = originalNeighborPos;
-                                Physics.SyncTransforms();
-                                continue;
-                            }
-                            if (avoidOverlaps && HasOverlap(candidate.transform, colliders, renderers, placedColliders, placedVisualBounds))
-                            {
-                                neighbor.transform.position = originalNeighborPos;
-                                Physics.SyncTransforms();
-                                continue;
-                            }
-                            accepted = true;
-                            break;
-                        }
-                        if (!accepted)
-                        {
-                            neighbor.transform.position = originalNeighborPos;
-                            Physics.SyncTransforms();
-                        }
-                    }
                 }
                 if (!accepted)
                 {

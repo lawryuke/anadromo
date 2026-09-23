@@ -27,6 +27,9 @@ namespace Anadromo.Mechanics
         [Tooltip("Si dos peces persiguen el mismo objetivo y su distancia es menor a este valor ('q'), el más lejano cambiará de presa. 0 desactiva esta función.")]
         [Min(0f)] public float preyContentionDistance = 0f;
 
+        [Header("Debug")]
+        public bool showDebugLines = true;
+
         [Header("Nado normal")]
         [Tooltip("Si se asigna, los peces siempre regresarán a este objeto invisible cuando terminen de cazar (estado Normal).")]
         public Transform customHome;
@@ -337,6 +340,19 @@ namespace Anadromo.Mechanics
                             Mathf.Cos(phase * 0.9f)) * Mathf.Max(0f, wanderRadius);
                     }
                 }
+
+                #if UNITY_EDITOR
+                if (showDebugLines)
+                {
+                    if (hunting && member.currentPrey != null)
+                        Debug.DrawLine(member.position, member.currentPrey.position, Color.red);
+                    else if (state != SwimState.Normal)
+                        Debug.DrawLine(member.position, goal, Color.yellow);
+                    else
+                        Debug.DrawLine(member.position, goal, Color.gray);
+                }
+                #endif
+
                 Vector3 direction = goal - member.position;
                 Vector3 separation = Vector3.zero;
                 float separationRange = Mathf.Max(0f, separationDistance);
@@ -369,17 +385,9 @@ namespace Anadromo.Mechanics
                 heading = Quaternion.RotateTowards(heading, Quaternion.LookRotation(forward, up), turnSpeed * dt);
                 Quaternion rotation = heading * member.modelCorrection;
                 float desiredSpeed = Mathf.Max(0f, swimSpeed);
-                if (swimStyle == SwimStyle.Fish)
-                {
-                    // Slow down through tight turns and propel along the fish's heading,
-                    // including while hunting, instead of sliding sideways toward prey.
-                    float alignment = Mathf.Clamp01(Vector3.Dot(heading * Vector3.forward, forward));
-                    float stroke = .85f + .15f * Mathf.Sin(swimTime * .7f + member.phase);
-                    desiredSpeed *= Mathf.Clamp01(remaining) * alignment * stroke;
-                }
+                if (swimStyle == SwimStyle.Fish) desiredSpeed *= Mathf.Clamp01(remaining);
                 member.speed = Mathf.MoveTowards(member.speed, desiredSpeed, Mathf.Max(0.01f, acceleration) * dt);
-                Vector3 travelDirection = linearShark || (hunting && swimStyle == SwimStyle.Shark)
-                    ? forward : heading * Vector3.forward;
+                Vector3 travelDirection = linearShark || hunting ? forward : heading * Vector3.forward;
                 Vector3 position = member.position + travelDirection * Mathf.Min(member.speed * dt, remaining);
                 if (collideWithObstacles)
                     position = ResolveCollision(member, position - member.position, !linearShark);

@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 public static class TerrainTunnelValidation
 {
-    [MenuItem("Anadromo/Validate TerrainTestVisuales Shelter Cave")]
+    [MenuItem("Anadromo/Validate TerrainTestCero Tunnel")]
     public static void Validate()
     {
         var scene = SceneManager.GetActiveScene();
@@ -19,7 +19,6 @@ public static class TerrainTunnelValidation
         {
             foreach (var surface in root.GetComponentsInChildren<ContinuousRockTunnelInterior>()) surface.Rebuild();
             foreach (var infill in root.GetComponentsInChildren<TunnelGapInfill>()) infill.Rebuild();
-            foreach (var exterior in root.GetComponentsInChildren<RockyTunnelExterior>()) exterior.Rebuild();
         }
         Physics.SyncTransforms();
         var player = scene.GetRootGameObjects().First(go => go.name == "Person1");
@@ -32,9 +31,9 @@ public static class TerrainTunnelValidation
         foreach (float y in new[] { 3.03f, 3.23f, 3.43f })
         foreach (int direction in new[] { 1, -1 })
         {
-            Vector3 start = new Vector3(x, y, direction == 1 ? 19 : 25);
+            Vector3 start = new Vector3(x, y, direction == 1 ? 19 : 30);
             var hits = Physics.CapsuleCastAll(start - axis, start + axis, radius,
-                Vector3.forward * direction, 6, ~0, QueryTriggerInteraction.Ignore)
+                Vector3.forward * direction, 11, ~0, QueryTriggerInteraction.Ignore)
                 .Where(h => h.collider.gameObject.scene == scene && !h.collider.transform.IsChildOf(player.transform))
                 .ToArray();
             if (hits.Length > 0)
@@ -42,13 +41,7 @@ public static class TerrainTunnelValidation
                     string.Join(", ", hits.Select(h => AnimationUtility.CalculateTransformPath(h.collider.transform, null))));
             passed++;
         }
-        var endWall=scene.GetRootGameObjects().SelectMany(go=>go.GetComponentsInChildren<MeshCollider>())
-            .Single(c=>c.name=="Fondo de roca - sin salida");
-        for(float x=11.65f;x<12.95f;x+=.2f)
-        for(float y=2.7f;y<3.9f;y+=.2f)
-            if(!endWall.Raycast(new Ray(new Vector3(x,y,25),Vector3.forward),out _,5))
-                throw new InvalidOperationException("El fondo de la cueva tiene una abertura.");
-        Debug.Log($"PASS: {passed} recorridos de entrada/salida libres; fondo de la cueva cerrado con colision.");
+        Debug.Log($"PASS: {passed} recorridos libres por el tunel, en ambos sentidos, con la capsula del jugador.");
     }
 }
 #endif

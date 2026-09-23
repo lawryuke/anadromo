@@ -2,14 +2,6 @@ Shader "Anadromo/White Shark Natural Swim"
 {
     Properties
     {
-        _DorsalColor("Dorsal Color (Lomo)", Color) = (0.09, 0.13, 0.17, 1.0)
-        _VentralColor("Ventral Color (Vientre)", Color) = (0.92, 0.94, 0.96, 1.0)
-        _CounterShadeHeight("Countershade Height", Range(-1.0, 1.0)) = 0.0
-        _CounterShadeSoftness("Countershade Softness", Range(0.01, 1.0)) = 0.20
-        _ColorBlend("Vertex Color Blend", Range(0.0, 1.0)) = 0.15
-        _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.70
-        _Metallic("Metallic", Range(0.0, 1.0)) = 0.04
-        _FresnelStrength("Fresnel Sheen", Range(0.0, 1.0)) = 0.40
         _SwimPhase("Swim phase", Float) = 0
         _SwimStrength("Swim strength", Float) = 0
         [Enum(UnityEngine.Rendering.CullMode)] _Cull("Cull", Float) = 0
@@ -23,14 +15,6 @@ Shader "Anadromo/White Shark Natural Swim"
         HLSLINCLUDE
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
         CBUFFER_START(UnityPerMaterial)
-            float4 _DorsalColor;
-            float4 _VentralColor;
-            float _CounterShadeHeight;
-            float _CounterShadeSoftness;
-            float _ColorBlend;
-            float _Smoothness;
-            float _Metallic;
-            float _FresnelStrength;
             float _SwimPhase;
             float _SwimStrength;
             float _Cull;
@@ -137,30 +121,12 @@ Shader "Anadromo/White Shark Natural Swim"
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
                 float3 normal = normalize(input.normalWS);
-                float3 viewDir = GetWorldSpaceNormalizeViewDir(input.positionWS);
-
-                // Realist counter-shading
-                float heightNorm = input.positionOS.y;
-                float normalUp = normal.y;
-                float blendFactor = saturate((heightNorm - _CounterShadeHeight) / max(0.001, _CounterShadeSoftness));
-                blendFactor = saturate(blendFactor * 0.6 + saturate(normalUp * 0.5 + 0.5) * 0.4);
-
-                half3 baseSharkColor = lerp(_VentralColor.rgb, _DorsalColor.rgb, blendFactor);
-
-                // Fin tips & tail edge subtle darkening
-                float finDarkening = saturate((input.positionOS.y - 0.35) * 1.8);
-                finDarkening += saturate((-input.positionOS.z - 1.2) * 0.4);
-                half3 finalColor = lerp(baseSharkColor, baseSharkColor * 0.72, finDarkening * 0.3);
-
-                // Blend with vertex colors if present
-                finalColor = lerp(finalColor, input.color.rgb * finalColor * 1.5, _ColorBlend);
-
                 SurfaceData surface = (SurfaceData)0;
-                surface.albedo = finalColor;
-                surface.metallic = _Metallic;
-                surface.specular = half3(0.04, 0.04, 0.04);
-                surface.smoothness = _Smoothness;
-                surface.normalTS = half3(0, 0, 1);
+                surface.albedo = input.color.rgb;
+                surface.metallic = 0.05;
+                surface.specular = half3(0.04,0.04,0.04);
+                surface.smoothness = 0.48;
+                surface.normalTS = half3(0,0,1);
                 surface.occlusion = 1;
                 surface.alpha = 1;
 
@@ -168,7 +134,7 @@ Shader "Anadromo/White Shark Natural Swim"
                 lighting.positionWS = input.positionWS;
                 lighting.positionCS = input.positionCS;
                 lighting.normalWS = normal;
-                lighting.viewDirectionWS = viewDir;
+                lighting.viewDirectionWS = GetWorldSpaceNormalizeViewDir(input.positionWS);
                 lighting.shadowCoord = TransformWorldToShadowCoord(input.positionWS);
                 #if defined(_MAIN_LIGHT_SHADOWS_SCREEN)
                     lighting.shadowCoord = ComputeScreenPos(TransformWorldToHClip(input.positionWS));
@@ -178,13 +144,8 @@ Shader "Anadromo/White Shark Natural Swim"
                 lighting.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
                 lighting.shadowMask = half4(1,1,1,1);
                 half4 color = UniversalFragmentPBR(lighting, surface);
-
-                // Wet skin Fresnel rim sheen
-                float fresnel = pow(1.0 - saturate(dot(normal, viewDir)), 4.0) * _FresnelStrength;
-                color.rgb += fresnel * half3(0.12, 0.18, 0.24);
-
                 color.rgb = MixFog(color.rgb, input.fog);
-                return half4(color.rgb, 1);
+                return half4(color.rgb,1);
             }
             ENDHLSL
         }
