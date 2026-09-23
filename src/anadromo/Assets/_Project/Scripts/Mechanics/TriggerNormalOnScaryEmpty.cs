@@ -78,26 +78,11 @@ namespace Anadromo.Mechanics
                 {
                     if (group != null)
                     {
-                        // 1. Detener la cacería
-                        group.individualHunting = false;
-                        group.movementTarget = null;
-                        
-                        // 2. Volver al estado de nado pacífico (Normal)
-                        group.ReturnToNormal();
-
-                        // 3. Asignar la caja invisible como destino de patrullaje principal
-                        if (finalDestination != null)
-                        {
-                            group.normalWaypoints = new Transform[] { finalDestination };
-                            
-                            // Por seguridad, asignamos también customHome para evitar que otros scripts lo sobrescriban
-                            group.customHome = finalDestination;
-                            group.UpdateHomePosition(finalDestination.position);
-                        }
+                        group.NormalAtWaypoint(finalDestination);
                     }
                 }
             }
-            Debug.Log($"[{gameObject.name}] Se comieron todos los krills Scary. ¡Los salmones nadan en forma normal hacia la caja invisible!");
+            Debug.Log($"[{gameObject.name}] Se comieron todos los krills Scary. ¡Los salmones nadan hacia {(finalDestination != null ? finalDestination.name : "home")}!");
         }
     }
 }

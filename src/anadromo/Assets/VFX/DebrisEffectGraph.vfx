@@ -20,7 +20,7 @@ MonoBehaviour:
     x: 669
     y: -191
     width: 1569
-    height: 1648
+    height: 1643
 --- !u!114 &114350483966674976
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -154,7 +154,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
           PublicKeyToken=b77a5c561934e089
-      m_SerializableObject: 7500
+      m_SerializableObject: 1000
     m_Space: -1
   m_Property:
     name: Rate
@@ -220,7 +220,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614583}
   - {fileID: 8926484042661614585}
   dataType: 0
-  capacity: 7500
+  capacity: 1000
   stripCapacity: 16
   particlePerStripCount: 16
   needsComputeBounds: 1
@@ -326,7 +326,7 @@ MonoBehaviour:
   enableRayTracing: 0
   decimationFactor: 1
   raytracedScaleMode: 0
-  needsOwnSort: 0
+  needsOwnSort: 1
   needsOwnAabbBuffer: 0
   shaderGraph: {fileID: 0}
   materialSettings:
@@ -1623,7 +1623,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
           Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"x":0.23074007034301759,"y":0.26225072145462038,"z":0.23074007034301759}'
+      m_SerializableObject: '{"x":0.5188679099082947,"y":0.5188679099082947,"z":0.5188679099082947}'
     m_Space: -1
   m_Property:
     name: A
@@ -1750,7 +1750,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615084}
   - {fileID: 8926484042661615085}
   m_UIPosition: {x: 0, y: 0}
-  m_UICollapsed: 1
+  m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_MasterSlot: {fileID: 8926484042661615082}
   m_MasterData:
@@ -1759,7 +1759,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEngine.Vector3, UnityEngine.CoreModule, Version=0.0.0.0,
           Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"x":0.6736363768577576,"y":0.7799999713897705,"z":0.6736363768577576}'
+      m_SerializableObject: '{"x":0.5566037893295288,"y":0.5566037893295288,"z":0.5566037893295288}'
     m_Space: -1
   m_Property:
     name: B
@@ -1951,7 +1951,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEditor.VFX.AABox, Unity.VisualEffectGraph.Editor,
           Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"center":{"x":0.0,"y":0.0,"z":0.0},"size":{"x":2.0,"y":2.0,"z":2.0}}'
+      m_SerializableObject: '{"center":{"x":0.0,"y":0.0,"z":0.0},"size":{"x":1.399999976158142,"y":1.399999976158142,"z":1.399999976158142}}'
     m_Space: 1
   m_Property:
     name: Volume
@@ -4160,7 +4160,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
           PublicKeyToken=b77a5c561934e089
-      m_SerializableObject: 180
+      m_SerializableObject: 100
     m_Space: -1
   m_Property:
     name: Max

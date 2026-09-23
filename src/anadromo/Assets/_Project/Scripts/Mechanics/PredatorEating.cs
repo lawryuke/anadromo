@@ -25,8 +25,21 @@ namespace Anadromo.Mechanics
         private int mealsLimit;
         private bool hungerInitialized;
         private Transform owner;
+        private bool controlled;
+        private bool huntingEnabled;
+        private Transform huntingScope;
+        public bool unlimitedMeals;
+
+        public void SetHunt(Transform target, string tag, bool active)
+        {
+            controlled = true;
+            huntingScope = target;
+            huntingEnabled = active;
+            preyTag = tag;
+            unlimitedMeals = true;
+        }
         public int mealsEaten { get; private set; }
-        public bool IsFull { get { InitializeHunger(); return mealsEaten >= mealsLimit; } }
+        public bool IsFull { get { InitializeHunger(); return !unlimitedMeals && mealsEaten >= mealsLimit; } }
         public int MealsLimit { get { InitializeHunger(); return mealsLimit; } }
         public Transform Owner => owner != null ? owner : transform;
         public Vector3 MouthPosition => mouthCollider != null
@@ -73,17 +86,13 @@ namespace Anadromo.Mechanics
         public Transform ResolvePrey(Transform candidate)
         {
             if (candidate == null || !candidate.gameObject.activeInHierarchy || string.IsNullOrEmpty(preyTag)) return null;
+            if (controlled && (!huntingEnabled || huntingScope == null)) return null;
             Prey marker = candidate.GetComponentInParent<Prey>();
-            for (Transform current = candidate; current != null; current = current.parent)
-            {
-                if (current == Owner || current.IsChildOf(Owner)) return null;
-                // String comparison also handles an unconfigured/nonexistent tag without throwing.
-                if (current.tag != preyTag) continue;
-                Transform result = marker != null && marker.transform.IsChildOf(current) ? marker.transform : current;
-                if (marker != null && current.IsChildOf(marker.transform)) result = marker.transform;
-                return Owner.IsChildOf(result) ? null : result;
-            }
-            return null;
+            if (marker == null || !marker.isActiveAndEnabled || marker.IsConsumed || marker.tag != preyTag) return null;
+            Transform result = marker.transform;
+            if (result == Owner || result.IsChildOf(Owner) || Owner.IsChildOf(result)) return null;
+            if (controlled && !result.IsChildOf(huntingScope)) return null;
+            return result;
         }
 
         private void FixedUpdate() => TryEatNearby();
@@ -132,48 +141,9 @@ namespace Anadromo.Mechanics
                 foreach (RaycastHit hit in Physics.RaycastAll(mouth, ray.normalized, ray.magnitude,
                     biteBlockingLayers, QueryTriggerInteraction.Ignore))
                     if (!hit.transform.IsChildOf(Owner) && !hit.transform.IsChildOf(prey)) return false;
-            // Claim immediately: another predator/collider cannot eat the same prey this frame.
-            prey.gameObject.SetActive(false);
+            Prey marker = prey.GetComponent<Prey>();
+            if (marker == null || !marker.TryConsume()) return false;
             mealsEaten++;
-            
-            // Si el krill devorado pertenecía a un grupo asustadizo (Scary)
-            var scaryGroup = prey.GetComponentInParent<Anadromo.AI.ScaredKrillBehavior>();
-            if (scaryGroup != null)
-            {
-                // Encontrar al SwimGroupController del depredador (los salmones)
-                var predatorGroup = Owner.GetComponentInParent<SwimGroupController>();
-                if (predatorGroup != null)
-                {
-                    // Asignar el grupo asustadizo como su objetivo principal para que no regresen a otros grupos
-                    predatorGroup.movementTarget = scaryGroup.transform;
-
-                    // Calcular la posición exacta del abismo (hacia donde huyen los krills)
-                    Vector3 abyssPosition = scaryGroup.transform.TransformPoint(scaryGroup.fleeOffset);
-                    // Forzar la "casa" del grupo al abismo para que no vuelvan atrás.
-                    predatorGroup.UpdateHomePosition(abyssPosition);
-
-                    // Revisar si quedan más krills vivos en ese grupo scary
-                    bool hasMoreKrills = false;
-                    foreach (Transform child in scaryGroup.GetComponentsInChildren<Transform>())
-                    {
-                        if (child != prey && child != scaryGroup.transform && child.gameObject.activeInHierarchy && child.CompareTag(preyTag))
-                        {
-                            hasMoreKrills = true;
-                            break;
-                        }
-                    }
-
-                    // Si ya no quedan krills en este grupo, desactivamos la caza para todo el cardumen
-                    // de salmones, obligándolos a pasar a modo normal definitivamente en el abismo.
-                    if (!hasMoreKrills)
-                    {
-                        predatorGroup.individualHunting = false;
-                        predatorGroup.movementTarget = null;
-                    }
-                }
-            }
-
-            Destroy(prey.gameObject);
             return true;
         }
 

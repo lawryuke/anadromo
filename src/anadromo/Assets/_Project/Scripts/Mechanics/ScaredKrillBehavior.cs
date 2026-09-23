@@ -41,20 +41,38 @@ namespace Anadromo.AI
 
         void CheckForPredators()
         {
-            // Busca colliders en un radio alrededor del grupo
-            Collider[] hits = Physics.OverlapSphere(transform.position, scareDistance);
-            foreach (var hit in hits)
+            float sqrScareDistance = scareDistance * scareDistance;
+
+            // En lugar de usar Physics.OverlapSphere que puede fallar por capas o triggers,
+            // comprobamos la distancia contra todos los miembros activos de los grupos de nado (salmones).
+            foreach (SwimGroupController group in SwimGroupController.enabledControllers)
             {
-                // Identificamos al depredador si tiene el componente PredatorEating,
-                // PlayerFeeding, si tiene la etiqueta Player, o si su nombre incluye "Salmon"
-                if (hit.GetComponentInParent<PredatorEating>() != null || 
-                    hit.GetComponentInParent<Anadromo.Mechanics.PlayerFeeding>() != null ||
-                    hit.CompareTag("Player") || 
-                    hit.name.ToLower().Contains("salmon"))
+                // Solo nos asustamos de los grupos que sean Salmones o depredadores
+                if (group == swimGroup) continue;
+                
+                bool isPredator = group.CompareTag("Depredator_Salmon") || 
+                                  group.name.ToLower().Contains("salmon");
+                                  
+                if (!isPredator) continue;
+
+                foreach (SwimGroupController.Member member in group.active)
                 {
-                    TriggerFlee();
-                    break; // Solo necesitamos detectar uno para huir
+                    if (member.transform == null) continue;
+                    
+                    float sqrDist = (member.transform.position - transform.position).sqrMagnitude;
+                    if (sqrDist <= sqrScareDistance)
+                    {
+                        TriggerFlee();
+                        return; // Solo necesitamos detectar uno
+                    }
                 }
+            }
+            
+            // También comprobamos si el jugador (cámara/playerFeeding) está cerca
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null && (player.transform.position - transform.position).sqrMagnitude <= sqrScareDistance)
+            {
+                TriggerFlee();
             }
         }
 

@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace Anadromo.Mechanics
 {
-    [RequireComponent(typeof(Collider))]
     public class TriggerHuntOnExit : MonoBehaviour
     {
         [Header("Configuración del Trigger")]
@@ -17,6 +16,36 @@ namespace Anadromo.Mechanics
         public SwimGroupController[] swimGroups;
 
         private bool hasTriggered = false;
+        private ZoneLimit zoneLimit;
+        private Transform targetTransform;
+        private bool wasInside = true; // Asume que el jugador empieza adentro
+
+        private void Awake()
+        {
+            zoneLimit = GetComponent<ZoneLimit>();
+        }
+
+        private void Update()
+        {
+            if (triggerOnlyOnce && hasTriggered) return;
+            if (zoneLimit == null) return;
+
+            if (targetTransform == null)
+            {
+                GameObject targetObj = GameObject.FindGameObjectWithTag(targetTag);
+                if (targetObj != null) targetTransform = targetObj.transform;
+            }
+
+            if (targetTransform != null)
+            {
+                bool isInside = zoneLimit.Contains(targetTransform.position);
+                if (wasInside && !isInside)
+                {
+                    ExecuteTrigger();
+                }
+                wasInside = isInside;
+            }
+        }
 
         private void OnTriggerExit(Collider other)
         {
@@ -25,28 +54,33 @@ namespace Anadromo.Mechanics
             // Verificamos si el objeto que sale tiene el tag que buscamos
             if (other.CompareTag(targetTag))
             {
-                hasTriggered = true;
-                
-                // Recorremos todos los grupos asignados
-                if (swimGroups != null)
+                ExecuteTrigger();
+            }
+        }
+
+        private void ExecuteTrigger()
+        {
+            hasTriggered = true;
+            
+            // Recorremos todos los grupos asignados
+            if (swimGroups != null)
+            {
+                foreach (var group in swimGroups)
                 {
-                    foreach (var group in swimGroups)
+                    if (group != null)
                     {
-                        if (group != null)
-                        {
-                            // Iniciar la secuencia de nado inicial si estaba pausada
-                            group.StartFishSequence();
-                            
-                            // Activamos la bandera que hace que comiencen a cazar
-                            group.individualHunting = true;
-                            // Cambiamos su estado para que empiecen a nadar hacia el krill
-                            group.state = SwimGroupController.SwimState.MoveToTarget;
-                        }
+                        // Iniciar la secuencia de nado inicial si estaba pausada
+                        group.StartFishSequence();
+                        
+                        // Activamos la bandera que hace que comiencen a cazar
+                        group.individualHunting = true;
+                        // Cambiamos su estado para que empiecen a nadar hacia el krill
+                        group.state = SwimGroupController.SwimState.MoveToTarget;
                     }
                 }
-                
-                Debug.Log($"[{gameObject.name}] El {targetTag} ha salido de la zona inicial. ¡Los salmones empiezan a cazar!");
             }
+            
+            Debug.Log($"[{gameObject.name}] El {targetTag} ha salido de la zona inicial. ¡Los salmones empiezan a cazar!");
         }
     }
 }

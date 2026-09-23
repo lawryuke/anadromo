@@ -7,6 +7,7 @@ public class SwimGroupControllerEditor : Editor
 {
     public override void OnInspectorGUI()
     {
+        if (target == null) return;
         DrawDefaultInspector();
         var controller = (SwimGroupController)target;
         EditorGUILayout.HelpBox("Controla las copias del Box Object Spawner durante Play. " +

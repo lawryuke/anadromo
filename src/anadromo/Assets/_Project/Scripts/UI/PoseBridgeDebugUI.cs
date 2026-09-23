@@ -16,7 +16,9 @@ namespace Anadromo.Systems
         [SerializeField] private Anadromo.Locomotion.FlapDetector flapDetector;
 
         [Header("Configuración Visual")]
+#pragma warning disable 0414
         [SerializeField] private bool showInBuild = false;
+#pragma warning restore 0414
         [SerializeField] private bool showLandmarkValues = true;
         [SerializeField] private KeyCode toggleKey = KeyCode.F3;
 

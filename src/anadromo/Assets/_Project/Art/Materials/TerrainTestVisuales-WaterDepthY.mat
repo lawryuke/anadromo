@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: TerrainTestVisuales-WaterDepthY
+  m_Shader: {fileID: 4800000, guid: 7a9c1e2f4b8d4632a1f97302e653ce81, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _DeepLight: 0.12
+    - _DeepY: -18
+    - _Density: 0
+    - _OpenWaterDistance: 60
+    - _ShallowY: 7
+    - _SurfaceY: 10
+    - _VisibilityEnd: 10
+    - _VisibilityStart: 5
+    m_Colors:
+    - _DeepColor: {r: 0.04774832, g: 0.30522984, b: 0.3490566, a: 1}
+    - _ShallowColor: {r: 0.053221796, g: 0.42445946, b: 0.49056602, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

@@ -18,6 +18,8 @@ TagManager:
   - Food_PlayerOnly
   - Food_PlayerOnly_First
   - Food_Krill_Scary
+  - Orca
+  - Bloop
   layers:
   - Default
   - TransparentFX

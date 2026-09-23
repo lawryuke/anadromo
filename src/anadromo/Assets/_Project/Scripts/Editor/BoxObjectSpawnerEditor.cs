@@ -11,13 +11,14 @@ public class BoxObjectSpawnerEditor : Editor
 
     public override void OnInspectorGUI()
     {
+        if (target == null) return;
         DrawDefaultInspector();
         EditorGUILayout.HelpBox("Arrastra el objeto de Hierarchy a Source Object. La caja no necesita Collider. " +
             "En Scene: W mueve el generador; R permite ajustar las caras de la caja. " +
             "Los MeshCollider no convexos se comprueban mediante sus bounds (más conservador). " +
             "La separación se comprueba solo al generar.", MessageType.Info);
         var spawner = (BoxObjectSpawner)target;
-        if (spawner.GetComponent<SwimGroupController>() == null && !EditorUtility.IsPersistent(spawner))
+        if (spawner != null && spawner.GetComponent<SwimGroupController>() == null && !EditorUtility.IsPersistent(spawner))
             if (GUILayout.Button("Añadir controlador de nado al grupo"))
                 Undo.AddComponent<SwimGroupController>(spawner.gameObject);
         if (!string.IsNullOrEmpty(spawner.LastGenerationMessage))

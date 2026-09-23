@@ -8,8 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: WaterMediterranean
-  m_Shader: {fileID: -6465566751694194690, guid: 0daa3bca6b98f0d45a308df2ba2a6cab,
-    type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 0daa3bca6b98f0d45a308df2ba2a6cab, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -56,7 +55,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _MinDistance: 10
+    - _MinDistance: 2
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Range: 10.58
@@ -68,7 +67,7 @@ Material:
     - _VertexWaveScale: 0.2
     - _VertexWaveSpeed: 4
     m_Colors:
-    - _Color: {r: 0.11764707, g: 0.44706756, b: 0.49019608, a: 1}
+    - _Color: {r: 0, g: 0.5882353, b: 0.67058825, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &6249581604048846788

@@ -11,6 +11,113 @@ namespace Anadromo.Mechanics
         public enum SwimState { Normal, MoveToTarget, AtTarget }
         public enum SwimStyle { Fish, Shark }
         public enum ArrivalMode { StayNear, Circle, ReturnToNormal }
+        enum LevelMotion { Legacy, Waiting, Hold, Normal, Hunt }
+        LevelMotion levelMotion;
+        BoxObjectSpawner huntSpawner;
+        Transform facingTarget;
+        string huntTag;
+        bool desperate;
+
+        [Header("Post-Hunt Destination")]
+        [Tooltip("Si se asigna, al terminar de cazar los peces nadarán hacia este destino en vez de volver a su caja de spawn.")]
+        public Transform postHuntDestination;
+
+        public void WaitForLevel()
+        {
+            levelMotion = LevelMotion.Waiting;
+            useFishStartSequence = false;
+            individualHunting = false;
+            ApplyHuntToMembers();
+        }
+
+        public void HoldFacing(Transform target)
+        {
+            WaitForLevel();
+            facingTarget = target;
+            levelMotion = LevelMotion.Hold;
+        }
+
+        public void Hunt(BoxObjectSpawner target, string preyTag)
+        {
+            if (target == null) { NormalInSpawnBox(); return; }
+            levelMotion = LevelMotion.Hunt;
+            useFishStartSequence = false;
+            huntSpawner = target;
+            huntTag = preyTag;
+            individualHunting = true;
+            GoToTarget(target.transform);
+            ApplyHuntToMembers();
+        }
+
+        public void NormalInSpawnBox()
+        {
+            levelMotion = LevelMotion.Normal;
+            useFishStartSequence = false;
+            individualHunting = false;
+            movementTarget = null;
+            customHome = null;
+            normalWaypoints = new Transform[0];
+            state = SwimState.Normal;
+            ApplyHuntToMembers();
+        }
+
+        /// <summary>
+        /// Transiciona el cardumen a nado pacífico alrededor del waypoint indicado,
+        /// sin restringir a la caja de spawn original.
+        /// </summary>
+        public void NormalAtWaypoint(Transform destination)
+        {
+            levelMotion = LevelMotion.Legacy;
+            useFishStartSequence = false;
+            individualHunting = false;
+            movementTarget = null;
+            huntSpawner = null;
+            customHome = destination;
+            if (destination != null)
+            {
+                normalWaypoints = new Transform[] { destination };
+                home = destination.position;
+                groupCenter = Vector3.Lerp(groupCenter, home, 0.5f);
+            }
+            else
+            {
+                normalWaypoints = new Transform[0];
+            }
+            state = SwimState.Normal;
+            ApplyHuntToMembers();
+        }
+
+        public void Desperate()
+        {
+            if (!desperate)
+            {
+                desperate = true;
+                GetComponent<BoxObjectSpawner>().size *= 1.5f;
+                swimSpeed += .7f;
+            }
+            NormalInSpawnBox();
+        }
+
+        void ApplyHuntToMembers()
+        {
+            foreach (var member in members.Values)
+            {
+                member.currentPrey = null;
+                member.chooseRandomPrey = true;
+                if (member.stomach != null) member.stomach.SetHunt(
+                    huntSpawner != null ? huntSpawner.transform : null, huntTag,
+                    levelMotion == LevelMotion.Hunt);
+            }
+        }
+
+        public void ConfigureSpawnedAnimal(GameObject animal)
+        {
+            var eater = animal.GetComponentInChildren<PredatorEating>();
+            if (eater == null || levelMotion == LevelMotion.Legacy) return;
+            eater.BindOwner(animal.transform);
+            eater.SetHunt(huntSpawner != null ? huntSpawner.transform : null, huntTag,
+                levelMotion == LevelMotion.Hunt);
+        }
 
         [Header("Estado y destino (independiente del Target Object del spawner)")]
         public SwimState state = SwimState.Normal;
@@ -89,7 +196,7 @@ namespace Anadromo.Mechanics
         public int RecoveredOverlaps { get; private set; }
         private SphereCollider collisionProbe;
 
-        private sealed class Member
+        public sealed class Member
         {
             public Transform transform;
             public Rigidbody body;
@@ -110,13 +217,15 @@ namespace Anadromo.Mechanics
             public Vector3 oscillationAxis;
             public float waitTimer;
             public Vector3 currentTargetPos;
+            public Vector3 restPosition;
+            public bool chooseRandomPrey = true;
         }
 
         private readonly Dictionary<GameObject, Member> members = new Dictionary<GameObject, Member>();
         private readonly List<GameObject> removed = new List<GameObject>();
-        private readonly List<Member> active = new List<Member>();
+        public readonly List<Member> active = new List<Member>();
         private readonly List<Member> peerMembers = new List<Member>();
-        private static readonly HashSet<SwimGroupController> enabledControllers = new HashSet<SwimGroupController>();
+        public static readonly HashSet<SwimGroupController> enabledControllers = new HashSet<SwimGroupController>();
         private BoxObjectSpawner spawner;
         private Vector3 home;
         private Vector3 groupCenter;
@@ -204,6 +313,16 @@ namespace Anadromo.Mechanics
         {
             SyncMembers();
             if (active.Count == 0) return;
+            if (levelMotion == LevelMotion.Waiting) return;
+            if (levelMotion == LevelMotion.Hold) { UpdateHold(Time.fixedDeltaTime); return; }
+            if (levelMotion == LevelMotion.Hunt && (huntSpawner == null ||
+                (huntSpawner.IsInitialized && huntSpawner.AliveCount == 0)))
+            {
+                if (postHuntDestination != null)
+                    NormalAtWaypoint(postHuntDestination);
+                else
+                    NormalInSpawnBox();
+            }
             peerMembers.Clear();
             foreach (SwimGroupController controller in enabledControllers)
             {
@@ -259,7 +378,8 @@ namespace Anadromo.Mechanics
                     }
                 }
             }
-            if (state == SwimState.Normal) destination = NormalDestination();
+            if (state == SwimState.Normal) destination = levelMotion == LevelMotion.Normal
+                ? spawner.transform.TransformPoint(spawner.center) : NormalDestination();
             // The parent remains still; this virtual center guides the individual members.
             groupCenter = Vector3.MoveTowards(groupCenter, destination, Mathf.Max(0f, swimSpeed) * 0.65f * dt);
 
@@ -276,7 +396,7 @@ namespace Anadromo.Mechanics
                 Vector3 goal = (linearShark ? destination : groupCenter) + member.offset - offsetCenter;
                 bool hunting = false;
                 if (member.stomach != null && member.stomach.isActiveAndEnabled && !member.stomach.IsFull &&
-                    (canHunt || (individualHunting && member.stomach.mealsEaten > 0)))
+                    (canHunt || (levelMotion == LevelMotion.Legacy && individualHunting && member.stomach.mealsEaten > 0)))
                 {
                     member.stomach.TryEatNearby();
                     if (member.observedMeals != member.stomach.mealsEaten)
@@ -353,6 +473,7 @@ namespace Anadromo.Mechanics
                 }
                 #endif
 
+                if (levelMotion == LevelMotion.Normal) goal = ClampToSpawnBox(goal);
                 Vector3 direction = goal - member.position;
                 Vector3 separation = Vector3.zero;
                 float separationRange = Mathf.Max(0f, separationDistance);
@@ -379,18 +500,33 @@ namespace Anadromo.Mechanics
                 float remaining = direction.magnitude;
                 if (remaining < 0.001f) { member.speed = 0f; continue; }
                 Vector3 forward = direction / remaining;
+                if (levelMotion != LevelMotion.Legacy && collideWithObstacles)
+                    forward = SteerAroundObstacles(member, forward);
                 Vector3 up = Mathf.Abs(Vector3.Dot(forward, Vector3.up)) > 0.999f ? Vector3.forward : Vector3.up;
                 Quaternion current = member.body != null ? member.body.rotation : member.transform.rotation;
                 Quaternion heading = current * Quaternion.Inverse(member.modelCorrection);
                 heading = Quaternion.RotateTowards(heading, Quaternion.LookRotation(forward, up), turnSpeed * dt);
                 Quaternion rotation = heading * member.modelCorrection;
                 float desiredSpeed = Mathf.Max(0f, swimSpeed);
-                if (swimStyle == SwimStyle.Fish) desiredSpeed *= Mathf.Clamp01(remaining);
+                if (swimStyle == SwimStyle.Fish)
+                {
+                    desiredSpeed *= Mathf.Clamp01(remaining);
+                    if (levelMotion != LevelMotion.Legacy)
+                        desiredSpeed *= Mathf.Clamp01(Vector3.Dot(heading * Vector3.forward, forward));
+                }
                 member.speed = Mathf.MoveTowards(member.speed, desiredSpeed, Mathf.Max(0.01f, acceleration) * dt);
-                Vector3 travelDirection = linearShark || hunting ? forward : heading * Vector3.forward;
+                Vector3 travelDirection = linearShark || (hunting && levelMotion == LevelMotion.Legacy)
+                    ? forward : heading * Vector3.forward;
                 Vector3 position = member.position + travelDirection * Mathf.Min(member.speed * dt, remaining);
+                if (levelMotion == LevelMotion.Normal &&
+                    (ClampToSpawnBox(member.position) - member.position).sqrMagnitude < .000001f)
+                    position = ClampToSpawnBox(position);
                 if (collideWithObstacles)
                     position = ResolveCollision(member, position - member.position, !linearShark);
+                if (levelMotion == LevelMotion.Normal &&
+                    (ClampToSpawnBox(member.position) - member.position).sqrMagnitude < .000001f &&
+                    (ClampToSpawnBox(position) - position).sqrMagnitude > .000001f)
+                    position = member.position;
                 if (member.body != null)
                 {
                     member.body.MovePosition(position);
@@ -411,6 +547,74 @@ namespace Anadromo.Mechanics
             }
             fishSequenceStarted = true;
             fishSequenceTime = 0f;
+        }
+
+        Vector3 ClampToSpawnBox(Vector3 point)
+        {
+            Vector3 local = spawner.transform.InverseTransformPoint(point) - spawner.center;
+            Vector3 half = spawner.size * .5f;
+            local = new Vector3(Mathf.Clamp(local.x, -half.x, half.x),
+                Mathf.Clamp(local.y, -half.y, half.y), Mathf.Clamp(local.z, -half.z, half.z));
+            return spawner.transform.TransformPoint(local + spawner.center);
+        }
+
+        Vector3 SteerAroundObstacles(Member member, Vector3 desired)
+        {
+            float probeRadius = automaticCollisionRadius ? Mathf.Max(collisionRadius, member.initialRadius) : collisionRadius;
+            float distance = Mathf.Max(.5f, member.speed * .8f);
+            float Clearance(Vector3 direction)
+            {
+                float clearance = distance;
+                foreach (var hit in Physics.SphereCastAll(member.position, probeRadius, direction, distance,
+                    collisionLayers, collideWithTriggers ? QueryTriggerInteraction.Collide : QueryTriggerInteraction.Ignore))
+                    if (Blocks(member, hit.collider)) clearance = Mathf.Min(clearance, hit.distance);
+                return clearance;
+            }
+            if (Clearance(desired) >= distance) return desired;
+            Vector3 right = Vector3.Cross(Vector3.up, desired).normalized;
+            if (right.sqrMagnitude < .01f) right = Vector3.right;
+            Vector3 up = Vector3.Cross(desired, right).normalized;
+            Vector3 best = desired;
+            float bestScore = -float.MaxValue;
+            // Local detours retain collision sweeps; no teleporting through a blocked route.
+            for (int i = 0; i < 8; i++)
+            {
+                float angle = i * Mathf.PI * .25f;
+                Vector3 candidate = (desired * .35f + right * Mathf.Cos(angle) + up * Mathf.Sin(angle)).normalized;
+                if (levelMotion == LevelMotion.Normal &&
+                    (ClampToSpawnBox(member.position + candidate * distance) - (member.position + candidate * distance)).sqrMagnitude > .001f) continue;
+                float score = Clearance(candidate) / distance + Vector3.Dot(candidate, desired) * .2f;
+                if (score > bestScore) { bestScore = score; best = candidate; }
+            }
+            return best;
+        }
+
+        void UpdateHold(float dt)
+        {
+            swimTime += dt;
+            foreach (var member in active)
+            {
+                member.position = member.body != null ? member.body.position : member.transform.position;
+                // World X/Y only: preserve the authored Z plane while facing Target_Mid.
+                float t = swimTime * Mathf.Max(0, fishOscillationFrequency) * Mathf.PI * 2;
+                float envelope = Mathf.SmoothStep(0, 1, swimTime);
+                Vector3 offset = new Vector3(Mathf.Sin(t + member.phase),
+                    Mathf.Sin(t * .7f + member.phase), 0) * fishOscillationAmplitude * envelope;
+                Vector3 position = ClampToSpawnBox(member.restPosition + offset);
+                position.z = member.restPosition.z;
+                if (collideWithObstacles) position = ResolveCollision(member, position - member.position, false);
+                if (Mathf.Abs(position.z - member.restPosition.z) > .0001f) position = member.position;
+                Vector3 forward = facingTarget != null ? facingTarget.position - member.restPosition : Vector3.forward;
+                Quaternion rotation = member.transform.rotation;
+                if (forward.sqrMagnitude > .000001f)
+                {
+                    Vector3 up = Mathf.Abs(Vector3.Dot(forward.normalized, Vector3.up)) > .999f ? Vector3.forward : Vector3.up;
+                    rotation = Quaternion.RotateTowards(rotation, Quaternion.LookRotation(forward, up) * member.modelCorrection, fishTurnSpeed * dt);
+                }
+                if (member.body != null) { member.body.MovePosition(position); member.body.MoveRotation(rotation); }
+                else member.transform.SetPositionAndRotation(position, rotation);
+                member.speed = 0;
+            }
         }
 
         private void UpdateFishSequence(float dt)
@@ -637,7 +841,7 @@ namespace Anadromo.Mechanics
         private Transform FindBestPrey(Member member, Transform target, Transform ignoredPrey = null)
         {
             if (member.stomach.IsFull) return null;
-            if (member.stomach.mealsEaten > 0)
+            if (levelMotion == LevelMotion.Legacy && member.stomach.mealsEaten > 0)
             {
                 // Permitir búsqueda libre solo si no están ya enfocados en un grupo asustadizo
                 if (target == null || target.GetComponent<Anadromo.AI.ScaredKrillBehavior>() == null)
@@ -666,7 +870,11 @@ namespace Anadromo.Mechanics
                 }
             }
             if (candidates.Count == 0) return null;
-            if (member.stomach.mealsEaten == 0) return candidates[Random.Range(0, candidates.Count)];
+            if (member.chooseRandomPrey || member.stomach.mealsEaten == 0)
+            {
+                member.chooseRandomPrey = false;
+                return candidates[Random.Range(0, candidates.Count)];
+            }
             Transform closest = null;
             float distance = float.PositiveInfinity;
             foreach (Transform prey in candidates)
@@ -725,6 +933,7 @@ namespace Anadromo.Mechanics
                 var member = new Member
                 {
                     transform = instance.transform,
+                    restPosition = instance.transform.position,
                     body = instance.GetComponent<Rigidbody>(),
                     modelCorrection = spawner.ModelRotationCorrection,
                     stomach = instance.GetComponentInChildren<PredatorEating>(),
@@ -742,6 +951,9 @@ namespace Anadromo.Mechanics
                     Physics.SyncTransforms();
                 }
                 if (member.stomach != null) member.stomach.BindOwner(instance.transform);
+                if (member.stomach != null && levelMotion != LevelMotion.Legacy)
+                    member.stomach.SetHunt(huntSpawner != null ? huntSpawner.transform : null,
+                        huntTag, levelMotion == LevelMotion.Hunt);
                 member.initialRadius = MeasureRadius(instance.transform);
                 member.initialScale = instance.transform.lossyScale;
                 if (member.body != null)

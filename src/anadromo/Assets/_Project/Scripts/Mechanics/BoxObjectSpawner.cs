@@ -11,6 +11,21 @@ namespace Anadromo.Mechanics
         public GameObject sourceObject;
         [Min(0)] public int count = 20;
         public bool generateOnStart = true;
+        [Tooltip("Tag aplicado a cada copia. Vacío conserva el tag del modelo.")]
+        public string spawnedTag = "";
+        public bool markAsPrey;
+        public bool IsInitialized { get; private set; }
+        public int InitialPopulation { get; private set; }
+        public int AliveCount
+        {
+            get
+            {
+                int alive = 0;
+                foreach (var item in generated)
+                    if (item != null && item.activeInHierarchy) alive++;
+                return alive;
+            }
+        }
 
         [Header("Orientación inicial (opcional)")]
         [Tooltip("Al generar, cada copia apunta a este objeto conservando la corrección del modelo. Tiene prioridad sobre Random Yaw; no hay seguimiento posterior.")]
@@ -73,6 +88,12 @@ namespace Anadromo.Mechanics
 
         private void Start()
         {
+            Initialize();
+        }
+
+        public void Initialize()
+        {
+            if (IsInitialized) return;
             if (generateOnStart && generated.Count == 0 && count > 0) Generate();
 
             // Si no se generó nada, asume los objetos hijos precreados manualmente
@@ -80,9 +101,20 @@ namespace Anadromo.Mechanics
             {
                 foreach (Transform child in transform)
                 {
-                    generated.Add(child.gameObject);
+                    if (child.gameObject != sourceObject) generated.Add(child.gameObject);
                 }
             }
+            foreach (var item in generated) if (item != null) ConfigureCopy(item);
+            InitialPopulation = AliveCount;
+            IsInitialized = true;
+        }
+
+        private void ConfigureCopy(GameObject item)
+        {
+            if (!string.IsNullOrEmpty(spawnedTag)) item.tag = spawnedTag;
+            if (markAsPrey && item.GetComponent<Prey>() == null) item.AddComponent<Prey>();
+            var controller = GetComponent<SwimGroupController>();
+            if (controller != null) controller.ConfigureSpawnedAnimal(item);
         }
 
         public void Generate()
@@ -125,6 +157,7 @@ namespace Anadromo.Mechanics
                     sourceObject.transform.rotation, sourceObject.transform.parent);
                 candidate.transform.SetParent(transform, true);
                 candidate.name = sourceObject.name + " (Generated " + (i + 1) + ")";
+                ConfigureCopy(candidate);
                 candidate.SetActive(true);
                 Collider[] colliders = candidate.GetComponentsInChildren<Collider>();
                 Renderer[] renderers = candidate.GetComponentsInChildren<Renderer>();
@@ -182,6 +215,8 @@ namespace Anadromo.Mechanics
             lastGenerationMessage = $"Generados {generated.Count}/{count}. Intentos fuera de la caja: {outsideAttempts}. Intentos con solapamiento: {overlapAttempts}.";
             if (generated.Count < count)
                 Debug.LogWarning(lastGenerationMessage, this);
+            InitialPopulation = AliveCount;
+            IsInitialized = true;
         }
 
         public void ClearGenerated()

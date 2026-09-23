@@ -2,52 +2,41 @@ using UnityEngine;
 
 public class BloopFishMovement : MonoBehaviour
 {
-    [Header("Puntos de Movimiento")]
-    [Tooltip("Punto de inicio abajo (donde empieza)")]
-    public Vector3 puntoInicio = new Vector3(12.9899998f, -8.89000034f, 19.0599995f);
-    
-    [Tooltip("Punto final arriba")]
-    public Vector3 puntoFin = new Vector3(12.9899998f, 80f, 19.0599995f);
-
-    [Header("Configuración")]
-    [Tooltip("Velocidad constante de movimiento de ascenso vertical")]
-    public float velocidad = 5.0f;
-
-    [Header("Control de Teclado")]
-    [Tooltip("La tecla que debes presionar para que este pez empiece a subir")]
+    public Vector3 puntoInicio = new Vector3(11, -19, 21);
+    public Vector3 puntoFin = new Vector3(11, 80, 21);
+    public float velocidad = 5;
     public KeyCode teclaParaIniciar = KeyCode.Alpha5;
+    public bool allowKeyboard = true;
+    bool started;
+    NaturalSwimPath movement;
 
-    private bool animacionIniciada = false;
-    private NaturalSwimPath movimiento;
+    void Awake() => Initialize();
 
-    void Start()
+    void Initialize()
     {
-        // Colocamos al pez en la posición de inicio al arrancar el juego
+        if (movement != null) return;
         transform.position = puntoInicio;
-        movimiento = GetComponent<NaturalSwimPath>();
-        if (!movimiento) movimiento = gameObject.AddComponent<NaturalSwimPath>();
-        movimiento.acceleration = 0.9f;
-        movimiento.courseWidth = .08f;
-        // Se mantiene orientToCourse en false para conservar la postura vertical natural del modelo al emerger hacia arriba
-        movimiento.orientToCourse = false;
+        movement = GetComponent<NaturalSwimPath>();
+        if (!movement) movement = gameObject.AddComponent<NaturalSwimPath>();
+        movement.acceleration = .9f;
+        movement.courseWidth = 0;
+        movement.orientToCourse = false;
         if (!GetComponent<BloopSwimAnimation>()) gameObject.AddComponent<BloopSwimAnimation>();
     }
 
     void Update()
     {
-        // Detectar si el usuario presiona la tecla configurada en el Inspector
-        if (!animacionIniciada && Input.GetKeyDown(teclaParaIniciar))
-        {
-            IniciarMovimiento();
-        }
-
-        if (animacionIniciada && !movimiento.IsSwimming) animacionIniciada = false;
+        if (allowKeyboard && Input.GetKeyDown(teclaParaIniciar)) IniciarMovimiento();
     }
 
-    public void IniciarMovimiento()
+    public void IniciarMovimiento() => BeginAscent(puntoFin.y);
+
+    public void BeginAscent(float height)
     {
-        if (animacionIniciada || !movimiento) return;
-        animacionIniciada = true;
-        movimiento.Begin(puntoFin, velocidad);
+        if (started) return;
+        Initialize();
+        started = true;
+        puntoFin = new Vector3(transform.position.x, Mathf.Max(height, transform.position.y), transform.position.z);
+        movement.Begin(puntoFin, Mathf.Max(.1f, velocidad));
     }
 }

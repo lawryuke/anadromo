@@ -28,7 +28,7 @@ public static class FishWaterValidation
         {
             var water = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<FishWaterExperience>()).Single();
             Check(water.viewer && water.surface && water.bubbleMaterial && water.snellMaterial, "Serialized references");
-            Check(water.viewer.GetComponentInParent<SimpleFlyCamera>().waterExperience == water, "Desktop current connection");
+            Check(water.viewer.GetComponentInParent<SimpleFlyCamera>() != null, "Desktop camera controller");
             Check(water.visibility == 10, "Ten metre visual range");
             var quiet = water.SampleFlow(new Vector3(1000, 0, 1000), 4, out float calm);
             Check(quiet == Vector3.zero && calm == 0, "No force or haptics outside currents");

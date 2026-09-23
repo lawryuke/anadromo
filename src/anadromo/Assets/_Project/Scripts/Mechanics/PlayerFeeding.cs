@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using Anadromo.Systems;
 
 namespace Anadromo.Mechanics
@@ -6,173 +8,56 @@ namespace Anadromo.Mechanics
     [RequireComponent(typeof(SphereCollider))]
     public class PlayerFeeding : MonoBehaviour
     {
-        [Header("Feeding Settings")]
-        [SerializeField] private float mouthRadius = 1.0f; // Tamaño de la boca
-
-        [Tooltip("Etiquetas (Tags) que el jugador puede comer. Si está vacío, puede comer cualquier presa.")]
+        [SerializeField] private float mouthRadius = 1f;
         public string[] edibleTags = { "Food_PlayerOnly", "Food_PlayerOnly_First" };
+        public UnityEvent OnPreyConsumed = new UnityEvent();
+        public bool consumptionEnabled = true;
+        public int TotalConsumed { get; private set; }
+        public string LastConsumedTag { get; private set; }
+        public LayerMask biteBlockingLayers = ~0;
+        readonly Dictionary<string, int> consumed = new Dictionary<string, int>();
+        EnergySystem energy;
+        SphereCollider mouth;
 
-        public UnityEngine.Events.UnityEvent OnPreyConsumed = new UnityEngine.Events.UnityEvent();
-
-        private EnergySystem energySystem;
-        private SphereCollider mouthCollider;
-        private bool hasTriggeredScaryHunt;
-
-        // Tag del grupo cuya eliminación completa activa la fase 2.
-        private const string TriggerGroupTag = "Food_PlayerOnly_First";
-        // Tag de presa al que cambiarán los depredadores en la fase 2.
-        private const string ScaryPreyTag = "Food_Krill_Scary";
-
-        private void Start()
+        void Awake()
         {
-            // Buscamos el EnergySystem en la raíz del jugador (XR Origin)
-            energySystem = GetComponentInParent<EnergySystem>();
-            
-            // Configuramos la boca invisible automáticamente
-            mouthCollider = GetComponent<SphereCollider>();
-            mouthCollider.isTrigger = true;
-            mouthCollider.radius = mouthRadius;
+            energy = GetComponentInParent<EnergySystem>();
+            mouth = GetComponent<SphereCollider>();
+            mouth.isTrigger = true;
+            mouth.radius = mouthRadius;
         }
 
-        private void OnTriggerEnter(Collider other)
+        public int ConsumedWithTag(string tag) => consumed.TryGetValue(tag, out int count) ? count : 0;
+        void OnTriggerEnter(Collider other) => TryEat(other);
+        void OnTriggerStay(Collider other) => TryEat(other);
+
+        public bool TryEat(Collider other)
         {
-            // Verificamos si la presa tiene alguna de las etiquetas permitidas
-            bool canEat = edibleTags == null || edibleTags.Length == 0;
-            
-            if (!canEat)
-            {
-                foreach (string t in edibleTags)
-                {
-                    // Buscar la etiqueta en el objeto o en sus padres (como el Spawner)
-                    Transform current = other.transform;
-                    while (current != null)
-                    {
-                        if (current.CompareTag(t))
-                        {
-                            canEat = true;
-                            break;
-                        }
-                        current = current.parent;
-                    }
-                    if (canEat) break;
-                }
-            }
-
-            if (canEat)
-            {
-                // Evitar que el jugador se coma a sí mismo o a sus propios hijos
-                if (other.transform.IsChildOf(transform.root)) return;
-
-                // Buscamos si tiene el componente Prey para obtener su valor de energía
-                Prey prey = other.GetComponentInParent<Prey>();
-                
-                // Si encontramos un componente Prey pero está desactivado, lo ignoramos
-                if (prey != null && !prey.isActiveAndEnabled) return;
-
-                EatPrey(prey, other.gameObject);
-            }
-        }
-
-        private void EatPrey(Prey prey, GameObject preyObject)
-        {
-            float energyGained = prey != null ? prey.energyValue : 15f;
-            
-            if (prey != null) prey.enabled = false;
-            
-            // Si hay script Prey, destruimos la raíz que marca el script. Si no, destruimos el objeto colisionado.
-            GameObject objToDestroy = prey != null ? prey.gameObject : preyObject;
-            
-            objToDestroy.SetActive(false); // Desactivar para evitar que se vuelva a procesar este frame
-            Destroy(objToDestroy);
-
-            // Recuperar energía si tenemos el sistema conectado
-            if (energySystem != null)
-            {
-                energySystem.RestoreEnergy(energyGained);
-            }
-            
+            if (!consumptionEnabled || !isActiveAndEnabled || other == null || !other.enabled ||
+                other.transform.IsChildOf(transform.root)) return false;
+            Prey prey = other.GetComponentInParent<Prey>();
+            if (prey == null || !prey.isActiveAndEnabled || prey.IsConsumed) return false;
+            string tag = prey.tag;
+            bool edible = edibleTags == null || edibleTags.Length == 0;
+            if (edibleTags != null) foreach (string allowed in edibleTags) edible |= tag == allowed;
+            if (!edible) return false;
+            Vector3 origin = transform.TransformPoint(mouth.center);
+            float radius = mouth.radius * Mathf.Max(Mathf.Abs(transform.lossyScale.x),
+                Mathf.Abs(transform.lossyScale.y), Mathf.Abs(transform.lossyScale.z));
+            Vector3 delta = other.ClosestPoint(origin) - origin;
+            if (delta.sqrMagnitude > radius * radius) return false;
+            if (delta.sqrMagnitude > .000001f)
+                foreach (var hit in Physics.RaycastAll(origin, delta.normalized, delta.magnitude,
+                    biteBlockingLayers, QueryTriggerInteraction.Ignore))
+                    if (!hit.transform.IsChildOf(transform.root) && !hit.transform.IsChildOf(prey.transform)) return false;
+            float value = prey.energyValue;
+            if (!prey.TryConsume()) return false;
+            TotalConsumed++;
+            LastConsumedTag = tag;
+            consumed[tag] = ConsumedWithTag(tag) + 1;
+            if (energy != null) energy.RestoreEnergy(value);
             OnPreyConsumed.Invoke();
-            Debug.Log($"¡Presa comida! Recuperaste {energyGained} de energía.");
-
-            // Verificar si ya se consumieron todos los krils Food_PlayerOnly_First
-            if (!hasTriggeredScaryHunt)
-            {
-                CheckAndTriggerScaryHunt();
-            }
-        }
-
-        /// <summary>
-        /// Busca TODOS los grupos con tag Food_PlayerOnly_First en la escena.
-        /// Si ninguno tiene hijos activos, activa la fase 2 de depredación.
-        /// </summary>
-        private void CheckAndTriggerScaryHunt()
-        {
-            GameObject[] triggerGroups = GameObject.FindGameObjectsWithTag(TriggerGroupTag);
-            if (triggerGroups.Length == 0) return;
-
-            // Revisar si algún grupo todavía tiene krils vivos (hijos activos)
-            foreach (var group in triggerGroups)
-            {
-                foreach (Transform child in group.transform)
-                {
-                    if (child.gameObject.activeSelf)
-                    {
-                        return; // Aún quedan krils vivos, no activar fase 2
-                    }
-                }
-            }
-
-            // Todos los krils Food_PlayerOnly_First han sido consumidos
-            hasTriggeredScaryHunt = true;
-            Debug.Log($"¡{TriggerGroupTag} consumido por completo! Los salmones empezarán a cazar {ScaryPreyTag}.");
-            ActivateScaryHunt();
-        }
-
-        /// <summary>
-        /// Cambia el objetivo de todos los depredadores (salmones) a Food_Krill_Scary
-        /// y redirige cada cardumen al grupo scary más cercano.
-        /// </summary>
-        private void ActivateScaryHunt()
-        {
-            // 1. Cambiar el preyTag de todos los depredadores y resetear su hambre
-            PredatorEating[] predators = Object.FindObjectsByType<PredatorEating>(FindObjectsSortMode.None);
-            foreach (var predator in predators)
-            {
-                predator.preyTag = ScaryPreyTag;
-                predator.ResetHunger();
-            }
-
-            // 2. Encontrar los grupos scary disponibles
-            GameObject[] scaryGroups = GameObject.FindGameObjectsWithTag(ScaryPreyTag);
-            if (scaryGroups.Length == 0) return;
-
-            // 3. Redirigir cada cardumen de salmones al grupo scary más cercano
-            SwimGroupController[] allSwimGroups = Object.FindObjectsByType<SwimGroupController>(FindObjectsSortMode.None);
-            foreach (var swimGroup in allSwimGroups)
-            {
-                // Solo redirigir swim groups que tienen depredadores (salmones, no krils)
-                if (swimGroup.GetComponentsInChildren<PredatorEating>().Length == 0) continue;
-
-                // Buscar el grupo scary más cercano a este cardumen
-                Transform closest = null;
-                float closestDist = float.MaxValue;
-                foreach (var sg in scaryGroups)
-                {
-                    float dist = (sg.transform.position - swimGroup.transform.position).sqrMagnitude;
-                    if (dist < closestDist)
-                    {
-                        closestDist = dist;
-                        closest = sg.transform;
-                    }
-                }
-
-                if (closest != null)
-                {
-                    swimGroup.movementTarget = closest;
-                    swimGroup.state = SwimGroupController.SwimState.MoveToTarget;
-                    swimGroup.individualHunting = true;
-                }
-            }
+            return true;
         }
     }
 }
