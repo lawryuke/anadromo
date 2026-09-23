@@ -25,6 +25,7 @@
     "com.unity.visualeffectgraph": "17.3.0",
     "com.unity.visualscripting": "1.9.10",
     "com.unity.xr.interaction.toolkit": "3.6.0",
+    "com.unity.xr.oculus": "4.5.5",
     "com.unity.xr.openxr": "1.18.0",
     "moe.meryuhi.effects.fog": "https://github.com/meryuhi/URPFog.git?path=Packages/Fog",
     "com.unity.modules.accessibility": "1.0.0",

@@ -13,6 +13,8 @@ namespace Anadromo.AI
         // Animación de flotar en menú
         private float floatOffset;
         private Vector3 startPos; // Guardamos su posición inicial para que no se escapen al infinito
+        private float menuTimer = 0f;
+        private Vector3 menuTargetPos;
 
         public void Initialize(FlockManager flockManager)
         {
@@ -22,6 +24,8 @@ namespace Anadromo.AI
             targetDirection = transform.forward;
             floatOffset = Random.Range(0f, Mathf.PI * 2f); 
             startPos = transform.position; // Guardar donde nacieron
+            menuTargetPos = startPos;
+            menuTimer = Random.Range(0.5f, 1.5f);
         }
 
         private void Update()
@@ -31,13 +35,32 @@ namespace Anadromo.AI
             // FASE 1: MENÚ (Pantalla de inicio, esperando la tecla J)
             if (!manager.isGameStarted)
             {
-                // Flotan suavemente en Y y X sin alejarse de su StartPos
-                float newY = startPos.y + Mathf.Sin(Time.time * manager.menuFloatSpeed + floatOffset) * manager.menuFloatAmplitude;
-                float newX = startPos.x + Mathf.Cos(Time.time * (manager.menuFloatSpeed * 0.5f) + floatOffset) * (manager.menuFloatAmplitude * 0.3f);
-                
-                transform.position = new Vector3(newX, newY, startPos.z);
+                menuTimer -= Time.deltaTime;
+                if (menuTimer <= 0f)
+                {
+                    // Reiniciar tiempo de espera entre 0.5 y 1.5 segundos
+                    menuTimer = Random.Range(0.5f, 1.5f);
 
-                // Rotan un poco de izquierda a derecha para verse vivos
+                    // Elegir moverse 0, 30cm adelante (0.3f), o 30cm atrás (-0.3f)
+                    float[] choices = { -0.3f, 0f, 0.3f };
+                    float zOffset = choices[Random.Range(0, choices.Length)];
+                    float yOffset = choices[Random.Range(0, choices.Length)];
+
+                    // Si por azar ambos son 0, forzar que se mueva en algún eje para que no se quede quieto
+                    if (zOffset == 0f && yOffset == 0f)
+                    {
+                        zOffset = 0.3f;
+                    }
+
+                    // Calcular la nueva posición objetivo relativa a la posición original (startPos)
+                    // tomando en cuenta su rotación inicial para que Z sea adelante/atrás y Y arriba/abajo.
+                    menuTargetPos = startPos + transform.forward * zOffset + transform.up * yOffset;
+                }
+
+                // Interpolar suavemente hacia la nueva posición elegida
+                transform.position = Vector3.Lerp(transform.position, menuTargetPos, Time.deltaTime * 1.5f);
+
+                // Rotan un poco de izquierda a derecha para verse vivos (mantenemos esto opcional)
                 float rotY = Mathf.Sin(Time.time * manager.menuFloatSpeed + floatOffset) * manager.menuRotationSway;
                 transform.rotation = Quaternion.Euler(0, rotY, 0); 
                 
@@ -62,6 +85,7 @@ namespace Anadromo.AI
                 
                 // Moverse
                 transform.Translate(0, 0, Time.deltaTime * speed);
+                ApplyAntiStuckBounce();
                 return; // Cortamos aquí. Aún no se aplican las reglas de cardumen
             }
 
@@ -109,6 +133,27 @@ namespace Anadromo.AI
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetDirection), currentRotSpeed * Time.deltaTime);
             }
             transform.Translate(0, 0, Time.deltaTime * speed);
+            ApplyAntiStuckBounce();
+        }
+
+        private void ApplyAntiStuckBounce()
+        {
+            if (manager == null || manager.allFish == null) return;
+            
+            foreach (GameObject go in manager.allFish)
+            {
+                if (go != this.gameObject && go != null)
+                {
+                    float dist = Vector3.Distance(transform.position, go.transform.position);
+                    // Si están muy cerca (menos de 0.6 unidades), aplicamos el rebote
+                    if (dist > 0.001f && dist < 0.6f) 
+                    {
+                        Vector3 push = (transform.position - go.transform.position).normalized;
+                        // Empujamos suavemente hacia afuera para separarlos y evitar que se atasquen
+                        transform.position += push * Time.deltaTime * (manager.maxSpeed * 0.5f);
+                    }
+                }
+            }
         }
 
         private void ApplyFlockingRules()

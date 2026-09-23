@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Anadromo.Environment
 {
     [CustomEditor(typeof(NaturalRockCaveAssembler))]
-    public class NaturalRockCaveAssemblerEditor : Editor
+    public class NaturalRockCaveAssemblerEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {

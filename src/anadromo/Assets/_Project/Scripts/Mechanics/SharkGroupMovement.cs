@@ -20,10 +20,6 @@ public class SharkGroupMovement : MonoBehaviour
     [Tooltip("Tiempo máximo de espera antes de que salga el siguiente tiburón")]
     public float delayMaximo = 1.5f;
 
-    [Header("Control de Teclado")]
-    [Tooltip("La tecla que debes presionar para que este grupo empiece a salir")]
-    public KeyCode teclaParaIniciar = KeyCode.Alpha4;
-
     private bool animacionIniciada = false;
 
     // Clase interna para guardar el estado individual de cada tiburón
@@ -61,15 +57,6 @@ public class SharkGroupMovement : MonoBehaviour
                 movement = movement,
                 speed = velocidad * Random.Range(1 - variacionVelocidad, 1 + variacionVelocidad)
             });
-        }
-    }
-
-    void Update()
-    {
-        // Esperar a que se presione la tecla configurada (Alfa o Teclado numérico)
-        if (!animacionIniciada && (Input.GetKeyDown(teclaParaIniciar) || (teclaParaIniciar == KeyCode.Alpha4 && Input.GetKeyDown(KeyCode.Keypad4))))
-        {
-            IniciarGrupo();
         }
     }
 

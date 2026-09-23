@@ -13,8 +13,25 @@ namespace Anadromo.Mechanics
         public bool generateOnStart = true;
 
         [Header("Orientación inicial (opcional)")]
-        [Tooltip("Al generar, el eje local +Z de cada copia apunta a este objeto. Tiene prioridad sobre Random Yaw; no hay seguimiento posterior.")]
+        [Tooltip("Al generar, cada copia apunta a este objeto conservando la corrección del modelo. Tiene prioridad sobre Random Yaw; no hay seguimiento posterior.")]
         public Transform targetObject;
+
+        [Header("Orientación del modelo (compartida con el nado)")]
+        [Tooltip("Conservar la inclinación y el giro lateral del Source Object, quitando solo su rumbo Y. Por ejemplo, X=-90 en un modelo importado vertical.")]
+        public bool useSourceModelRotation = true;
+        [Tooltip("Corrección del modelo respecto a un rumbo +Z con arriba +Y. Se usa si Use Source Model Rotation está desactivado. Regenera tras cambiarla.")]
+        public Vector3 modelRotationOffset;
+
+        public Quaternion ModelRotationCorrection
+        {
+            get
+            {
+                if (!useSourceModelRotation || sourceObject == null)
+                    return Quaternion.Euler(modelRotationOffset);
+                Quaternion sourceRotation = sourceObject.transform.rotation;
+                return Quaternion.Inverse(Quaternion.Euler(0f, sourceRotation.eulerAngles.y, 0f)) * sourceRotation;
+            }
+        }
 
         [Header("Caja local (se mueve, rota y escala con este objeto)")]
         public Vector3 center;
@@ -28,9 +45,31 @@ namespace Anadromo.Mechanics
         public bool avoidOverlaps = true;
         [Tooltip("Capas de obstáculos de la escena. Las copias siempre se comprueban entre sí.")]
         public LayerMask obstacleLayers = ~0;
+        [Tooltip("Incluir triggers de la escena como obstáculos. Los colliders de las copias, incluidos triggers, siempre definen su volumen.")]
         public bool includeTriggers;
         [Min(1)] public int attemptsPerObject = 100;
         [SerializeField, HideInInspector] private List<GameObject> generated = new List<GameObject>();
+
+        [SerializeField, HideInInspector] private string lastGenerationMessage;
+        public string LastGenerationMessage => lastGenerationMessage;
+        public IReadOnlyList<GameObject> GeneratedObjects => generated;
+
+        public Quaternion GetInitialRotation(Vector3 position, Quaternion fallback)
+        {
+            Vector3 targetPosition;
+            if (targetObject != null) targetPosition = targetObject.position;
+            else
+            {
+                SwimGroupController controller = GetComponent<SwimGroupController>();
+                if (controller == null || !controller.isActiveAndEnabled ||
+                    !controller.TryGetSharkInitialTarget(out targetPosition)) return fallback;
+            }
+            Vector3 direction = targetPosition - position;
+            if (direction.sqrMagnitude < 0.00000001f) return fallback;
+            Vector3 forward = direction.normalized;
+            Vector3 up = Mathf.Abs(Vector3.Dot(forward, Vector3.up)) > 0.999f ? Vector3.forward : Vector3.up;
+            return Quaternion.LookRotation(forward, up) * ModelRotationCorrection;
+        }
 
         private void Start()
         {
@@ -63,7 +102,12 @@ namespace Anadromo.Mechanics
 
             ClearGenerated();
             var random = new System.Random(seed);
+            Quaternion baseRotation = Quaternion.Euler(0f, sourceObject.transform.eulerAngles.y, 0f) * ModelRotationCorrection;
             var placedColliders = new List<Collider>();
+            var placedVisualBounds = new List<Bounds>();
+            int outsideAttempts = 0;
+            int overlapAttempts = 0;
+            lastGenerationMessage = string.Empty;
             Physics.SyncTransforms();
             for (int i = 0; i < Mathf.Max(0, count); i++)
             {
@@ -75,11 +119,13 @@ namespace Anadromo.Mechanics
                 candidate.SetActive(true);
                 Collider[] colliders = candidate.GetComponentsInChildren<Collider>();
                 Renderer[] renderers = candidate.GetComponentsInChildren<Renderer>();
-                if (avoidOverlaps && !System.Array.Exists(colliders, IsUsable))
+                bool hasColliders = System.Array.Exists(colliders, IsUsable);
+                if (avoidOverlaps && !hasColliders && !System.Array.Exists(renderers, r => r.enabled))
                 {
                     RemoveObject(candidate, false);
-                    Debug.LogWarning("Evitar solapamientos requiere un Collider habilitado en el objeto o sus hijos.", this);
-                    break;
+                    lastGenerationMessage = "No se puede comprobar el volumen: el objeto no tiene colliders ni renderers habilitados. Añade uno o desactiva Avoid Overlaps.";
+                    Debug.LogWarning(lastGenerationMessage, this);
+                    return;
                 }
 
                 bool accepted = false;
@@ -90,24 +136,22 @@ namespace Anadromo.Mechanics
                         (float)random.NextDouble() - 0.5f));
                     Vector3 position = transform.TransformPoint(localPoint);
                     Quaternion rotation = randomYaw
-                        ? Quaternion.AngleAxis((float)random.NextDouble() * 360f, transform.up) * sourceObject.transform.rotation
-                        : sourceObject.transform.rotation;
-                    if (targetObject != null)
-                    {
-                        Vector3 direction = targetObject.position - position;
-                        if (direction.sqrMagnitude > 0.00000001f)
-                        {
-                            Vector3 forward = direction.normalized;
-                            Vector3 up = Mathf.Abs(Vector3.Dot(forward, Vector3.up)) > 0.999f
-                                ? Vector3.forward : Vector3.up;
-                            rotation = Quaternion.LookRotation(forward, up);
-                        }
-                    }
+                        ? Quaternion.AngleAxis((float)random.NextDouble() * 360f, transform.up) * baseRotation
+                        : baseRotation;
+                    rotation = GetInitialRotation(position, rotation);
                     // Validate containment and collisions with the final initial orientation.
                     candidate.transform.SetPositionAndRotation(position, rotation);
                     Physics.SyncTransforms();
-                    if (containWholeObject && !FitsInside(colliders, renderers)) continue;
-                    if (avoidOverlaps && HasOverlap(candidate.transform, colliders, placedColliders)) continue;
+                    if (containWholeObject && !FitsInside(colliders, renderers))
+                    {
+                        outsideAttempts++;
+                        continue;
+                    }
+                    if (avoidOverlaps && HasOverlap(candidate.transform, colliders, renderers, placedColliders, placedVisualBounds))
+                    {
+                        overlapAttempts++;
+                        continue;
+                    }
                     accepted = true;
                     break;
                 }
@@ -122,9 +166,13 @@ namespace Anadromo.Mechanics
                 generated.Add(candidate);
                 foreach (Collider collider in colliders)
                     if (IsUsable(collider)) placedColliders.Add(collider);
+                if (!hasColliders)
+                    foreach (Renderer renderer in renderers)
+                        if (renderer.enabled) placedVisualBounds.Add(renderer.bounds);
             }
+            lastGenerationMessage = $"Generados {generated.Count}/{count}. Intentos fuera de la caja: {outsideAttempts}. Intentos con solapamiento: {overlapAttempts}.";
             if (generated.Count < count)
-                Debug.LogWarning($"Se generaron {generated.Count}/{count} objetos. Amplía la caja o aumenta los intentos.", this);
+                Debug.LogWarning(lastGenerationMessage, this);
         }
 
         public void ClearGenerated()
@@ -132,19 +180,22 @@ namespace Anadromo.Mechanics
             foreach (GameObject instance in generated)
                 if (instance != null) RemoveObject(instance);
             generated.Clear();
+            lastGenerationMessage = string.Empty;
         }
 
         private bool IsUsable(Collider collider)
         {
-            return collider != null && collider.enabled && collider.gameObject.activeInHierarchy &&
-                (includeTriggers || !collider.isTrigger);
+            return collider != null && collider.enabled && collider.gameObject.activeInHierarchy;
         }
 
-        private bool HasOverlap(Transform candidate, Collider[] colliders, List<Collider> placed)
+        private bool HasOverlap(Transform candidate, Collider[] colliders, Renderer[] renderers,
+            List<Collider> placed, List<Bounds> placedVisualBounds)
         {
+            bool hasColliders = false;
             foreach (Collider collider in colliders)
             {
                 if (!IsUsable(collider)) continue;
+                hasColliders = true;
                 Bounds bounds = collider.bounds;
                 Collider[] obstacles = Physics.OverlapBox(bounds.center, bounds.extents, Quaternion.identity,
                     obstacleLayers, includeTriggers ? QueryTriggerInteraction.Collide : QueryTriggerInteraction.Ignore);
@@ -155,6 +206,26 @@ namespace Anadromo.Mechanics
                 }
                 foreach (Collider other in placed)
                     if (IsUsable(other) && Intersects(collider, other)) return true;
+                foreach (Bounds other in placedVisualBounds)
+                    if (bounds.Intersects(other)) return true;
+            }
+            if (!hasColliders)
+            {
+                // Visual bounds supply a conservative placement volume without adding
+                // physical colliders to objects that intentionally do not have them.
+                foreach (Renderer renderer in renderers)
+                {
+                    if (!renderer.enabled) continue;
+                    Bounds bounds = renderer.bounds;
+                    Collider[] obstacles = Physics.OverlapBox(bounds.center, bounds.extents, Quaternion.identity,
+                        obstacleLayers, includeTriggers ? QueryTriggerInteraction.Collide : QueryTriggerInteraction.Ignore);
+                    foreach (Collider other in obstacles)
+                        if (!other.transform.IsChildOf(candidate)) return true;
+                    foreach (Collider other in placed)
+                        if (IsUsable(other) && bounds.Intersects(other.bounds)) return true;
+                    foreach (Bounds other in placedVisualBounds)
+                        if (bounds.Intersects(other)) return true;
+                }
             }
             return false;
         }

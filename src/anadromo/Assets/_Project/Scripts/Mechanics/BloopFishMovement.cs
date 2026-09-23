@@ -13,6 +13,10 @@ public class BloopFishMovement : MonoBehaviour
     [Tooltip("Velocidad constante de movimiento de ascenso vertical")]
     public float velocidad = 5.0f;
 
+    [Header("Control de Teclado")]
+    [Tooltip("La tecla que debes presionar para que este pez empiece a subir")]
+    public KeyCode teclaParaIniciar = KeyCode.Alpha5;
+
     private bool animacionIniciada = false;
     private NaturalSwimPath movimiento;
 
@@ -31,8 +35,8 @@ public class BloopFishMovement : MonoBehaviour
 
     void Update()
     {
-        // Detectar si el usuario presiona la tecla '5' (alfanumérica o del teclado numérico)
-        if (Input.GetKeyDown(KeyCode.Alpha5) || Input.GetKeyDown(KeyCode.Keypad5))
+        // Detectar si el usuario presiona la tecla configurada en el Inspector
+        if (!animacionIniciada && Input.GetKeyDown(teclaParaIniciar))
         {
             IniciarMovimiento();
         }
