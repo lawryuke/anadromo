@@ -46,8 +46,7 @@ public static class VisualLevelValidation
             {
                 if (behaviour == null) throw new InvalidOperationException("Missing script in scene");
                 if (behaviour is TriggerHuntOnExit || behaviour is TriggerHuntOnGroupEmpty ||
-                    behaviour is TriggerNormalOnScaryEmpty || behaviour is TriggerSharkStampede ||
-                    behaviour is Anadromo.AI.ScaredKrillBehavior)
+                    behaviour is TriggerNormalOnScaryEmpty || behaviour is TriggerSharkStampede)
                     Require(!behaviour.isActiveAndEnabled, "Legacy event is still enabled: " + behaviour.name);
             }
             int count = LevelProgressionChecks.Run();

@@ -201,7 +201,7 @@ namespace Anadromo.Logic
                     salmonesTop.Hunt(krillScaryRight.GetComponent<BoxObjectSpawner>(), "Food_Krill_Scary");
                     break;
                 case GamePhase.OrcaAscent:
-                    foreach (var group in salmon) group.Desperate();
+                    foreach (var group in salmon) group.NormalAtWaypoint(group.postHuntDestination);
                     foreach (var group in orcaGroups) group.BeginAscent(topReference.position.y);
                     break;
                 case GamePhase.BloopAwakening:

@@ -144,7 +144,7 @@ Transform:
   m_GameObject: {fileID: 5535822}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.38081, y: 4.95067, z: 4.65102}
+  m_LocalPosition: {x: 9.38081, y: 4.95067, z: 10.59}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -191,14 +191,17 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8343365}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3e2dce1b8d7f6954ca84e7591dd02ff2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.AI.ScaredKrillBehavior
   scareDistance: 1
-  checkInterval: 0.5
-  fleeOffset: {x: 0, y: 0, z: 3}
+  checkInterval: 0.1
+  scareFromPlayer: 0
+  player: {fileID: 0}
+  playerScareDistance: 1
+  fleeOffset: {x: 0, y: 0, z: 10}
 --- !u!114 &8343368
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -531,9 +534,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9c5e616066e88347ad6418c1946aee3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BloopFishMovement
-  puntoInicio: {x: 11, y: -19, z: 21}
-  puntoFin: {x: 11, y: 80, z: 21}
-  velocidad: 13
+  puntoInicio: {x: 11.4, y: -18.4, z: 15.7}
+  puntoFin: {x: 11.4, y: 120, z: 15.7}
+  velocidad: 14
   teclaParaIniciar: 53
   allowKeyboard: 0
 --- !u!4 &88480908 stripped
@@ -1047,7 +1050,7 @@ Transform:
   m_GameObject: {fileID: 206300349}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 9.38, y: 6.158, z: -17.549}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.43899, y: 1, z: 0.73434}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1454,7 +1457,7 @@ Transform:
   m_GameObject: {fileID: 263232668}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.35313, y: 3.62079, z: -3.52}
+  m_LocalPosition: {x: 9.85, y: 6.47, z: -13.96}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2184,7 +2187,7 @@ Transform:
   m_GameObject: {fileID: 448203257}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.35313, y: -3.22079, z: 8.06453}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3310,7 +3313,7 @@ Transform:
   m_GameObject: {fileID: 744617477}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.731, y: -2.5456, z: 25.559}
+  m_LocalPosition: {x: 4.731, y: -2.5456, z: 24.48}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3329,7 +3332,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.ZoneLimit
   center: {x: 0, y: 0, z: 0}
-  size: {x: 3, y: 3, z: 3}
+  size: {x: 3, y: 3, z: 6}
 --- !u!1 &768065901
 GameObject:
   m_ObjectHideFlags: 0
@@ -3505,7 +3508,7 @@ Transform:
   m_GameObject: {fileID: 768065901}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 9.61, y: 2.8492098, z: -10.25}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1.4, y: 1.4, z: 1.4}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4864,7 +4867,7 @@ Transform:
   m_GameObject: {fileID: 1119295913}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 6.3983, y: 3.3344002, z: -38.5}
+  m_LocalPosition: {x: 6.3983, y: 3.3344002, z: -99.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4883,7 +4886,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.ZoneLimit
   center: {x: 0, y: 0, z: 0}
-  size: {x: 40, y: 30, z: 60}
+  size: {x: 40, y: 30, z: 180}
 --- !u!1 &1171905209
 GameObject:
   m_ObjectHideFlags: 0
@@ -5145,7 +5148,7 @@ Transform:
   m_GameObject: {fileID: 1340368773}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.9965177, z: 0.083382376, w: 0}
-  m_LocalPosition: {x: -2.7404332, y: -18.06, z: 20.74}
+  m_LocalPosition: {x: -2.7404332, y: -18.06, z: 21.19}
   m_LocalScale: {x: 3.1963, y: 1.7646818, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5403,7 +5406,7 @@ MonoBehaviour:
   speed: 2
   loop: 0
   waitAbysmPhase: 1
-  showDebug: 1
+  showDebug: 0
   logRouteEvents: 1
   debugCamera: {fileID: 2121971304}
 --- !u!114 &1409005006
@@ -5887,14 +5890,17 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1555601529}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3e2dce1b8d7f6954ca84e7591dd02ff2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.AI.ScaredKrillBehavior
   scareDistance: 1
-  checkInterval: 0.5
-  fleeOffset: {x: 0, y: 0, z: 3}
+  checkInterval: 0.1
+  scareFromPlayer: 1
+  player: {fileID: 2121971301}
+  playerScareDistance: 1
+  fleeOffset: {x: 0, y: 0, z: 10}
 --- !u!114 &1555601532
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6007,8 +6013,8 @@ Transform:
   m_GameObject: {fileID: 1570781052}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.056614444, z: -0, w: 0.99839616}
-  m_LocalPosition: {x: 7.855, y: 4.67, z: 0.375}
-  m_LocalScale: {x: 0.6281679, y: 0.3583501, z: 1.975517}
+  m_LocalPosition: {x: 7.915, y: 4.78, z: -0.27}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2144689108}
@@ -6085,7 +6091,7 @@ MonoBehaviour:
   useSourceModelRotation: 0
   modelRotationOffset: {x: -90, y: 180, z: 0}
   center: {x: 0, y: 0, z: 0}
-  size: {x: 1, y: 1, z: 1}
+  size: {x: 2, y: 2, z: 3}
   containWholeObject: 1
   randomYaw: 1
   seed: 12345
@@ -6387,14 +6393,17 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1652384441}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3e2dce1b8d7f6954ca84e7591dd02ff2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.AI.ScaredKrillBehavior
   scareDistance: 1
-  checkInterval: 0.5
-  fleeOffset: {x: 0, y: 0, z: 3}
+  checkInterval: 0.1
+  scareFromPlayer: 0
+  player: {fileID: 0}
+  playerScareDistance: 1
+  fleeOffset: {x: 0, y: 0, z: 10}
 --- !u!114 &1652384444
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6623,23 +6632,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 74a42210367d8e84c9956abbd18b0305, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.67770004
+      value: 1.0230346
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 74a42210367d8e84c9956abbd18b0305, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.8214818
+      value: 0.95513695
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 74a42210367d8e84c9956abbd18b0305, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 11
+      value: 11.59
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 74a42210367d8e84c9956abbd18b0305, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -19
+      value: -18.4
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 74a42210367d8e84c9956abbd18b0305, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 21
+      value: 18.25
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 74a42210367d8e84c9956abbd18b0305, type: 3}
       propertyPath: m_LocalRotation.w
@@ -6993,7 +7002,7 @@ Transform:
   m_GameObject: {fileID: 1991546646}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 8.938001, y: 6.158, z: -17.56}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.48849, y: 1, z: 0.8830823}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7130,7 +7139,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OrcaGroupMovement
   puntoInicio: {x: 7.1, y: -19.77, z: 22.9}
   puntoFin: {x: 7.1, y: 42, z: 22.9}
-  velocidad: 4
+  velocidad: 7
   aceleracion: 1.2
   variacionVelocidad: 0.1
   amplitudTrayectoria: 0.22
@@ -7239,13 +7248,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2121971300}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0.037381507, y: -0, z: -0, w: 0.9993011}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 2.5, y: 2.5, z: 2.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 768065909}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 4.285, y: 0, z: 0}
 --- !u!114 &2121971302
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7628,7 +7637,7 @@ Transform:
   m_GameObject: {fileID: 2147090875}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 9.150001, y: 6.284, z: -17.558}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.7565, y: 0.6673, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

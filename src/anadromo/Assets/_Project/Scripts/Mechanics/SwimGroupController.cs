@@ -13,6 +13,7 @@ namespace Anadromo.Mechanics
         public enum ArrivalMode { StayNear, Circle, ReturnToNormal }
         enum LevelMotion { Legacy, Waiting, Hold, Normal, Hunt }
         LevelMotion levelMotion;
+        ZoneLimit normalZone;
         BoxObjectSpawner huntSpawner;
         Transform facingTarget;
         string huntTag;
@@ -24,6 +25,7 @@ namespace Anadromo.Mechanics
 
         public void WaitForLevel()
         {
+            normalZone = null;
             levelMotion = LevelMotion.Waiting;
             useFishStartSequence = false;
             individualHunting = false;
@@ -39,6 +41,7 @@ namespace Anadromo.Mechanics
 
         public void Hunt(BoxObjectSpawner target, string preyTag)
         {
+            normalZone = null;
             if (target == null) { NormalInSpawnBox(); return; }
             levelMotion = LevelMotion.Hunt;
             useFishStartSequence = false;
@@ -51,6 +54,7 @@ namespace Anadromo.Mechanics
 
         public void NormalInSpawnBox()
         {
+            normalZone = null;
             levelMotion = LevelMotion.Normal;
             useFishStartSequence = false;
             individualHunting = false;
@@ -63,11 +67,12 @@ namespace Anadromo.Mechanics
 
         /// <summary>
         /// Transiciona el cardumen a nado pacífico alrededor del waypoint indicado,
-        /// sin restringir a la caja de spawn original.
+        /// usando los límites del destino si tiene ZoneLimit, nunca la caja de spawn original.
         /// </summary>
         public void NormalAtWaypoint(Transform destination)
         {
-            levelMotion = LevelMotion.Legacy;
+            normalZone = destination != null ? destination.GetComponent<ZoneLimit>() : null;
+            levelMotion = normalZone != null ? LevelMotion.Normal : LevelMotion.Legacy;
             useFishStartSequence = false;
             individualHunting = false;
             movementTarget = null;
@@ -76,7 +81,7 @@ namespace Anadromo.Mechanics
             if (destination != null)
             {
                 normalWaypoints = new Transform[] { destination };
-                home = destination.position;
+                home = normalZone != null ? destination.TransformPoint(normalZone.center) : destination.position;
                 groupCenter = Vector3.Lerp(groupCenter, home, 0.5f);
             }
             else
@@ -281,6 +286,19 @@ namespace Anadromo.Mechanics
             state = target != null ? SwimState.MoveToTarget : SwimState.Normal;
         }
 
+        public void FleeTo(Transform target)
+        {
+            if (target == null) return;
+            normalZone = null;
+            levelMotion = LevelMotion.Legacy;
+            useFishStartSequence = false;
+            individualHunting = false;
+            huntSpawner = null;
+            arrivalMode = ArrivalMode.StayNear;
+            ApplyHuntToMembers();
+            GoToTarget(target);
+        }
+
         public void ReturnToNormal() => state = SwimState.Normal;
 
         public bool TryGetSharkInitialTarget(out Vector3 position)
@@ -379,7 +397,8 @@ namespace Anadromo.Mechanics
                 }
             }
             if (state == SwimState.Normal) destination = levelMotion == LevelMotion.Normal
-                ? spawner.transform.TransformPoint(spawner.center) : NormalDestination();
+                ? (normalZone != null ? normalZone.transform.TransformPoint(normalZone.center)
+                    : spawner.transform.TransformPoint(spawner.center)) : NormalDestination();
             // The parent remains still; this virtual center guides the individual members.
             groupCenter = Vector3.MoveTowards(groupCenter, destination, Mathf.Max(0f, swimSpeed) * 0.65f * dt);
 
@@ -551,11 +570,16 @@ namespace Anadromo.Mechanics
 
         Vector3 ClampToSpawnBox(Vector3 point)
         {
-            Vector3 local = spawner.transform.InverseTransformPoint(point) - spawner.center;
-            Vector3 half = spawner.size * .5f;
+            // A post-hunt zone replaces the original spawn bounds. Outside members
+            // swim into it; FixedUpdate only confines a member after it has entered.
+            Transform boxTransform = normalZone != null ? normalZone.transform : spawner.transform;
+            Vector3 center = normalZone != null ? normalZone.center : spawner.center;
+            Vector3 size = normalZone != null ? normalZone.size : spawner.size;
+            Vector3 local = boxTransform.InverseTransformPoint(point) - center;
+            Vector3 half = size * .5f;
             local = new Vector3(Mathf.Clamp(local.x, -half.x, half.x),
                 Mathf.Clamp(local.y, -half.y, half.y), Mathf.Clamp(local.z, -half.z, half.z));
-            return spawner.transform.TransformPoint(local + spawner.center);
+            return boxTransform.TransformPoint(local + center);
         }
 
         Vector3 SteerAroundObstacles(Member member, Vector3 desired)
