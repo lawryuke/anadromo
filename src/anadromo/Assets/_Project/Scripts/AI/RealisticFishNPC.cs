@@ -14,6 +14,15 @@ namespace Anadromo.AI
         [Min(.05f)] public float cruiseSpeed = .35f;
         [Range(.01f, .08f)] public float tailAmplitude = .035f;
         [Range(.5f, 3)] public float tailFrequency = 1.3f;
+        [Header("Retraso del cuerpo al girar")]
+        public bool turnLag;
+        [Range(.05f, 1.5f)] public float tailFollowTime = .65f;
+        [Range(30f, 170f)] public float maxTurnLag = 160f;
+        const int SpineSegments = 16;
+        const float NeckZ = .10f, TailZ = -.354f;
+        readonly Quaternion[] spineWorld = new Quaternion[SpineSegments + 1];
+        readonly Quaternion[] spineLocal = new Quaternion[SpineSegments + 1];
+        readonly Vector3[] spinePosition = new Vector3[SpineSegments + 1];
         Mesh mesh, previousMesh;
         MeshFilter filter;
         Vector3[] rest, vertices, normals, restNormals;
@@ -28,6 +37,7 @@ namespace Anadromo.AI
             previousPosition = transform.position;
             phase = (GetInstanceID() & 0xFFFF) * 2.399963f;
             speed = 0;
+            ResetSpine();
         }
         void OnValidate() { rebuild = true; }
         void LateUpdate()
@@ -39,7 +49,52 @@ namespace Anadromo.AI
             previousPosition = transform.position;
             float dt = Mathf.Min(frameTime, .05f);
             speed = Mathf.Lerp(speed, measuredSpeed, 1 - Mathf.Exp(-dt * 8));
+            UpdateTurnLag(frameTime);
             Animate(dt);
+        }
+
+        void ResetSpine()
+        {
+            for (int i = 0; i <= SpineSegments; i++) spineWorld[i] = transform.rotation;
+            UpdateTurnLag(0);
+        }
+
+        void UpdateTurnLag(float dt)
+        {
+            Quaternion head = transform.rotation;
+            Quaternion inverse = Quaternion.Inverse(head);
+            float segmentLength = (NeckZ - TailZ) / SpineSegments;
+            spinePosition[0] = new Vector3(0, 0, NeckZ);
+            spineLocal[0] = Quaternion.identity;
+            spineWorld[0] = head;
+            for (int i = 1; i <= SpineSegments; i++)
+            {
+                float q = (float)i / SpineSegments;
+                if (!turnLag) spineWorld[i] = head;
+                else if (dt > 0)
+                {
+                    float response = Mathf.Max(.01f, tailFollowTime * q);
+                    spineWorld[i] = Quaternion.Slerp(spineWorld[i], head, 1 - Mathf.Exp(-dt / response));
+                    spineWorld[i] = Quaternion.RotateTowards(head, spineWorld[i], Mathf.Clamp(maxTurnLag, 0, 170));
+                }
+                spineLocal[i] = inverse * spineWorld[i];
+                // Integrate a flexible spine instead of rotating the entire mesh about one pivot.
+                Quaternion direction = Quaternion.Slerp(spineLocal[i - 1], spineLocal[i], .5f);
+                spinePosition[i] = spinePosition[i - 1] + direction * (Vector3.back * segmentLength);
+            }
+        }
+
+        void BendWithSpine(ref Vector3 point, ref Vector3 normal, ref Vector3 tangent)
+        {
+            if (!turnLag || point.z >= NeckZ) return;
+            float along = Mathf.Clamp01((NeckZ - point.z) / (NeckZ - TailZ)) * SpineSegments;
+            int segment = Mathf.Min((int)along, SpineSegments - 1);
+            float t = along - segment;
+            Quaternion rotation = Quaternion.Slerp(spineLocal[segment], spineLocal[segment + 1], t);
+            Vector3 center = Vector3.Lerp(spinePosition[segment], spinePosition[segment + 1], t);
+            point = center + rotation * new Vector3(point.x, point.y, Mathf.Min(0, point.z - TailZ));
+            normal = rotation * normal;
+            tangent = rotation * tangent;
         }
 
         public void BuildMesh()
@@ -112,15 +167,19 @@ namespace Anadromo.AI
                     * (1 - Mathf.SmoothStep(0, .12f, Mathf.Abs(p.z - .035f)))
                     * (1 - Mathf.SmoothStep(0, .035f, Mathf.Abs(p.y + .012f)));
                 p.y += Mathf.Sin(phase * .5f + Mathf.Sign(p.x) * .5f) * fin * .003f;
-                vertices[i] = p;
+
                 Vector3 normal = restNormals[i]; normal.z -= slope * normal.x;
-                normals[i] = normal.normalized;
+                normal.Normalize();
                 Vector4 t = restTangents[i];
                 Vector3 tangent = new Vector3(t.x + slope * t.z, t.y, t.z);
-                tangent = (tangent - Vector3.Dot(tangent, normals[i]) * normals[i]).normalized;
+                tangent = (tangent - Vector3.Dot(tangent, normal) * normal).normalized;
+                BendWithSpine(ref p, ref normal, ref tangent);
+                vertices[i] = p;
+                normals[i] = normal;
                 tangents[i] = new Vector4(tangent.x, tangent.y, tangent.z, t.w);
             }
             mesh.vertices = vertices; mesh.normals = normals; mesh.tangents = tangents;
+            if (turnLag) mesh.RecalculateBounds();
         }
 
         void ReleaseMesh()
