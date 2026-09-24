@@ -29,6 +29,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Project/Scenes/TerrainTestVisuales.unity
     guid: 8de432e6946efb54d8dc0a081243116c
+  - enabled: 1
+    path: Assets/_Project/Scenes/Escenario4.unity
+    guid: cbac248e87355119a2db05e206d3d600
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: e6f5d51e58a9844408625110b326aadd, type: 2}
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
