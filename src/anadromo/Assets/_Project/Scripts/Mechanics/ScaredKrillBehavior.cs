@@ -25,6 +25,7 @@ namespace Anadromo.AI
         
         private SwimGroupController swimGroup;
         private bool isScared = false;
+        public bool IsScared => isScared;
         private float timer = 0f;
         private Transform fleeTarget;
 

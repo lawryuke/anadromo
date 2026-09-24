@@ -37,6 +37,7 @@ namespace Anadromo.Logic
         public bool isPlayerInAbysm;
         public bool showStartButton = true;
         public bool autoStart;
+        public DiegeticSwimIntro swimIntro;
         public bool IsReady { get; private set; }
         public string ConfigurationError { get; private set; }
         readonly LevelProgression progress = new LevelProgression();
@@ -109,6 +110,7 @@ namespace Anadromo.Logic
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
             IsReady = true;
+            if (swimIntro != null) swimIntro.Prepare(this, salmon);
             if (autoStart) StartGame();
         }
 
@@ -157,13 +159,15 @@ namespace Anadromo.Logic
 
         public void StartGame()
         {
+            if (swimIntro != null && !swimIntro.Revealed) return;
             if (!IsReady || !progress.Start()) return;
-            SetPlayerMovement(true);
+            if (swimIntro == null) SetPlayerMovement(true);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
-            playerFeeding.consumptionEnabled = true;
+            playerFeeding.consumptionEnabled = swimIntro == null;
             playerFeeding.edibleTags = new[] { "Food_PlayerOnly_First" };
-            foreach (var group in salmon) group.HoldFacing(targetMid);
+            if (swimIntro != null) swimIntro.Launch();
+            else foreach (var group in salmon) group.HoldFacing(targetMid);
             EnterPhase();
         }
 
@@ -178,11 +182,13 @@ namespace Anadromo.Logic
                 playerFeeding.ConsumedWithTag("Food_PlayerOnly") - abysmMealBaseline;
             bool allAbove = true;
             foreach (var group in orcaGroups) allAbove &= group != null && group.AllAbove(orcaLimit.position.y);
+            var scaryMidBehaviour = krillScaryMid.GetComponent<Anadromo.AI.ScaredKrillBehavior>();
             bool changed = progress.Tick(!Contains(initialZone, point) || legacyLeft,
                 krillFirstMid.IsInitialized && krillFirstMid.InitialPopulation > 0 && krillFirstMid.AliveCount == 0,
                 isPlayerInAbysm, meals, EffectiveRequiredMeals, Contains(caveZone, point) || legacyCave,
                 allAbove, EffectiveBloopTimeout > 0 && phaseTime >= EffectiveBloopTimeout, bloopMovement.transform.position.y,
-                FirstLimit, SecondLimit, endingEffects.IsComplete);
+                FirstLimit, SecondLimit, endingEffects.IsComplete,
+                scaryMidBehaviour != null && scaryMidBehaviour.IsScared);
             if (changed) EnterPhase();
         }
 
@@ -193,13 +199,21 @@ namespace Anadromo.Logic
             switch (currentPhase)
             {
                 case GamePhase.KrillFeeding:
+                    if (swimIntro != null)
+                    {
+                        SetPlayerMovement(true);
+                        swimIntro.ReleasePlayer();
+                        playerFeeding.consumptionEnabled = true;
+                    }
                     salmonesLeft.Hunt(krillNormalLeft.GetComponent<BoxObjectSpawner>(), "Food_Krill");
                     salmonesRight.Hunt(krillNormalRight1.GetComponent<BoxObjectSpawner>(), "Food_Krill");
                     salmonesTop.Hunt(krillNormalRight2.GetComponent<BoxObjectSpawner>(), "Food_Krill");
                     break;
                 case GamePhase.AbysmDescent:
                     abysmMealBaseline = playerFeeding.ConsumedWithTag("Food_PlayerOnly");
-                    playerFeeding.edibleTags = new[] { "Food_PlayerOnly" };
+                    // Leftover first-group krill remain edible, but only Scary meals
+                    // count toward the abysm requirement when countMealsFromStart is false.
+                    playerFeeding.edibleTags = new[] { "Food_PlayerOnly_First", "Food_PlayerOnly" };
                     salmonesLeft.Hunt(krillScaryLeft.GetComponent<BoxObjectSpawner>(), "Food_Krill_Scary");
                     salmonesRight.Hunt(krillScaryRight.GetComponent<BoxObjectSpawner>(), "Food_Krill_Scary");
                     salmonesTop.Hunt(krillScaryRight.GetComponent<BoxObjectSpawner>(), "Food_Krill_Scary");
@@ -252,6 +266,7 @@ namespace Anadromo.Logic
         void OnGUI()
         {
             if (!IsReady || progress.Phase != GamePhase.WaitingForStart || !showStartButton) return;
+            if (swimIntro != null && !swimIntro.Revealed) return;
             if (GUI.Button(new Rect((Screen.width - 220) * .5f, (Screen.height - 64) * .5f, 220, 64), "Iniciar partida"))
                 StartGame();
         }

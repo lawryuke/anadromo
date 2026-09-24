@@ -8,6 +8,9 @@ public class SimpleFlyCamera : MonoBehaviour
     public float movementSpeed = 10f;
     public float fastMovementSpeed = 25f;
     public float mouseSensitivity = 0.2f;
+    [System.NonSerialized] public bool allowTranslation = true;
+    [System.NonSerialized] public bool menuLook;
+    [System.NonSerialized] public Vector3 externalVelocity;
 
     private float pitch = 0f;
     private float yaw = 0f;
@@ -42,7 +45,7 @@ public class SimpleFlyCamera : MonoBehaviour
         }
 
         // Camera Rotation (Siempre activa si el cursor está bloqueado)
-        if (Cursor.lockState == CursorLockMode.Locked)
+        if (Cursor.lockState == CursorLockMode.Locked || (menuLook && mouse.rightButton.isPressed))
         {
             Vector2 mouseDelta = mouse.delta.ReadValue();
             float sens = GameSettings.I ? GameSettings.I.mouseSensitivity : mouseSensitivity;
@@ -56,6 +59,7 @@ public class SimpleFlyCamera : MonoBehaviour
         }
 
         // Camera Movement
+        if (!allowTranslation) return;
         float baseSpeed = GameSettings.I ? GameSettings.I.playerSpeed : movementSpeed;
         float sprintSpeed = GameSettings.I ? GameSettings.I.playerSprintSpeed : fastMovementSpeed;
         float currentSpeed = keyboard.leftShiftKey.isPressed ? sprintSpeed : baseSpeed;
@@ -72,11 +76,11 @@ public class SimpleFlyCamera : MonoBehaviour
 
         if (rb != null && !rb.isKinematic)
         {
-            rb.linearVelocity = direction * currentSpeed;
+            rb.linearVelocity = direction * currentSpeed + externalVelocity;
         }
         else
         {
-            transform.position += direction * currentSpeed * Time.deltaTime;
+            transform.position += (direction * currentSpeed + externalVelocity) * Time.deltaTime;
         }
     }
 }

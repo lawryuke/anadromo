@@ -14,6 +14,20 @@ namespace Anadromo.Mechanics
         enum LevelMotion { Legacy, Waiting, Hold, Normal, Hunt }
         LevelMotion levelMotion;
         ZoneLimit normalZone;
+        [System.NonSerialized] public Vector3 externalVelocity;
+
+        // Called immediately after the intro translates the common parent.
+        public void TranslateIntroFrame(Vector3 delta)
+        {
+            home += delta;
+            groupCenter += delta;
+            foreach (var member in members.Values)
+            {
+                member.restPosition += delta;
+                member.position += delta;
+                if (member.body != null) member.body.position = member.transform.position;
+            }
+        }
         BoxObjectSpawner huntSpawner;
         Transform facingTarget;
         string huntTag;
@@ -536,7 +550,8 @@ namespace Anadromo.Mechanics
                 member.speed = Mathf.MoveTowards(member.speed, desiredSpeed, Mathf.Max(0.01f, acceleration) * dt);
                 Vector3 travelDirection = linearShark || (hunting && levelMotion == LevelMotion.Legacy)
                     ? forward : heading * Vector3.forward;
-                Vector3 position = member.position + travelDirection * Mathf.Min(member.speed * dt, remaining);
+                Vector3 position = member.position + travelDirection * Mathf.Min(member.speed * dt, remaining)
+                    + externalVelocity * dt;
                 if (levelMotion == LevelMotion.Normal &&
                     (ClampToSpawnBox(member.position) - member.position).sqrMagnitude < .000001f)
                     position = ClampToSpawnBox(position);

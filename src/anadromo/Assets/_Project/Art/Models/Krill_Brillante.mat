@@ -108,7 +108,7 @@ Material:
     - _ZWriteControl: 0
     - alphaCutoff: 0
     - baseColorTexture_texCoord: 0
-    - emissiveExposureWeight: 0
+    - emissiveExposureWeight: 1
     - emissiveTexture_texCoord: 0
     - metallicFactor: 0
     - metallicRoughnessTexture_texCoord: 0
@@ -116,12 +116,12 @@ Material:
     - normalTexture_texCoord: 0
     - occlusionTexture_strength: 1
     - occlusionTexture_texCoord: 0
-    - roughnessFactor: 0.5
+    - roughnessFactor: 0.22
     - transmissionFactor: 0
     m_Colors:
-    - baseColorFactor: {r: 0.707596, g: 0.25133577, b: 0.13900304, a: 1}
+    - baseColorFactor: {r: 0.85, g: 0.025, b: 0.015, a: 1}
     - baseColorTexture_Rotation: {r: 0, g: 0, b: 0, a: 0}
-    - emissiveFactor: {r: 5.992157, g: 0.2543839, b: 0.2543839, a: 1}
+    - emissiveFactor: {r: 8, g: 0.04, b: 0.02, a: 1}
     - emissiveTexture_Rotation: {r: 0, g: 0, b: 0, a: 0}
     - metallicRoughnessTexture_Rotation: {r: 0, g: 0, b: 0, a: 0}
     - normalTexture_Rotation: {r: 0, g: 0, b: 0, a: 0}

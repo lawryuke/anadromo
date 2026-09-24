@@ -18,7 +18,8 @@ namespace Anadromo.Logic
         }
 
         public bool Tick(bool outsideInitial, bool firstKrillDepleted, bool inAbysm, int meals, int requiredMeals,
-            bool inCave, bool allOrcasAbove, bool timeout, float bloopHeight, float firstLimit, float secondLimit, bool endingDone)
+            bool inCave, bool allOrcasAbove, bool timeout, float bloopHeight, float firstLimit, float secondLimit, bool endingDone,
+            bool scaryMidActivated = false)
         {
             GamePhase next = Phase;
             switch (Phase)
@@ -27,7 +28,7 @@ namespace Anadromo.Logic
                     if (outsideInitial) next = GamePhase.KrillFeeding;
                     break;
                 case GamePhase.KrillFeeding:
-                    if (firstKrillDepleted) next = GamePhase.AbysmDescent;
+                    if (firstKrillDepleted || scaryMidActivated) next = GamePhase.AbysmDescent;
                     break;
                 case GamePhase.AbysmDescent:
                     if (inAbysm && meals >= requiredMeals) next = GamePhase.OrcaAscent;
