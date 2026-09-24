@@ -29,13 +29,10 @@ namespace Anadromo.Locomotion
 
         private Rigidbody rb;
 
-        // ─── Variables de estado para retrasar la evaluación ───
-        private float leftFlapTimer = 0f;
-        private float rightFlapTimer = 0f;
-        private bool leftFlapPending = false;
-        private bool rightFlapPending = false;
-        private float storedLeftIntensity = 0f;
-        private float storedRightIntensity = 0f;
+        // Acumular eventos hasta el siguiente paso de física, sin esperar al otro brazo.
+        private float pendingIntensity;
+        private float windowIntensity;
+        private float lastImpulseTime = float.NegativeInfinity;
 
         private void Awake()
         {
@@ -46,8 +43,8 @@ namespace Anadromo.Locomotion
         {
             if (flapDetector != null)
             {
-                flapDetector.OnLeftFlap.AddListener(HandleLeftFlap);
-                flapDetector.OnRightFlap.AddListener(HandleRightFlap);
+                flapDetector.OnLeftFlap.AddListener(QueueFlap);
+                flapDetector.OnRightFlap.AddListener(QueueFlap);
             }
         }
 
@@ -55,11 +52,11 @@ namespace Anadromo.Locomotion
         {
             if (flapDetector != null)
             {
-                flapDetector.OnLeftFlap.RemoveListener(HandleLeftFlap);
-                flapDetector.OnRightFlap.RemoveListener(HandleRightFlap);
+                flapDetector.OnLeftFlap.RemoveListener(QueueFlap);
+                flapDetector.OnRightFlap.RemoveListener(QueueFlap);
             }
-            leftFlapPending = false;
-            rightFlapPending = false;
+            pendingIntensity = windowIntensity = 0f;
+            lastImpulseTime = float.NegativeInfinity;
         }
 
         private void FixedUpdate()
@@ -88,61 +85,37 @@ namespace Anadromo.Locomotion
 
         // ─── Manejo de Aleteos ───
 
-        private void HandleLeftFlap(float intensity)
+        private void QueueFlap(float intensity)
         {
-            leftFlapPending = true;
-            leftFlapTimer = 0f;
-            storedLeftIntensity = intensity;
-        }
-
-        private void HandleRightFlap(float intensity)
-        {
-            rightFlapPending = true;
-            rightFlapTimer = 0f;
-            storedRightIntensity = intensity;
+            if (rb.isKinematic || float.IsNaN(intensity) || float.IsInfinity(intensity)) return;
+            pendingIntensity = Mathf.Max(pendingIntensity, Mathf.Clamp01(intensity));
         }
 
         private void ProcessPendingFlaps()
         {
-            if (rb.isKinematic) return;
+            float intensity = pendingIntensity;
+            pendingIntensity = 0f;
+            if (rb.isKinematic || intensity <= 0f) return;
 
-            float dt = Time.fixedDeltaTime;
-
-            if (leftFlapPending) leftFlapTimer += dt;
-            if (rightFlapPending) rightFlapTimer += dt;
-
-            // Solo combinar aleteos que realmente caen dentro de la ventana.
-            if (leftFlapPending && rightFlapPending &&
-                leftFlapTimer <= settings.simultaneityWindow &&
-                rightFlapTimer <= settings.simultaneityWindow)
+            // First arm propels immediately. Nearby events only top up to the stronger stroke.
+            if (Time.fixedTime - lastImpulseTime > settings.simultaneityWindow)
             {
-                // Avance frontal
-                float avgIntensity = (storedLeftIntensity + storedRightIntensity) * 0.5f;
-                ApplyForwardImpulse(avgIntensity);
-
-                // Consumir
-                leftFlapPending = false;
-                rightFlapPending = false;
-                return;
+                lastImpulseTime = Time.fixedTime;
+                windowIntensity = 0f;
             }
-
-            // El visor controla el giro; un aleteo aislado no aplica torque.
-            if (leftFlapPending && leftFlapTimer > settings.simultaneityWindow)
-                leftFlapPending = false;
-
-            if (rightFlapPending && rightFlapTimer > settings.simultaneityWindow)
-                rightFlapPending = false;
+            float additionalIntensity = Mathf.Max(0f, intensity - windowIntensity);
+            windowIntensity = Mathf.Max(windowIntensity, intensity);
+            if (additionalIntensity > 0f) ApplyForwardImpulse(additionalIntensity);
         }
-
-        // ─── Aplicación de Fuerzas ───
 
         private void ApplyForwardImpulse(float intensity)
         {
             if (salmonBody == null) return;
             
             // Avanzar en la dirección frontal del cuerpo del salmón
-            Vector3 force = salmonBody.forward * (intensity * settings.forwardForceMultiplier);
-            rb.AddForce(force, ForceMode.Impulse);
+            Vector3 deltaVelocity = salmonBody.forward * (intensity * settings.forwardForceMultiplier / rb.mass);
+            Vector3 cappedVelocity = Vector3.ClampMagnitude(rb.linearVelocity + deltaVelocity, settings.maxLinearVelocity);
+            rb.AddForce((cappedVelocity - rb.linearVelocity) * rb.mass, ForceMode.Impulse);
         }
 
         // ─── Movimiento del Cuerpo ───

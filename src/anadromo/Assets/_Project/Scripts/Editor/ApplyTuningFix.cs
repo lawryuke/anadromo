@@ -16,11 +16,9 @@ namespace Anadromo.Editor
             if (flapSettings != null)
             {
                 Undo.RecordObject(flapSettings, "Fix FlapSettings");
-                flapSettings.flapVelocityThreshold = 0.4f;
-                flapSettings.flapCooldown = 0.3f;
-                flapSettings.intensityMultiplier = 1.2f;
-                flapSettings.smoothingFactor = 0.85f;
-                flapSettings.simultaneityWindow = 0.2f;
+                flapSettings.cycle = ArmStrokeCycle.Parameters.Default;
+                flapSettings.minimumVisibility = 0.5f;
+                flapSettings.trackingTimeout = 0.3f;
                 EditorUtility.SetDirty(flapSettings);
                 Debug.Log("[Anadromo] FlapSettings ajustado para ignorar ruido.");
             }
@@ -34,6 +32,7 @@ namespace Anadromo.Editor
                 swimSettings.headTurnFullSpeedAngle = 30f;
                 swimSettings.headTurnMaxSpeed = 60f;
                 swimSettings.yawLerpSpeed = 8f;
+                swimSettings.simultaneityWindow = 0.12f;
                 swimSettings.maxLinearVelocity = 6f;
                 swimSettings.maxAngularVelocity = 3f;
                 EditorUtility.SetDirty(swimSettings);

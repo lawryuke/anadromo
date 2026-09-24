@@ -31,12 +31,44 @@ La escena `Assets/_Project/Scenes/TerrainTestVisuales.unity` ya incluye el `XR O
 abre la escena en Unity y ejecuta `python mediapipe_bridge.py --port 5555` desde
 `src/pose_bridge` antes de entrar en Play.
 
-Un aleteo de ambos brazos dentro de la ventana configurada impulsa al jugador hacia
-la dirección del visor. Al girar el visor más de 15° a un lado, el `XR Origin` gira
+Un ciclo de cualquiera de los brazos impulsa al jugador hacia la dirección del visor.
+Se admiten recorridos verticales, laterales, diagonales y circulares visibles en la cámara.
+Los brazos pueden trabajar juntos o alternarse. Al girar el visor más de 15° a un lado, el `XR Origin` gira
 continuamente hacia ese lado; la velocidad aumenta con el ángulo hasta 60°/s.
 Los valores se ajustan en `Assets/_Project/ScriptableObjects/SwimSettings.asset`.
-La cámara externa debe ver ambas muñecas, codos y hombros: si alguno queda oculto,
-el bridge pausa los paquetes de pose para evitar movimientos falsos.
+La cámara externa debe ver ambos hombros y la muñeca y el codo de al menos un brazo.
+Un brazo oculto se suspende sin bloquear el otro. Si se pierde la referencia de los
+hombros, se suspenden ambos. Reinicia el bridge tras actualizar para enviar el protocolo nuevo.
+
+### Cómo se reconoce un ciclo
+
+El detector mide un punto formado por muñeca (80 %) y codo (20 %) respecto a su hombro,
+usando el ancho de hombros como escala y corrigiendo la relación de aspecto de la imagen.
+Un recorrido de 0.3 anchos de hombros genera un impulso. Para volver a impulsarse,
+el brazo debe regresar cerca de su punto inicial (45 % del umbral). El regreso no
+genera otro impulso. Permanecer quieto durante 0.7 segundos adopta esa postura como
+nuevo reposo; mantener el brazo extendido no genera impulsos repetidos.
+
+Los parámetros están en `Assets/_Project/ScriptableObjects/FlapSettings.asset`:
+
+| Parámetro | Valor inicial | Ajuste |
+|---|---:|---|
+| `cycle.amplitude` | 0.3 | Bajar para recorridos más pequeños; subir si hay activaciones involuntarias. |
+| `cycle.recoveryRatio` | 0.45 | Subir para permitir un regreso menos completo. |
+| `cycle.restHoldTime` | 0.7 s | Tiempo quieto para adoptar otra postura cómoda. |
+| `cycle.smoothingTime` | 0.08 s | Subir reduce ruido, pero añade retraso. |
+| `minimumVisibility` | 0.5 | Confianza mínima por punto del brazo y hombros. |
+| `trackingTimeout` | 0.3 s | Un intervalo mayor reinicia los ciclos sin impulso. |
+
+Estos son valores iniciales para probar con usuarios. La detección usa la proyección
+2D: un gesto dirigido exclusivamente hacia la cámara puede ser difícil de reconocer.
+Mantén el torso orientado hacia ella y utiliza el visor para dirigir el giro virtual.
+La física conserva inercia y corrientes cuando cesan los impulsos.
+
+En el panel de depuración (F3) aparecen los contadores y los estados `LISTO`,
+`RECUPERANDO` y `SIN TRACKING` de cada brazo. Para una prueba manual, realiza aleteos
+verticales, laterales y alternados; después mantén los brazos quietos y oculta uno.
+Comprueba que los contadores no aumenten en reposo ni al recuperar el tracking.
 
 ### 1. Listar cámaras disponibles
 
@@ -79,7 +111,11 @@ Cada frame, Python envía un paquete UDP con JSON:
 
 ```json
 {
-  "t": 1234567890.123,
+  "version": 2,
+  "t": 12345.123,
+  "tracked": true,
+  "aspect": 1.3333333,
+  "v": [0.99, 0.99, 0.98, 0.98, 0.99, 0.99],
   "lw": [0.40, 0.65, 0.10],
   "rw": [0.60, 0.65, 0.10],
   "le": [0.35, 0.50, 0.15],
@@ -91,13 +127,28 @@ Cada frame, Python envía un paquete UDP con JSON:
 
 | Campo | Significado |
 |:------|:------------|
-| `t`   | Timestamp (epoch seconds) |
+| `t`   | Tiempo monotónico de captura en segundos, con precisión double en Unity |
+| `tracked` | Si se detectó una pose; false reinicia ambos brazos sin impulso |
+| `aspect` | Ancho/alto de la imagen |
+| `v` | Visibilidad en orden lw, rw, le, re, ls, rs |
 | `lw`  | Left Wrist (muñeca izquierda) |
 | `rw`  | Right Wrist (muñeca derecha) |
 | `le`  | Left Elbow (codo izquierdo) |
 | `re`  | Right Elbow (codo derecho) |
 | `ls`  | Left Shoulder (hombro izquierdo) |
 | `rs`  | Right Shoulder (hombro derecho) |
+
+Se envían también poses parciales y paquetes con `tracked: false` cuando no hay persona.
+Unity procesa cada timestamp una sola vez. Los paquetes antiguos con seis landmarks
+siguen siendo aceptados, pero no permiten evaluar la visibilidad por brazo.
+
+### Pruebas del detector
+
+Desde la raíz del repositorio, ejecuta `src/pose_bridge/tests/run-cycle-checks.ps1`
+con PowerShell y Unity 6000.3.10f1 instalado (la ruta se puede pasar con `-UnityEditor`).
+El runner compila el detector C# real y reproduce trayectorias a 15, 30 y 60 muestras/s,
+además de ruido, regreso, posturas mantenidas y saltos de tracking. Los resultados
+temporales se guardan en `src/anadromo/Temp/LocomotionValidation`.
 
 ### Coordenadas
 

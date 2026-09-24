@@ -87,6 +87,8 @@ namespace Anadromo.Systems
                 string opIcon = flapDetector.IsOperational ? "<color=#00FF00>●</color>" : "<color=#FFAA00>●</color>";
                 string opText = flapDetector.IsOperational ? "OPERATIVO" : "ESPERANDO";
                 GUILayout.Label($"{opIcon} Detector: {opText}", labelStyle);
+                GUILayout.Label($"Izq: {flapDetector.LeftStatus} ({flapDetector.TotalLeftFlaps})", labelStyle);
+                GUILayout.Label($"Der: {flapDetector.RightStatus} ({flapDetector.TotalRightFlaps})", labelStyle);
             }
 
             GUILayout.Space(6);

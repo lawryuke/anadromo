@@ -933,14 +933,6 @@ MonoBehaviour:
   OnRightFlap:
     m_PersistentCalls:
       m_Calls: []
-  leftWristRawY: 0
-  leftWristSmoothedY: 0
-  leftVelocityY: 0
-  leftInCooldown: 0
-  rightWristRawY: 0
-  rightWristSmoothedY: 0
-  rightVelocityY: 0
-  rightInCooldown: 0
   totalLeftFlaps: 0
   totalRightFlaps: 0
 --- !u!114 &186648291

@@ -10,7 +10,7 @@ namespace Anadromo.Locomotion
     public class SwimSettings : ScriptableObject
     {
         [Header("Fuerzas de Movimiento")]
-        [Tooltip("Multiplicador de fuerza para avanzar cuando ambos brazos aletean. (Impulso frontal)")]
+        [Tooltip("Multiplicador del impulso frontal de un ciclo de aleteo de cualquier brazo.")]
         [Range(1f, 300f)]
         public float forwardForceMultiplier = 6f; // Reducido muchísimo de 80 a 6 para evitar "teletransporte"
 
@@ -50,8 +50,8 @@ namespace Anadromo.Locomotion
         public float maxPitchAngle = 80f;
 
         [Header("Simultaneidad")]
-        [Tooltip("Ventana de tiempo (seg.) en que dos aleteos consecutivos de distintos brazos cuentan como simultáneos (Avance).")]
+        [Tooltip("Ventana para combinar impulsos próximos sin duplicar la fuerza. Un brazo ya permite avanzar.")]
         [Range(0.05f, 0.4f)]
-        public float simultaneityWindow = 0.15f;
+        public float simultaneityWindow = 0.12f;
     }
 }

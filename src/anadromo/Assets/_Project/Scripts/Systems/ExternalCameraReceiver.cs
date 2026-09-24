@@ -15,6 +15,8 @@ namespace Anadromo.Systems
     ///   - Python envía un paquete UDP por frame con JSON:
     ///     {"t":timestamp, "lw":[x,y,z], "rw":[x,y,z], "le":[x,y,z], "re":[x,y,z], "ls":[x,y,z], "rs":[x,y,z]}
     ///   - Coordenadas normalizadas: X[0,1] izq-der, Y[0,1] abajo-arriba (invertido desde MediaPipe), Z profundidad
+    ///   - Versión 2 añade version, tracked, aspect y visibilidad v (lw,rw,le,re,ls,rs).
+    ///     t es el tiempo monotónico de captura; tracked=false indica pérdida de pose.
     /// 
     /// Uso:
     ///   1. Agregar este componente a un GameObject en la escena
@@ -22,6 +24,7 @@ namespace Anadromo.Systems
     ///   3. Al dar Play en Unity, este componente empieza a escuchar automáticamente
     ///   4. FlapDetector lee las propiedades LeftWrist, RightWrist, etc.
     /// </summary>
+    [DefaultExecutionOrder(-100)]
     public class ExternalCameraReceiver : MonoBehaviour
     {
         [Header("Conexión UDP")]
@@ -53,6 +56,38 @@ namespace Anadromo.Systems
 
         /// <summary>True si se han recibido datos en el último segundo.</summary>
         public bool IsReceiving => isReceiving;
+        public uint SampleId { get; private set; }
+        public float SampleDeltaTime { get; private set; }
+        public float PoseAge => hasValidPacket ? Time.realtimeSinceStartup - lastPacketTime : float.PositiveInfinity;
+        private double sampleTimestamp;
+        private float aspectRatio = 4f / 3f;
+        private bool hasPose;
+        private float[] visibility;
+
+        // Use a shoulder-based frame: translation, image size and body roll cancel out.
+        public bool TryGetArmPoint(bool left, float minimumVisibility, out Vector2 point)
+        {
+            point = default;
+            int wrist = left ? 0 : 1;
+            int elbow = left ? 2 : 3;
+            if (!hasPose || visibility == null || visibility[wrist] < minimumVisibility ||
+                visibility[elbow] < minimumVisibility || visibility[4] < minimumVisibility ||
+                visibility[5] < minimumVisibility) return false;
+
+            Vector2 ls = ImagePoint(LeftShoulder), rs = ImagePoint(RightShoulder);
+            Vector2 across = rs - ls;
+            float width = across.magnitude;
+            if (width < 0.04f) return false; // Too small or side-on for a reliable body frame.
+            Vector2 horizontal = across / width;
+            Vector2 vertical = new Vector2(-horizontal.y, horizontal.x);
+            Vector2 shoulder = left ? ls : rs;
+            Vector2 arm = (ImagePoint(left ? LeftWrist : RightWrist) * 0.8f +
+                           ImagePoint(left ? LeftElbow : RightElbow) * 0.2f - shoulder) / width;
+            point = new Vector2(Vector2.Dot(arm, horizontal), Vector2.Dot(arm, vertical));
+            return true;
+        }
+
+        private Vector2 ImagePoint(Vector3 landmark) => new Vector2(landmark.x * aspectRatio, landmark.y);
 
         // ─── UDP internals ───
         private UdpClient udpClient;
@@ -135,6 +170,8 @@ namespace Anadromo.Systems
             udpClient = null;
             isReceiving = false;
             hasValidPacket = false;
+            hasPose = false;
+            lock (dataLock) { latestPacket = null; hasNewData = false; }
         }
 
         // ─── Thread de recepción ───
@@ -189,14 +226,14 @@ namespace Anadromo.Systems
             {
                 if (ParsePacket(packet))
                 {
-                    lastPacketTime = Time.time;
+                    lastPacketTime = Time.realtimeSinceStartup;
                     hasValidPacket = true;
                     packetCount++;
                 }
             }
 
             // Actualizar estado de conexión
-            timeSinceLastPacket = Time.time - lastPacketTime;
+            timeSinceLastPacket = Time.realtimeSinceStartup - lastPacketTime;
             isReceiving = hasValidPacket && timeSinceLastPacket < 1.0f;
 
             // Estadísticas: paquetes por segundo
@@ -217,20 +254,28 @@ namespace Anadromo.Systems
             {
                 var data = JsonUtility.FromJson<PoseData>(json);
 
-                if (data == null || data.lw == null || data.lw.Length < 3 ||
-                    data.rw == null || data.rw.Length < 3)
+                if (data == null || double.IsNaN(data.t) || double.IsInfinity(data.t) || data.t <= 0)
                     return false;
+                if (hasValidPacket && data.t == sampleTimestamp) return false;
 
-                LeftWrist = new Vector3(data.lw[0], data.lw[1], data.lw[2]);
-                RightWrist = new Vector3(data.rw[0], data.rw[1], data.rw[2]);
-                if (data.le != null && data.le.Length >= 3)
-                    LeftElbow = new Vector3(data.le[0], data.le[1], data.le[2]);
-                if (data.re != null && data.re.Length >= 3)
-                    RightElbow = new Vector3(data.re[0], data.re[1], data.re[2]);
-                if (data.ls != null && data.ls.Length >= 3)
-                    LeftShoulder = new Vector3(data.ls[0], data.ls[1], data.ls[2]);
-                if (data.rs != null && data.rs.Length >= 3)
-                    RightShoulder = new Vector3(data.rs[0], data.rs[1], data.rs[2]);
+                SampleDeltaTime = hasValidPacket ? (float)(data.t - sampleTimestamp) : 0f;
+                sampleTimestamp = data.t;
+                aspectRatio = data.aspect > 0f && data.aspect < 10f ? data.aspect : 4f / 3f;
+                visibility = data.version >= 2 && data.v != null && data.v.Length == 6
+                    ? data.v : new float[] { 1, 1, 1, 1, 1, 1 };
+                hasPose = data.version < 2 || data.tracked;
+                if (data.version >= 2 && (data.v == null || data.v.Length != 6)) hasPose = false;
+                float[][] points = { data.lw, data.rw, data.le, data.re, data.ls, data.rs };
+                for (int i = 0; i < 6; i++)
+                    if (!ValidPoint(points[i]) || float.IsNaN(visibility[i]) || float.IsInfinity(visibility[i]))
+                        visibility[i] = 0f;
+                LeftWrist = ReadPoint(data.lw);
+                RightWrist = ReadPoint(data.rw);
+                LeftElbow = ReadPoint(data.le);
+                RightElbow = ReadPoint(data.re);
+                LeftShoulder = ReadPoint(data.ls);
+                RightShoulder = ReadPoint(data.rs);
+                SampleId++;
                 return true;
             }
             catch (Exception e)
@@ -240,6 +285,17 @@ namespace Anadromo.Systems
             }
         }
 
+        private static bool ValidPoint(float[] values)
+        {
+            if (values == null || values.Length < 3) return false;
+            for (int i = 0; i < 3; i++)
+                if (float.IsNaN(values[i]) || float.IsInfinity(values[i])) return false;
+            return true;
+        }
+
+        private static Vector3 ReadPoint(float[] values) => ValidPoint(values)
+            ? new Vector3(values[0], values[1], values[2]) : Vector3.zero;
+
         /// <summary>
         /// Estructura para deserializar el JSON de MediaPipe bridge.
         /// Los nombres de campo deben coincidir exactamente con las claves JSON.
@@ -247,7 +303,11 @@ namespace Anadromo.Systems
         [Serializable]
         private class PoseData
         {
-            public float t;      // timestamp
+            public double t;     // Capture timestamp; float loses frame precision at epoch magnitudes.
+            public int version;
+            public bool tracked;
+            public float aspect;
+            public float[] v;    // lw, rw, le, re, ls, rs
             public float[] lw;   // left wrist  [x, y, z]
             public float[] rw;   // right wrist [x, y, z]
             public float[] le;   // left elbow  [x, y, z]

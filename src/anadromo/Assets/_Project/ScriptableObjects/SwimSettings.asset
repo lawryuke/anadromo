@@ -21,4 +21,4 @@ MonoBehaviour:
   maxAngularVelocity: 3
   pitchLerpSpeed: 3
   maxPitchAngle: 80
-  simultaneityWindow: 0.3
+  simultaneityWindow: 0.12

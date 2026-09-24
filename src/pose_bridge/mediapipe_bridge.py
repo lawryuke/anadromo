@@ -14,7 +14,11 @@ Uso:
 
 Protocolo UDP (JSON por paquete):
     {
-      "t": 1234567890.123,              // timestamp (epoch)
+      "version": 2,
+      "t": 12345.123,                   // monotonic capture timestamp
+      "tracked": true,
+      "aspect": 1.3333333,
+      "v": [0.99,0.99,0.99,0.99,0.99,0.99], // visibility: lw,rw,le,re,ls,rs
       "lw": [0.40, 0.65, 0.10],        // left wrist  [x, y, z]
       "rw": [0.60, 0.65, 0.10],        // right wrist [x, y, z]
       "le": [0.35, 0.50, 0.15],        // left elbow
@@ -71,10 +75,10 @@ def create_status_bar(frame, data, all_visible, fps, host, port):
     color_warn = (0, 100, 255)
     color_info = (200, 200, 200)
 
-    status = "TRACKING" if all_visible else "PARCIAL"
+    status = "TRACKING" if all_visible else ("PARCIAL" if data.get('tracked') else "SIN POSE")
     status_color = color_ok if all_visible else color_warn
 
-    if data:
+    if data.get('tracked'):
         lw_y = data['lw'][1]
         rw_y = data['rw'][1]
         cv2.putText(frame, f"Muneca Izq Y: {lw_y:.3f}", (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
@@ -174,18 +178,21 @@ def main():
                 time.sleep(0.01)
                 continue
 
+            captured_at = time.monotonic()
+
             frame = cv2.flip(frame, 1)
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
 
             detection_result = detector.detect(mp_image)
 
-            data = None
+            data = {'version': 2, 't': captured_at, 'tracked': False,
+                    'aspect': frame.shape[1] / frame.shape[0], 'v': [0.0] * 6}
             all_visible = False
 
             if detection_result.pose_landmarks:
                 landmarks = detection_result.pose_landmarks[0]
-                data = {'t': round(time.time(), 4)}
+                data['tracked'] = True
                 all_visible = True
 
                 for key, idx in LANDMARKS.items():
@@ -194,11 +201,8 @@ def main():
                         all_visible = False
                     data[key] = [round(lm.x, 4), round(1.0 - lm.y, 4), round(lm.z, 4)]
 
-                # Evitar que una muñeca oculta genere un aleteo falso en Unity.
-                if all_visible:
-                    packet = json.dumps(data, separators=(',', ':'))
-                    sock.sendto(packet.encode('utf-8'), target)
-                    frames_sent += 1
+                data['v'] = [round(landmarks[LANDMARKS[key]].visibility, 4)
+                             for key in ('lw', 'rw', 'le', 're', 'ls', 'rs')]
 
                 if args.show:
                     h_frame, w_frame = frame.shape[:2]
@@ -216,6 +220,11 @@ def main():
                         cx, cy = int(lm.x * w_frame), int(lm.y * h_frame)
                         cv2.circle(frame, (cx, cy), 10, color, -1)
                         cv2.circle(frame, (cx, cy), 12, (255, 255, 255), 2)
+
+            # Send partial poses and explicit loss of tracking; Unity gates each arm separately.
+            packet = json.dumps(data, separators=(',', ':'))
+            sock.sendto(packet.encode('utf-8'), target)
+            frames_sent += 1
 
             fps_counter += 1
             if time.time() - fps_timer >= 1.0:
