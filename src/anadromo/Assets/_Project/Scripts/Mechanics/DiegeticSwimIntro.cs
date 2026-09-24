@@ -12,7 +12,7 @@ namespace Anadromo.Mechanics
     {
         public Transform groupRoot;
         public Transform initialTarget;
-        public SimpleFlyCamera playerMovement;
+        public Rigidbody playerBody;
         public VisualEffect debris;
         public Camera viewer;
         [Min(0.1f)] public float revealDuration = 3;
@@ -33,7 +33,6 @@ namespace Anadromo.Mechanics
 
         void Awake()
         {
-            if (playerMovement != null) playerMovement.allowTranslation = false;
             overlay = new GameObject("Fundido de entrada", typeof(Canvas), typeof(CanvasGroup));
             overlay.transform.SetParent(transform, false);
             var canvas = overlay.GetComponent<Canvas>();
@@ -58,16 +57,13 @@ namespace Anadromo.Mechanics
             if (prepared) return;
             manager = owner;
             groups = salmon;
-            if (!groupRoot || !initialTarget || !playerMovement || !debris || !viewer ||
+            if (!groupRoot || !initialTarget || !playerBody || !debris || !viewer ||
                 !debris.HasVector3(IntroVelocity))
             {
                 Debug.LogError("Inicio diegético: faltan referencias o el parámetro VFX IntroVelocity.", this);
                 return; // Remain black/locked rather than silently starting an inconsistent intro.
             }
             prepared = true;
-            playerMovement.enabled = true;
-            playerMovement.allowTranslation = false;
-            playerMovement.menuLook = true;
             foreach (var group in groups) group.HoldFacing(initialTarget);
             // The authored group position is never reset to a hard-coded spawn.
             debris.SetVector3(IntroVelocity, Vector3.back * SprintSpeed);
@@ -98,7 +94,6 @@ namespace Anadromo.Mechanics
             Launched = true;
             launchSpeed = Mathf.Max(0, SprintSpeed);
             ForwardSpeed = launchSpeed;
-            playerMovement.menuLook = false;
             // Same event as the physical launch: existing particles immediately lose velocity.
             debris.SetVector3(IntroVelocity, Vector3.zero);
         }
@@ -108,8 +103,7 @@ namespace Anadromo.Mechanics
             if (!Launched || Released) return;
             Released = true;
             coastElapsed = 0;
-            playerMovement.allowTranslation = true;
-            playerMovement.externalVelocity = Vector3.forward * ForwardSpeed;
+            playerBody.AddForce(Vector3.forward * ForwardSpeed, ForceMode.VelocityChange);
         }
 
         void FixedUpdate()
@@ -125,22 +119,22 @@ namespace Anadromo.Mechanics
                 Vector3 delta = Vector3.forward * ForwardSpeed * Time.fixedDeltaTime;
                 groupRoot.position += delta;
                 foreach (var group in groups) group.TranslateIntroFrame(delta);
-                var body = playerMovement.GetComponent<Rigidbody>();
-                if (body != null) body.position = playerMovement.transform.position;
+                playerBody.MovePosition(playerBody.position + delta);
             }
             else
             {
                 coastElapsed += Time.fixedDeltaTime;
                 ForwardSpeed = launchSpeed * (1 - Mathf.SmoothStep(0, 1, coastElapsed / coastDuration));
                 Vector3 drift = Vector3.forward * ForwardSpeed;
-                playerMovement.externalVelocity = drift;
+                float forwardSpeed = Vector3.Dot(playerBody.linearVelocity, Vector3.forward);
+                if (forwardSpeed < ForwardSpeed)
+                    playerBody.AddForce(Vector3.forward * (ForwardSpeed - forwardSpeed), ForceMode.VelocityChange);
                 foreach (var group in groups) group.externalVelocity = drift;
             }
         }
 
         void OnDisable()
         {
-            if (playerMovement != null) { playerMovement.externalVelocity = Vector3.zero; playerMovement.menuLook = false; }
             if (groups != null) foreach (var group in groups) if (group != null) group.externalVelocity = Vector3.zero;
             if (debris != null && debris.HasVector3(IntroVelocity)) debris.SetVector3(IntroVelocity, Vector3.zero);
             if (overlay != null) Destroy(overlay);

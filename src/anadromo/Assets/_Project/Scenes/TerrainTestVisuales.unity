@@ -2134,7 +2134,7 @@ MonoBehaviour:
   krillScaryMid: {fileID: 1555601530}
   krillFirstMid: {fileID: 1570781055}
   playerFeeding: {fileID: 768065910}
-  playerCamera: {fileID: 2121971304}
+  playerCamera: {fileID: 863163185}
   targetMid: {fileID: 1367978391}
   topReference: {fileID: 2200000011}
   orcaLimit: {fileID: 2200000021}
@@ -2205,9 +2205,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   groupRoot: {fileID: 263232669}
   initialTarget: {fileID: 112070201}
-  playerMovement: {fileID: 768065906}
+  playerBody: {fileID: 652773260}
   debris: {fileID: 10000000022}
-  viewer: {fileID: 2121971304}
+  viewer: {fileID: 863163185}
   revealDuration: 3
   warmupSeconds: 2
   coastDuration: 3
@@ -3019,6 +3019,7 @@ GameObject:
   - component: {fileID: 652773258}
   - component: {fileID: 652773257}
   - component: {fileID: 652773256}
+  - component: {fileID: 768065904}
   m_Layer: 0
   m_Name: XR Origin (VR)
   m_TagString: Player
@@ -3152,7 +3153,7 @@ Transform:
   m_GameObject: {fileID: 652773255}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10, y: 6.333, z: -1.978}
+  m_LocalPosition: {x: 9.85, y: 6.47, z: -24.9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3530,12 +3531,9 @@ GameObject:
   - component: {fileID: 768065907}
   - component: {fileID: 768065906}
   - component: {fileID: 768065905}
-  - component: {fileID: 768065904}
-  - component: {fileID: 768065902}
-  - component: {fileID: 768065910}
   m_Layer: 0
   m_Name: Person1
-  m_TagString: Player
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3546,7 +3544,7 @@ SphereCollider:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 768065901}
+  m_GameObject: {fileID: 863163180}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -3567,7 +3565,7 @@ CapsuleCollider:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 768065901}
+  m_GameObject: {fileID: 652773255}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -3580,10 +3578,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.08
-  m_Height: 0.4
+  m_Radius: 0.112
+  m_Height: 0.56
   m_Direction: 2
-  m_Center: {x: 0, y: 0, z: -0.01}
+  m_Center: {x: 0, y: 0, z: -0.014}
 --- !u!54 &768065905
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3705,7 +3703,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 768065901}
+  m_GameObject: {fileID: 863163180}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4746f5b7278e13447b68bd6364ab6cec, type: 3}
@@ -3939,6 +3937,8 @@ GameObject:
   - component: {fileID: 863163184}
   - component: {fileID: 863163183}
   - component: {fileID: 863163182}
+  - component: {fileID: 768065902}
+  - component: {fileID: 768065910}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -5933,7 +5933,7 @@ MonoBehaviour:
   waitAbysmPhase: 1
   showDebug: 0
   logRouteEvents: 1
-  debugCamera: {fileID: 2121971304}
+  debugCamera: {fileID: 863163185}
 --- !u!114 &1409005006
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6423,7 +6423,7 @@ MonoBehaviour:
   scareDistance: 1
   checkInterval: 0.1
   scareFromPlayer: 1
-  player: {fileID: 2121971301}
+  player: {fileID: 863163181}
   playerScareDistance: 1
   fleeOffset: {x: 0, y: 0, z: 10}
 --- !u!114 &1555601532
