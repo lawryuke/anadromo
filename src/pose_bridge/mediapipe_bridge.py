@@ -194,9 +194,11 @@ def main():
                         all_visible = False
                     data[key] = [round(lm.x, 4), round(1.0 - lm.y, 4), round(lm.z, 4)]
 
-                packet = json.dumps(data, separators=(',', ':'))
-                sock.sendto(packet.encode('utf-8'), target)
-                frames_sent += 1
+                # Evitar que una muñeca oculta genere un aleteo falso en Unity.
+                if all_visible:
+                    packet = json.dumps(data, separators=(',', ':'))
+                    sock.sendto(packet.encode('utf-8'), target)
+                    frames_sent += 1
 
                 if args.show:
                     h_frame, w_frame = frame.shape[:2]

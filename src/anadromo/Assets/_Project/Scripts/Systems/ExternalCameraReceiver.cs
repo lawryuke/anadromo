@@ -67,6 +67,7 @@ namespace Anadromo.Systems
         // Estadísticas
         private int packetCount;
         private float statsTimer;
+        private bool hasValidPacket;
 
         // ─── Lifecycle ───
 
@@ -133,6 +134,7 @@ namespace Anadromo.Systems
             receiveThread = null;
             udpClient = null;
             isReceiving = false;
+            hasValidPacket = false;
         }
 
         // ─── Thread de recepción ───
@@ -185,14 +187,17 @@ namespace Anadromo.Systems
 
             if (packet != null)
             {
-                ParsePacket(packet);
-                lastPacketTime = Time.time;
-                packetCount++;
+                if (ParsePacket(packet))
+                {
+                    lastPacketTime = Time.time;
+                    hasValidPacket = true;
+                    packetCount++;
+                }
             }
 
             // Actualizar estado de conexión
             timeSinceLastPacket = Time.time - lastPacketTime;
-            isReceiving = timeSinceLastPacket < 1.0f;
+            isReceiving = hasValidPacket && timeSinceLastPacket < 1.0f;
 
             // Estadísticas: paquetes por segundo
             statsTimer += Time.deltaTime;
@@ -206,16 +211,18 @@ namespace Anadromo.Systems
 
         // ─── Parsing ───
 
-        private void ParsePacket(string json)
+        private bool ParsePacket(string json)
         {
             try
             {
                 var data = JsonUtility.FromJson<PoseData>(json);
 
-                if (data.lw != null && data.lw.Length >= 3)
-                    LeftWrist = new Vector3(data.lw[0], data.lw[1], data.lw[2]);
-                if (data.rw != null && data.rw.Length >= 3)
-                    RightWrist = new Vector3(data.rw[0], data.rw[1], data.rw[2]);
+                if (data == null || data.lw == null || data.lw.Length < 3 ||
+                    data.rw == null || data.rw.Length < 3)
+                    return false;
+
+                LeftWrist = new Vector3(data.lw[0], data.lw[1], data.lw[2]);
+                RightWrist = new Vector3(data.rw[0], data.rw[1], data.rw[2]);
                 if (data.le != null && data.le.Length >= 3)
                     LeftElbow = new Vector3(data.le[0], data.le[1], data.le[2]);
                 if (data.re != null && data.re.Length >= 3)
@@ -224,10 +231,12 @@ namespace Anadromo.Systems
                     LeftShoulder = new Vector3(data.ls[0], data.ls[1], data.ls[2]);
                 if (data.rs != null && data.rs.Length >= 3)
                     RightShoulder = new Vector3(data.rs[0], data.rs[1], data.rs[2]);
+                return true;
             }
             catch (Exception e)
             {
                 Debug.LogWarning($"[Anadromo] Error parseando paquete pose: {e.Message}\nJSON: {json}");
+                return false;
             }
         }
 

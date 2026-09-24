@@ -24,6 +24,20 @@ pip install -r requirements.txt
 
 ## Uso
 
+### Escena TerrainTestVisuales (Oculus + cámara externa)
+
+La escena `Assets/_Project/Scenes/TerrainTestVisuales.unity` ya incluye el `XR Origin`,
+`PoseBridge`, `FlapDetector` y sus referencias. Conecta el visor Oculus al proyecto,
+abre la escena en Unity y ejecuta `python mediapipe_bridge.py --port 5555` desde
+`src/pose_bridge` antes de entrar en Play.
+
+Un aleteo de ambos brazos dentro de la ventana configurada impulsa al jugador hacia
+la dirección del visor. Al girar el visor más de 15° a un lado, el `XR Origin` gira
+continuamente hacia ese lado; la velocidad aumenta con el ángulo hasta 60°/s.
+Los valores se ajustan en `Assets/_Project/ScriptableObjects/SwimSettings.asset`.
+La cámara externa debe ver ambas muñecas, codos y hombros: si alguno queda oculto,
+el bridge pausa los paquetes de pose para evitar movimientos falsos.
+
 ### 1. Listar cámaras disponibles
 
 ```bash

@@ -30,8 +30,10 @@ namespace Anadromo.Editor
             {
                 Undo.RecordObject(swimSettings, "Fix SwimSettings");
                 swimSettings.forwardForceMultiplier = 6f;
-                swimSettings.rotationTorqueMultiplier = 4f;
-                swimSettings.forwardOnSingleFlapRatio = 0.1f;
+                swimSettings.headTurnDeadzone = 15f;
+                swimSettings.headTurnFullSpeedAngle = 30f;
+                swimSettings.headTurnMaxSpeed = 60f;
+                swimSettings.yawLerpSpeed = 8f;
                 swimSettings.maxLinearVelocity = 6f;
                 swimSettings.maxAngularVelocity = 3f;
                 EditorUtility.SetDirty(swimSettings);

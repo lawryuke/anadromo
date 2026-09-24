@@ -6,7 +6,7 @@ namespace Anadromo.Locomotion
     /// <summary>
     /// Controlador físico de nado por aleteo.
     /// Se acopla al Rigidbody del XR Origin y lee eventos del FlapDetector.
-    /// Maneja el SalmonBody (pitch + yaw) y aplica fuerzas en su dirección.
+    /// Orienta el nado con el visor y aplica impulsos al detectar aleteos.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public class FlapSwimController : MonoBehaviour
@@ -58,6 +58,8 @@ namespace Anadromo.Locomotion
                 flapDetector.OnLeftFlap.RemoveListener(HandleLeftFlap);
                 flapDetector.OnRightFlap.RemoveListener(HandleRightFlap);
             }
+            leftFlapPending = false;
+            rightFlapPending = false;
         }
 
         private void FixedUpdate()
@@ -65,6 +67,7 @@ namespace Anadromo.Locomotion
             if (settings == null || salmonBody == null || headTransform == null) return;
 
             UpdateBodyPitch();
+            UpdateBodyYaw();
             LimitVelocities();
             ApplyCurrents();
             ProcessPendingFlaps();
@@ -108,8 +111,10 @@ namespace Anadromo.Locomotion
             if (leftFlapPending) leftFlapTimer += dt;
             if (rightFlapPending) rightFlapTimer += dt;
 
-            // CASO 1: Ambos brazos han aleteado dentro de la ventana de simultaneidad
-            if (leftFlapPending && rightFlapPending)
+            // Solo combinar aleteos que realmente caen dentro de la ventana.
+            if (leftFlapPending && rightFlapPending &&
+                leftFlapTimer <= settings.simultaneityWindow &&
+                rightFlapTimer <= settings.simultaneityWindow)
             {
                 // Avance frontal
                 float avgIntensity = (storedLeftIntensity + storedRightIntensity) * 0.5f;
@@ -121,21 +126,12 @@ namespace Anadromo.Locomotion
                 return;
             }
 
-            // CASO 2: Solo el izquierdo aleteó y ya pasó la ventana de espera
+            // El visor controla el giro; un aleteo aislado no aplica torque.
             if (leftFlapPending && leftFlapTimer > settings.simultaneityWindow)
-            {
-                ApplyRotationTorque(storedLeftIntensity, 1f); // Rotar Derecha
-                ApplyForwardImpulse(storedLeftIntensity * settings.forwardOnSingleFlapRatio);
                 leftFlapPending = false;
-            }
 
-            // CASO 3: Solo el derecho aleteó y ya pasó la ventana de espera
             if (rightFlapPending && rightFlapTimer > settings.simultaneityWindow)
-            {
-                ApplyRotationTorque(storedRightIntensity, -1f); // Rotar Izquierda
-                ApplyForwardImpulse(storedRightIntensity * settings.forwardOnSingleFlapRatio);
                 rightFlapPending = false;
-            }
         }
 
         // ─── Aplicación de Fuerzas ───
@@ -149,20 +145,32 @@ namespace Anadromo.Locomotion
             rb.AddForce(force, ForceMode.Impulse);
         }
 
-        private void ApplyRotationTorque(float intensity, float direction)
-        {
-            // Rotar en el eje Y global (Yaw)
-            Vector3 torque = Vector3.up * (intensity * settings.rotationTorqueMultiplier * direction);
-            rb.AddTorque(torque, ForceMode.Impulse);
-        }
-
         // ─── Movimiento del Cuerpo ───
+
+        private void UpdateBodyYaw()
+        {
+            // El ángulo horizontal del visor respecto al XR Origin funciona como mando de giro.
+            Vector3 localForward = transform.InverseTransformDirection(headTransform.forward);
+            float localYaw = Mathf.Atan2(localForward.x, localForward.z) * Mathf.Rad2Deg;
+            float turnAmount = Mathf.Abs(localYaw) - settings.headTurnDeadzone;
+            if (turnAmount > 0f && !rb.isKinematic)
+            {
+                float speedRatio = Mathf.Clamp01(turnAmount / settings.headTurnFullSpeedAngle);
+                float degrees = Mathf.Sign(localYaw) * speedRatio *
+                                settings.headTurnMaxSpeed * Time.fixedDeltaTime;
+                rb.MoveRotation(rb.rotation * Quaternion.Euler(0f, degrees, 0f));
+            }
+
+            // El cuerpo sigue la dirección del visor para que el impulso avance hacia donde mira.
+            float newYaw = Mathf.LerpAngle(salmonBody.localEulerAngles.y, localYaw,
+                Time.fixedDeltaTime * settings.yawLerpSpeed);
+            Vector3 angles = salmonBody.localEulerAngles;
+            salmonBody.localEulerAngles = new Vector3(angles.x, newYaw, 0f);
+        }
 
         private void UpdateBodyPitch()
         {
-            // Queremos que el SalmonBody siga el Yaw (eje Y) del propio SalmonBody
-            // (que es manejado por la rotación física del Rigidbody del XR Origin)
-            // pero que siga el Pitch (arriba/abajo) de la cabeza (headTransform).
+            // El cuerpo sigue la inclinación de la cabeza sin perder el yaw del visor.
 
             // 1. Obtener el pitch del headset (convirtiéndolo a -180...180)
             float headPitch = headTransform.eulerAngles.x;
@@ -171,15 +179,15 @@ namespace Anadromo.Locomotion
             // Restringir el pitch máximo para que el salmón no se voltee por completo
             headPitch = Mathf.Clamp(headPitch, -settings.maxPitchAngle, settings.maxPitchAngle);
 
-            // 2. Obtener la rotación actual del cuerpo (su yaw viene del padre XR Origin, su pitch es local)
+            // 2. Obtener la inclinación local actual del cuerpo.
             float currentBodyPitch = salmonBody.localEulerAngles.x;
             if (currentBodyPitch > 180f) currentBodyPitch -= 360f;
 
             // 3. Interpolar suavemente
             float newPitch = Mathf.Lerp(currentBodyPitch, headPitch, Time.fixedDeltaTime * settings.pitchLerpSpeed);
 
-            // 4. Aplicar (mantenemos yaw y roll local en 0, ya que el Rigidbody del XR Origin controla el yaw)
-            salmonBody.localEulerAngles = new Vector3(newPitch, 0f, 0f);
+            // Conservar el yaw calculado a partir del visor.
+            salmonBody.localEulerAngles = new Vector3(newPitch, salmonBody.localEulerAngles.y, 0f);
         }
 
         private void LimitVelocities()

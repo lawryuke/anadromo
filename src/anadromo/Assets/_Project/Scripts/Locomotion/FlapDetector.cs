@@ -83,6 +83,12 @@ namespace Anadromo.Locomotion
             // No procesar si no hay datos de la cámara
             if (!cameraReceiver.IsReceiving)
             {
+                // Al recuperar el tracking, partir de la nueva pose y no de la última muñeca vista.
+                initialized = false;
+                leftCooldownTimer = 0f;
+                rightCooldownTimer = 0f;
+                leftInCooldown = false;
+                rightInCooldown = false;
                 return;
             }
 
