@@ -1198,7 +1198,7 @@ Transform:
   m_GameObject: {fileID: 210964975}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 25.21, y: 4.70553, z: 6.12}
+  m_LocalPosition: {x: 25.21, y: 0.83, z: -0.41}
   m_LocalScale: {x: 1.4, y: 1.4, z: 1.4}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1244,6 +1244,9 @@ MonoBehaviour:
   cruiseSpeed: 0.35
   tailAmplitude: 0.08
   tailFrequency: 1.3
+  turnLag: 0
+  tailFollowTime: 0.65
+  maxTurnLag: 160
 --- !u!135 &210964983
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -3687,7 +3690,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 768065901}
-  m_Mesh: {fileID: 0}
+  m_Mesh: {fileID: 694107847439892949, guid: 42dadc345a231524c8c312e2222334a9, type: 3}
 --- !u!4 &768065909
 Transform:
   m_ObjectHideFlags: 0
