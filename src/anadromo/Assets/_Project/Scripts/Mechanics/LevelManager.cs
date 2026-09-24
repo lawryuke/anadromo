@@ -21,6 +21,8 @@ namespace Anadromo.Logic
         public BoxObjectSpawner krillFirstMid;
         public PlayerFeeding playerFeeding;
         public Camera playerCamera;
+        public Transform PlayerRoot { get; private set; }
+        public bool UsesVRPlayer { get; private set; }
         public Transform targetMid, topReference, orcaLimit, firstBloopLimit, secondBloopLimit;
         public ZoneLimit initialZone, abysmZone, caveZone;
         public LevelEndingEffects endingEffects;
@@ -55,6 +57,7 @@ namespace Anadromo.Logic
             if (Instance != null && Instance != this && Instance.gameObject.scene == gameObject.scene)
             { enabled = false; return; }
             Instance = this;
+            BindActivePlayer();
             currentPhase = GamePhase.WaitingForStart;
             playerEatenCount = 0;
             isPlayerInAbysm = false;
@@ -111,7 +114,48 @@ namespace Anadromo.Logic
             Cursor.visible = true;
             IsReady = true;
             if (swimIntro != null) swimIntro.Prepare(this, salmon);
-            if (autoStart) StartGame();
+            if (autoStart || UsesVRPlayer) StartGame();
+        }
+
+        void BindActivePlayer()
+        {
+            foreach (var root in gameObject.scene.GetRootGameObjects())
+            foreach (var origin in root.GetComponentsInChildren<Unity.XR.CoreUtils.XROrigin>())
+            {
+                if (!origin.isActiveAndEnabled || origin.Camera == null) continue;
+                var oldFeeding = playerFeeding;
+                PlayerRoot = origin.transform;
+                playerCamera = origin.Camera;
+                playerFeeding = origin.GetComponentInChildren<PlayerFeeding>();
+                if (playerFeeding == null)
+                {
+                    var mouth = new GameObject("VR Mouth");
+                    mouth.transform.SetParent(playerCamera.transform, false);
+                    playerFeeding = mouth.AddComponent<PlayerFeeding>();
+                }
+                playerFeeding.mouthTarget = playerCamera.transform;
+                UsesVRPlayer = true;
+                if (oldFeeding != null && oldFeeding != playerFeeding && !oldFeeding.transform.IsChildOf(PlayerRoot))
+                    oldFeeding.gameObject.SetActive(false);
+                break;
+            }
+            if (PlayerRoot == null && playerFeeding != null)
+            {
+                var body = playerFeeding.GetComponentInParent<Rigidbody>();
+                PlayerRoot = body != null ? body.transform : playerFeeding.transform;
+            }
+            if (playerCamera != null)
+            {
+                foreach (var root in gameObject.scene.GetRootGameObjects())
+                {
+                    foreach (var scared in root.GetComponentsInChildren<Anadromo.AI.ScaredKrillBehavior>(true))
+                        scared.player = playerCamera.transform;
+                    foreach (var guide in root.GetComponentsInChildren<LuzViajera>(true))
+                        guide.debugCamera = playerCamera;
+                }
+            }
+            if (swimIntro != null && PlayerRoot != null && playerCamera != null)
+                swimIntro.BindPlayer(PlayerRoot, playerCamera);
         }
 
         void RegisterPrey(Transform root, string tag)
@@ -246,7 +290,7 @@ namespace Anadromo.Logic
 
         void CaptureMovementControls()
         {
-            foreach (var component in playerFeeding.transform.root.GetComponentsInChildren<MonoBehaviour>())
+            foreach (var component in PlayerRoot.GetComponentsInChildren<MonoBehaviour>())
                 if (component.enabled && (component is SimpleFlyCamera || component is DebugVuelo ||
                     component is Anadromo.Locomotion.FlapSwimController ||
                     component is Anadromo.Locomotion.SwimLocomotion))

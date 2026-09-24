@@ -51,13 +51,14 @@ namespace Anadromo.Locomotion
 
         private void Start()
         {
-            flapDetector = FindObjectOfType<FlapDetector>();
+            flapDetector = FindFirstObjectByType<FlapDetector>();
             if (autoStart) StartReceiving();
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void AutoInitialize()
         {
+            if (FindFirstObjectByType<PoseActionReceiver>() != null) return;
             // Auto-instanciar al iniciar el juego
             var go = new GameObject("PoseActionReceiver_Auto");
             var instance = go.AddComponent<PoseActionReceiver>();
@@ -92,7 +93,7 @@ namespace Anadromo.Locomotion
                 };
                 receiveThread.Start();
 
-                Debug.Log($"[Anadromo] Y" PoseActionReceiver escuchando en UDP:{udpPort}");
+                Debug.Log($"[Anadromo] PoseActionReceiver escuchando en UDP:{udpPort}");
             }
             catch (Exception e)
             {

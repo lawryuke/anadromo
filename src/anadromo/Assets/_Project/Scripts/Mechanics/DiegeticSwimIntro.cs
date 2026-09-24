@@ -28,6 +28,18 @@ namespace Anadromo.Mechanics
         GameObject overlay;
         float coastElapsed, launchSpeed;
         bool prepared;
+        Transform playerRoot;
+        Rigidbody playerBody;
+        Anadromo.Locomotion.FlapSwimController vrMovement;
+
+        public void BindPlayer(Transform root, Camera camera)
+        {
+            playerRoot = root;
+            playerBody = root.GetComponent<Rigidbody>();
+            playerMovement = root.GetComponent<SimpleFlyCamera>();
+            vrMovement = root.GetComponent<Anadromo.Locomotion.FlapSwimController>();
+            viewer = camera;
+        }
         static readonly int IntroVelocity = Shader.PropertyToID("IntroVelocity");
         float SprintSpeed => GameSettings.I ? GameSettings.I.playerSprintSpeed : 1.2f;
 
@@ -58,16 +70,20 @@ namespace Anadromo.Mechanics
             if (prepared) return;
             manager = owner;
             groups = salmon;
-            if (!groupRoot || !initialTarget || !playerMovement || !debris || !viewer ||
+            if (playerRoot == null && playerMovement != null) BindPlayer(playerMovement.transform, viewer);
+            if (!groupRoot || !initialTarget || (!playerMovement && !vrMovement) || !debris || !viewer ||
                 !debris.HasVector3(IntroVelocity))
             {
                 Debug.LogError("Inicio diegético: faltan referencias o el parámetro VFX IntroVelocity.", this);
                 return; // Remain black/locked rather than silently starting an inconsistent intro.
             }
             prepared = true;
-            playerMovement.enabled = true;
-            playerMovement.allowTranslation = false;
-            playerMovement.menuLook = true;
+            if (playerMovement != null)
+            {
+                playerMovement.enabled = true;
+                playerMovement.allowTranslation = false;
+                playerMovement.menuLook = true;
+            }
             foreach (var group in groups) group.HoldFacing(initialTarget);
             // The authored group position is never reset to a hard-coded spawn.
             debris.SetVector3(IntroVelocity, Vector3.back * SprintSpeed);
@@ -89,7 +105,7 @@ namespace Anadromo.Mechanics
             }
             curtain.alpha = 0;
             Revealed = true;
-            if (manager.autoStart) manager.StartGame();
+            if (manager.autoStart || manager.UsesVRPlayer) manager.StartGame();
         }
 
         public void Launch()
@@ -98,7 +114,7 @@ namespace Anadromo.Mechanics
             Launched = true;
             launchSpeed = Mathf.Max(0, SprintSpeed);
             ForwardSpeed = launchSpeed;
-            playerMovement.menuLook = false;
+            if (playerMovement != null) playerMovement.menuLook = false;
             // Same event as the physical launch: existing particles immediately lose velocity.
             debris.SetVector3(IntroVelocity, Vector3.zero);
         }
@@ -108,8 +124,8 @@ namespace Anadromo.Mechanics
             if (!Launched || Released) return;
             Released = true;
             coastElapsed = 0;
-            playerMovement.allowTranslation = true;
-            playerMovement.externalVelocity = Vector3.forward * ForwardSpeed;
+            if (playerMovement != null) playerMovement.allowTranslation = true;
+            SetPlayerDrift(Vector3.forward * ForwardSpeed);
         }
 
         void FixedUpdate()
@@ -125,21 +141,28 @@ namespace Anadromo.Mechanics
                 Vector3 delta = Vector3.forward * ForwardSpeed * Time.fixedDeltaTime;
                 groupRoot.position += delta;
                 foreach (var group in groups) group.TranslateIntroFrame(delta);
-                var body = playerMovement.GetComponent<Rigidbody>();
-                if (body != null) body.position = playerMovement.transform.position;
+                if (!playerRoot.IsChildOf(groupRoot)) playerRoot.position += delta;
+                if (playerBody != null) playerBody.position = playerRoot.position;
             }
             else
             {
                 coastElapsed += Time.fixedDeltaTime;
                 ForwardSpeed = launchSpeed * (1 - Mathf.SmoothStep(0, 1, coastElapsed / coastDuration));
                 Vector3 drift = Vector3.forward * ForwardSpeed;
-                playerMovement.externalVelocity = drift;
+                SetPlayerDrift(drift);
                 foreach (var group in groups) group.externalVelocity = drift;
             }
         }
 
+        void SetPlayerDrift(Vector3 velocity)
+        {
+            if (playerMovement != null) playerMovement.externalVelocity = velocity;
+            if (vrMovement != null) vrMovement.externalVelocity = velocity;
+        }
+
         void OnDisable()
         {
+            SetPlayerDrift(Vector3.zero);
             if (playerMovement != null) { playerMovement.externalVelocity = Vector3.zero; playerMovement.menuLook = false; }
             if (groups != null) foreach (var group in groups) if (group != null) group.externalVelocity = Vector3.zero;
             if (debris != null && debris.HasVector3(IntroVelocity)) debris.SetVector3(IntroVelocity, Vector3.zero);

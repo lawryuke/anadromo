@@ -13,6 +13,7 @@ namespace Anadromo.Mechanics
         public string[] edibleTags = { "Food_PlayerOnly", "Food_PlayerOnly_First" };
         public UnityEvent OnPreyConsumed = new UnityEvent();
         public bool consumptionEnabled = true;
+        public Transform mouthTarget;
         public int TotalConsumed { get; private set; }
         public string LastConsumedTag { get; private set; }
         public LayerMask biteBlockingLayers = ~0;
@@ -30,6 +31,11 @@ namespace Anadromo.Mechanics
         }
 
         public int ConsumedWithTag(string tag) => consumed.TryGetValue(tag, out int count) ? count : 0;
+        void FixedUpdate()
+        {
+            if (mouthTarget != null)
+                mouth.center = transform.InverseTransformPoint(mouthTarget.position);
+        }
         void OnTriggerEnter(Collider other) => TryEat(other);
         void OnTriggerStay(Collider other) => TryEat(other);
 

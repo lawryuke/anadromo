@@ -28,6 +28,11 @@ namespace Anadromo.Locomotion
         [SerializeField] private bool applyOceanCurrents = true;
 
         private Rigidbody rb;
+        [Header("Controles adicionales Quest")]
+        public bool enableJoystickMovement = true;
+        public bool enableJoystickTurn = true;
+        [Min(0f)] public float joystickTurnSpeed = 60f;
+        [System.NonSerialized] public Vector3 externalVelocity;
 
         // ─── Variables de estado para retrasar la evaluación ───
         private float leftFlapTimer = 0f;
@@ -68,6 +73,26 @@ namespace Anadromo.Locomotion
             LimitVelocities();
             ApplyCurrents();
             ProcessPendingFlaps();
+            if (!rb.isKinematic)
+            {
+                rb.AddForce(externalVelocity * rb.linearDamping, ForceMode.Acceleration);
+                if (UnityEngine.XR.XRSettings.isDeviceActive)
+                {
+                    if (enableJoystickMovement)
+                    {
+                        Vector3 requested = QuestSwimInput.ReadVelocity(headTransform);
+                        if (requested.sqrMagnitude > 0f)
+                        {
+                            Vector3 direction = requested.normalized;
+                            float extra = Mathf.Max(0f, requested.magnitude - Vector3.Dot(rb.linearVelocity, direction));
+                            rb.AddForce(direction * extra, ForceMode.VelocityChange);
+                        }
+                    }
+                    if (enableJoystickTurn)
+                        QuestSwimInput.TurnAroundHead(transform, headTransform, rb,
+                            QuestSwimInput.ReadTurn() * joystickTurnSpeed * Time.fixedDeltaTime);
+                }
+            }
         }
 
         private void ApplyCurrents()
