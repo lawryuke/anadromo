@@ -1,4 +1,5 @@
 using UnityEngine;
+using Anadromo.Config;
 
 namespace Anadromo.Mechanics
 {
@@ -9,16 +10,21 @@ namespace Anadromo.Mechanics
         [Tooltip("Arrastra aquí los objetos vacíos que servirán como puntos del camino.")]
         public Transform[] waypoints;
         
-        [Tooltip("Velocidad a la que se mueve la luz.")]
+        [Tooltip("Velocidad a la que se mueve la luz (se sobreescribe con GameSettings).")]
         public float speed = 2f;
         
         [Tooltip("¿Vuelve a empezar desde el principio cuando llega al final?")]
         public bool loop = true;
 
         [Header("Activación")]
-        [Tooltip("Si es true, la medusa estará oculta y no iniciará su recorrido hasta que el jugador entre en Abysm_Mid.")]
+        [Tooltip("Si es true, la medusa estará oculta y no iniciará su recorrido hasta que el jugador entre en Abysm_Mid (se sobreescribe con GameSettings).")]
         public bool waitAbysmPhase = true;
         private bool isMoving = false;
+
+        /// <summary>Velocidad efectiva: prioriza GameSettings.I si existe.</summary>
+        float EffectiveSpeed => GameSettings.I ? GameSettings.I.jellyfishSpeed : speed;
+        /// <summary>Esperar al abismo: prioriza GameSettings.I si existe.</summary>
+        bool EffectiveWaitAbysm => GameSettings.I ? GameSettings.I.jellyfishWaitsForAbysm : waitAbysmPhase;
 
         [Header("Debug del recorrido")]
         public bool showDebug = true;
@@ -38,7 +44,7 @@ namespace Anadromo.Mechanics
                 transform.position = waypoints[0].position;
             }
 
-            if (waitAbysmPhase)
+            if (EffectiveWaitAbysm)
             {
                 routeStatus = "Esperando entrada a Abysm_Mid";
                 SetVisualsActive(false);
@@ -79,7 +85,7 @@ namespace Anadromo.Mechanics
 
         void Update()
         {
-            if (waitAbysmPhase && !isMoving)
+            if (EffectiveWaitAbysm && !isMoving)
             {
                 if (Anadromo.Logic.LevelManager.Instance != null && Anadromo.Logic.LevelManager.Instance.isPlayerInAbysm)
                 {
@@ -94,7 +100,7 @@ namespace Anadromo.Mechanics
             if (target == null) { routeStatus = "ERROR: destino vacío"; return; }
             
             // Moverse lentamente hacia el punto objetivo
-            transform.position = Vector3.MoveTowards(transform.position, target.position, speed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, target.position, EffectiveSpeed * Time.deltaTime);
 
             // Si está muy cerca del punto, pasamos al siguiente
             if (Vector3.Distance(transform.position, target.position) < 0.1f)

@@ -1,9 +1,10 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Anadromo.Config;
 
 public class SimpleFlyCamera : MonoBehaviour
 {
-    [Header("Settings")]
+    [Header("Settings (se sobreescriben con GameSettings)")]
     public float movementSpeed = 10f;
     public float fastMovementSpeed = 25f;
     public float mouseSensitivity = 0.2f;
@@ -44,8 +45,9 @@ public class SimpleFlyCamera : MonoBehaviour
         if (Cursor.lockState == CursorLockMode.Locked)
         {
             Vector2 mouseDelta = mouse.delta.ReadValue();
-            yaw += mouseDelta.x * mouseSensitivity;
-            pitch -= mouseDelta.y * mouseSensitivity;
+            float sens = GameSettings.I ? GameSettings.I.mouseSensitivity : mouseSensitivity;
+            yaw += mouseDelta.x * sens;
+            pitch -= mouseDelta.y * sens;
             
             // Clamp pitch to avoid flipping over
             pitch = Mathf.Clamp(pitch, -89f, 89f);
@@ -54,7 +56,9 @@ public class SimpleFlyCamera : MonoBehaviour
         }
 
         // Camera Movement
-        float currentSpeed = keyboard.leftShiftKey.isPressed ? fastMovementSpeed : movementSpeed;
+        float baseSpeed = GameSettings.I ? GameSettings.I.playerSpeed : movementSpeed;
+        float sprintSpeed = GameSettings.I ? GameSettings.I.playerSprintSpeed : fastMovementSpeed;
+        float currentSpeed = keyboard.leftShiftKey.isPressed ? sprintSpeed : baseSpeed;
         Vector3 direction = Vector3.zero;
 
         if (keyboard.wKey.isPressed) direction += transform.forward;

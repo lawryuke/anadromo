@@ -1,11 +1,12 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Anadromo.Config;
 
 namespace Anadromo.Mechanics
 {
     public class DebugVuelo : MonoBehaviour
     {
-        [Header("Configuración de Vuelo")]
+        [Header("Configuración de Vuelo (se sobreescribe con GameSettings)")]
         public float speed = 10f;
         public Transform cameraTransform; // Arrastra aquí la Main Camera
 
@@ -49,8 +50,9 @@ namespace Anadromo.Mechanics
             if (mouse != null && mouse.rightButton.isPressed)
             {
                 Vector2 delta = mouse.delta.ReadValue();
-                yaw += delta.x * mouseSensitivity;
-                pitch = Mathf.Clamp(pitch - delta.y * mouseSensitivity, -85f, 85f);
+                float sens = GameSettings.I ? GameSettings.I.mouseSensitivity : mouseSensitivity;
+                yaw += delta.x * sens;
+                pitch = Mathf.Clamp(pitch - delta.y * sens, -85f, 85f);
                 cameraTransform.localRotation = Quaternion.Euler(pitch, yaw, 0f);
             }
 
@@ -64,13 +66,17 @@ namespace Anadromo.Mechanics
             if (Keyboard.current.qKey.isPressed) moveDir -= Vector3.up;
 
             movement = moveDir.normalized;
-            if (body == null) transform.position += (movement * speed + Anadromo.Act1.OceanEnvironment.PlayerCurrentAt(transform.position)) * Time.deltaTime;
+            float spd = GameSettings.I ? GameSettings.I.playerSpeed : speed;
+            if (body == null) transform.position += (movement * spd + Anadromo.Act1.OceanEnvironment.PlayerCurrentAt(transform.position)) * Time.deltaTime;
         }
 
         private void FixedUpdate()
         {
             if (body != null)
-                body.MovePosition(body.position + (movement * speed + Anadromo.Act1.OceanEnvironment.PlayerCurrentAt(body.position)) * Time.fixedDeltaTime);
+            {
+                float spd = GameSettings.I ? GameSettings.I.playerSpeed : speed;
+                body.MovePosition(body.position + (movement * spd + Anadromo.Act1.OceanEnvironment.PlayerCurrentAt(body.position)) * Time.fixedDeltaTime);
+            }
         }
     }
 }

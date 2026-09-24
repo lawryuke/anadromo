@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using Anadromo.Systems;
+using Anadromo.Config;
 
 namespace Anadromo.Mechanics
 {
@@ -24,7 +25,8 @@ namespace Anadromo.Mechanics
             energy = GetComponentInParent<EnergySystem>();
             mouth = GetComponent<SphereCollider>();
             mouth.isTrigger = true;
-            mouth.radius = mouthRadius;
+            float radius = GameSettings.I ? GameSettings.I.mouthRadius : mouthRadius;
+            mouth.radius = radius;
         }
 
         public int ConsumedWithTag(string tag) => consumed.TryGetValue(tag, out int count) ? count : 0;

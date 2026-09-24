@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Anadromo.Mechanics;
+using Anadromo.Config;
 
 namespace Anadromo.Logic
 {
@@ -29,6 +30,9 @@ namespace Anadromo.Logic
         [Min(0)] public float bloopTimeout = 30;
         public float firstLimitBloop = -5;
         public float secondLimitBloop = 12;
+
+        int EffectiveRequiredMeals => GameSettings.I ? GameSettings.I.requiredAbysmMeals : requiredAbysmMeals;
+        float EffectiveBloopTimeout => GameSettings.I ? GameSettings.I.bloopTimeout : bloopTimeout;
         public int playerEatenCount;
         public bool isPlayerInAbysm;
         public bool showStartButton = true;
@@ -94,9 +98,9 @@ namespace Anadromo.Logic
                     yield break;
                 }
             var scaryMid = krillScaryMid.GetComponent<BoxObjectSpawner>();
-            if (!countMealsFromStart && scaryMid.AliveCount < requiredAbysmMeals)
+            if (!countMealsFromStart && scaryMid.AliveCount < EffectiveRequiredMeals)
             {
-                ConfigurationError = "El grupo central Scary necesita al menos " + requiredAbysmMeals + " presas.";
+                ConfigurationError = "El grupo central Scary necesita al menos " + EffectiveRequiredMeals + " presas.";
                 Debug.LogError(ConfigurationError, scaryMid);
                 yield break;
             }
@@ -176,8 +180,8 @@ namespace Anadromo.Logic
             foreach (var group in orcaGroups) allAbove &= group != null && group.AllAbove(orcaLimit.position.y);
             bool changed = progress.Tick(!Contains(initialZone, point) || legacyLeft,
                 krillFirstMid.IsInitialized && krillFirstMid.InitialPopulation > 0 && krillFirstMid.AliveCount == 0,
-                isPlayerInAbysm, meals, requiredAbysmMeals, Contains(caveZone, point) || legacyCave,
-                allAbove, bloopTimeout > 0 && phaseTime >= bloopTimeout, bloopMovement.transform.position.y,
+                isPlayerInAbysm, meals, EffectiveRequiredMeals, Contains(caveZone, point) || legacyCave,
+                allAbove, EffectiveBloopTimeout > 0 && phaseTime >= EffectiveBloopTimeout, bloopMovement.transform.position.y,
                 FirstLimit, SecondLimit, endingEffects.IsComplete);
             if (changed) EnterPhase();
         }
