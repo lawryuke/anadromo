@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50891bb5e13e59d4f8785de87e81951f, type: 3}
+  m_Name: DefaultShakeSettings
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.ShakeSettings
+  restYAlignmentTolerance: 0.1
+  restCenterXTolerance: 0.15
+  shakeVelocityThreshold: 0.5
+  shakeEnergyAddRate: 40
+  shakeEnergyDecayRate: 20
+  maxShakeEnergy: 100
+  requiredShakeEnergyLevel: 75
+  timeRequiredToBreakFree: 3
+  maxAttackDuration: 8
+  smoothingFactor: 0.8
