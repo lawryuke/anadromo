@@ -1,0 +1,66 @@
+{
+  "chambers": 8,
+  "cycles": 3,
+  "dead_ends": 3,
+  "gallery_connections": 13,
+  "combined_route_length_m": 333.6,
+  "triangles": 709616,
+  "wall_clearances": [
+    {
+      "route": "A-B",
+      "minimum_wall_clearance_m": 0.692
+    },
+    {
+      "route": "B-C",
+      "minimum_wall_clearance_m": 0.581
+    },
+    {
+      "route": "B-D",
+      "minimum_wall_clearance_m": 0.799
+    },
+    {
+      "route": "C-E",
+      "minimum_wall_clearance_m": 0.651
+    },
+    {
+      "route": "D-E",
+      "minimum_wall_clearance_m": 1.148
+    },
+    {
+      "route": "C-F",
+      "minimum_wall_clearance_m": 0.645
+    },
+    {
+      "route": "E-F",
+      "minimum_wall_clearance_m": 0.586
+    },
+    {
+      "route": "E-G",
+      "minimum_wall_clearance_m": 0.717
+    },
+    {
+      "route": "F-H",
+      "minimum_wall_clearance_m": 0.772
+    },
+    {
+      "route": "G-H",
+      "minimum_wall_clearance_m": 0.863
+    },
+    {
+      "route": "D-X1",
+      "minimum_wall_clearance_m": 0.736
+    },
+    {
+      "route": "F-X2",
+      "minimum_wall_clearance_m": 0.515
+    },
+    {
+      "route": "G-X3",
+      "minimum_wall_clearance_m": 0.634
+    }
+  ],
+  "route_segments_intersecting_walls": [],
+  "note": "Static geometric tests. Player traversal and Unity materials require in-engine review.",
+  "route_segments_intersecting_details": [],
+  "minimum_route_clearance_all_solids_m": 0.515
+}
