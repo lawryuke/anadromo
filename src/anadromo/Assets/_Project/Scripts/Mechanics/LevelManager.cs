@@ -21,10 +21,13 @@ namespace Anadromo.Logic
         public BoxObjectSpawner krillFirstMid;
         public PlayerFeeding playerFeeding;
         public Camera playerCamera;
+        public Transform PlayerRoot { get; private set; }
+        public bool UsesVRPlayer { get; private set; }
         public Transform targetMid, topReference, orcaLimit, firstBloopLimit, secondBloopLimit;
         public ZoneLimit initialZone, abysmZone, caveZone;
         public LevelEndingEffects endingEffects;
-        [Min(1)] public int requiredAbysmMeals = 5;
+        [Tooltip("0 desactiva el requisito de comer antes de activar las orcas.")]
+        [Min(0)] public int requiredAbysmMeals = 5;
         public bool countMealsFromStart;
         [Tooltip("0 desactiva el tiempo alternativo. Se cuenta desde la subida de orcas.")]
         [Min(0)] public float bloopTimeout = 30;
@@ -38,6 +41,10 @@ namespace Anadromo.Logic
         public bool showStartButton = true;
         public bool autoStart;
         public DiegeticSwimIntro swimIntro;
+        [Header("Debug de fases")]
+        public bool debugPhases = true;
+        [Min(0.5f)] public float debugPhaseInterval = 3f;
+        float nextPhaseDebugTime;
         public bool IsReady { get; private set; }
         public string ConfigurationError { get; private set; }
         readonly LevelProgression progress = new LevelProgression();
@@ -55,9 +62,14 @@ namespace Anadromo.Logic
             if (Instance != null && Instance != this && Instance.gameObject.scene == gameObject.scene)
             { enabled = false; return; }
             Instance = this;
+            BindActivePlayer();
             currentPhase = GamePhase.WaitingForStart;
             playerEatenCount = 0;
             isPlayerInAbysm = false;
+            if (debugPhases)
+                Debug.Log($"[Fases] ENTRADA WaitingForStart | escena={gameObject.scene.name} | " +
+                    $"jugador={PlayerRoot?.name ?? "SIN JUGADOR"} | VR={UsesVRPlayer} | " +
+                    $"camara={playerCamera?.name ?? "SIN CAMARA"} | comida={playerFeeding?.name ?? "SIN BOCA"}", this);
             salmon = new[] { salmonesLeft, salmonesRight, salmonesTop };
             foreach (var group in salmon) if (group != null) group.WaitForLevel();
             if (bloopMovement != null) bloopMovement.allowKeyboard = false;
@@ -74,6 +86,8 @@ namespace Anadromo.Logic
         {
             // Let Unity finish all Start callbacks (camera setup, spawners and input modes).
             yield return null;
+            // Retry after XR Awake/OnEnable: this manager runs before the XR components.
+            if (!UsesVRPlayer) BindActivePlayer();
             if (playerCamera == null && playerFeeding != null)
                 playerCamera = playerFeeding.GetComponentInChildren<Camera>();
             if (!ValidateConfiguration(out string error))
@@ -111,7 +125,53 @@ namespace Anadromo.Logic
             Cursor.visible = true;
             IsReady = true;
             if (swimIntro != null) swimIntro.Prepare(this, salmon);
-            if (autoStart) StartGame();
+            if (autoStart || UsesVRPlayer) StartGame();
+        }
+
+        void BindActivePlayer()
+        {
+            foreach (var root in gameObject.scene.GetRootGameObjects())
+            foreach (var origin in root.GetComponentsInChildren<Unity.XR.CoreUtils.XROrigin>())
+            {
+                // isActiveAndEnabled can still be false before XR Origin's OnEnable.
+                if (!origin.enabled || !origin.gameObject.activeInHierarchy) continue;
+                Camera camera = origin.Camera != null ? origin.Camera : origin.GetComponentInChildren<Camera>();
+                if (camera == null) continue;
+                var oldFeeding = playerFeeding;
+                PlayerRoot = origin.transform;
+                playerCamera = camera;
+                playerFeeding = origin.GetComponentInChildren<PlayerFeeding>();
+                if (playerFeeding == null)
+                {
+                    var mouth = new GameObject("VR Mouth");
+                    mouth.transform.SetParent(playerCamera.transform, false);
+                    playerFeeding = mouth.AddComponent<PlayerFeeding>();
+                }
+                playerFeeding.mouthTarget = playerCamera.transform;
+                UsesVRPlayer = true;
+                if (debugPhases)
+                    Debug.Log($"[Fases] Jugador VR vinculado: {PlayerRoot.name} | " +
+                        $"camara={playerCamera.name} | bocaSigueVisor={playerFeeding.mouthTarget != null}", this);
+                if (oldFeeding != null && oldFeeding != playerFeeding &&
+                    !oldFeeding.transform.IsChildOf(PlayerRoot))
+                    oldFeeding.gameObject.SetActive(false);
+                break;
+            }
+            if (PlayerRoot == null && playerFeeding != null)
+            {
+                var body = playerFeeding.GetComponentInParent<Rigidbody>();
+                PlayerRoot = body != null ? body.transform : playerFeeding.transform;
+            }
+            if (playerCamera != null)
+                foreach (var root in gameObject.scene.GetRootGameObjects())
+                {
+                    foreach (var scared in root.GetComponentsInChildren<Anadromo.AI.ScaredKrillBehavior>(true))
+                        scared.player = playerCamera.transform;
+                    foreach (var guide in root.GetComponentsInChildren<LuzViajera>(true))
+                        guide.debugCamera = playerCamera;
+                }
+            if (swimIntro != null && PlayerRoot != null && playerCamera != null)
+                swimIntro.BindPlayer(PlayerRoot, playerCamera);
         }
 
         void RegisterPrey(Transform root, string tag)
@@ -159,8 +219,16 @@ namespace Anadromo.Logic
 
         public void StartGame()
         {
-            if (swimIntro != null && !swimIntro.Revealed) return;
-            if (!IsReady || !progress.Start()) return;
+            if (swimIntro != null && !swimIntro.Revealed)
+            {
+                if (debugPhases) Debug.Log("[Fases] StartGame bloqueado: la introduccion aun no termino el fundido.", this);
+                return;
+            }
+            if (!IsReady || !progress.Start())
+            {
+                if (debugPhases) Debug.Log($"[Fases] StartGame bloqueado: listo={IsReady}, fase={progress.Phase}, error={ConfigurationError}", this);
+                return;
+            }
             if (swimIntro == null) SetPlayerMovement(true);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
@@ -173,6 +241,7 @@ namespace Anadromo.Logic
 
         void Update()
         {
+            LogPhaseState();
             if (!IsReady || progress.Phase == GamePhase.WaitingForStart) return;
             phaseTime += Time.deltaTime;
             playerEatenCount = playerFeeding.TotalConsumed;
@@ -194,8 +263,12 @@ namespace Anadromo.Logic
 
         void EnterPhase()
         {
+            var previous = currentPhase;
             currentPhase = progress.Phase;
             phaseTime = 0;
+            if (debugPhases)
+                Debug.Log($"[Fases] ENTRADA {previous} -> {currentPhase} | tiempo={Time.time:F1}s | " +
+                    $"visor={playerCamera.transform.position:F2}", this);
             switch (currentPhase)
             {
                 case GamePhase.KrillFeeding:
@@ -236,7 +309,72 @@ namespace Anadromo.Logic
                     playerFeeding.consumptionEnabled = false;
                     break;
             }
-            Debug.Log("Fase: " + currentPhase, this);
+            if (debugPhases) Debug.Log($"[Fases] Acciones de {currentPhase} completadas.", this);
+            LogPhaseState(true);
+        }
+
+        void LogPhaseState(bool force = false)
+        {
+            if (!debugPhases || (!force && Time.unscaledTime < nextPhaseDebugTime)) return;
+            nextPhaseDebugTime = Time.unscaledTime + Mathf.Max(.5f, debugPhaseInterval);
+            if (!IsReady || progress.Phase == GamePhase.WaitingForStart)
+            {
+                Debug.Log($"[Fases] ESPERA {progress.Phase} | listo={IsReady} | error={ConfigurationError ?? "ninguno"} | " +
+                    $"introRevelada={(swimIntro == null || swimIntro.Revealed)} | autoStart={autoStart} | VR={UsesVRPlayer}", this);
+                return;
+            }
+
+            Vector3 point = playerCamera.transform.position;
+            int meals = countMealsFromStart ? playerFeeding.TotalConsumed :
+                playerFeeding.ConsumedWithTag("Food_PlayerOnly") - abysmMealBaseline;
+            string condition;
+            switch (progress.Phase)
+            {
+                case GamePhase.Init:
+                    condition = $"salirZonaInicial={!Contains(initialZone, point) || legacyLeft} | " +
+                        $"introLanzada={swimIntro != null && swimIntro.Launched}";
+                    break;
+                case GamePhase.KrillFeeding:
+                    var scary = krillScaryMid.GetComponent<Anadromo.AI.ScaredKrillBehavior>();
+                    condition = $"krilsInicialesRestantes={krillFirstMid.AliveCount}/{krillFirstMid.InitialPopulation} | " +
+                        $"scaryActivado={scary != null && scary.IsScared} (basta agotar iniciales O activar scary)";
+                    break;
+                case GamePhase.AbysmDescent:
+                    condition = $"dentroAbismo={Contains(abysmZone, point)} | comidasValidas={meals}/{EffectiveRequiredMeals} | " +
+                        $"totalComido={playerFeeding.TotalConsumed} | baseAbismo={abysmMealBaseline} | " +
+                        $"contarDesdeInicio={countMealsFromStart} | zonaActiva={abysmZone.isActiveAndEnabled} | " +
+                        $"posLocalAbismo={(abysmZone.transform.InverseTransformPoint(point) - abysmZone.center):F2} | " +
+                        $"semiextensionAbismo={abysmZone.size * .5f:F2} | minimoComidasActivo={EffectiveRequiredMeals > 0}";
+                    var preySpawner = krillScaryMid.GetComponent<BoxObjectSpawner>();
+                    float nearest = float.PositiveInfinity;
+                    Vector3 nearestPosition = Vector3.zero;
+                    foreach (var prey in preySpawner.GeneratedObjects)
+                    {
+                        if (prey == null || !prey.activeInHierarchy) continue;
+                        float distance = Vector3.Distance(point, prey.transform.position);
+                        if (distance < nearest) { nearest = distance; nearestPosition = prey.transform.position; }
+                    }
+                    condition += $" | krilsScaryVivos={preySpawner.AliveCount} | " +
+                        $"krilMasCercano={nearest:F2}m en {nearestPosition:F2} | " +
+                        $"bocaSigueVisor={playerFeeding.mouthTarget != null}";
+                    break;
+                case GamePhase.OrcaAscent:
+                    condition = $"dentroCueva={Contains(caveZone, point) || legacyCave} | " +
+                        $"tiempo={phaseTime:F1}/{EffectiveBloopTimeout:F1}s (0 desactiva timeout)";
+                    foreach (var group in orcaGroups)
+                        condition += $" | {group.name}: activo={group.isActiveAndEnabled}, " +
+                            $"{group.AscentDebugState}, todasSobreLimite={group.AllAbove(orcaLimit.position.y)}";
+                    break;
+                case GamePhase.BloopAwakening:
+                case GamePhase.Trembling:
+                    condition = $"alturaBloop={bloopMovement.transform.position.y:F2} | temblor={FirstLimit:F2} | derrumbe={SecondLimit:F2}";
+                    break;
+                default:
+                    condition = $"finalizacionCompleta={endingEffects.IsComplete}";
+                    break;
+            }
+            Debug.Log($"[Fases] ESTADO {progress.Phase} | visor={point:F2} | " +
+                $"comerActivo={playerFeeding.isActiveAndEnabled && playerFeeding.consumptionEnabled} | {condition}", this);
         }
 
         public static bool Contains(ZoneLimit zone, Vector3 worldPoint)
@@ -246,7 +384,7 @@ namespace Anadromo.Logic
 
         void CaptureMovementControls()
         {
-            foreach (var component in playerFeeding.transform.root.GetComponentsInChildren<MonoBehaviour>())
+            foreach (var component in PlayerRoot.GetComponentsInChildren<MonoBehaviour>())
                 if (component.enabled && (component is SimpleFlyCamera || component is DebugVuelo ||
                     component is Anadromo.Locomotion.FlapSwimController ||
                     component is Anadromo.Locomotion.SwimLocomotion))

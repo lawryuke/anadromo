@@ -55,6 +55,17 @@ public static class LevelProgressionChecks
         Check(Tick(r, abysm: true, meals: 5, scary: true) && r.Phase == GamePhase.OrcaAscent,
             "Scary route reaches orcas without emptying first group");
         Check(!Tick(r, empty: true, scary: true), "Later depletion does not restart abysm phase");
+        // Reproduce the VR log: entering the abysm with 2/4 meals must keep waiting.
+        var vr = new LevelProgression();
+        vr.Start(); Tick(vr, outside: true); Tick(vr, scary: true);
+        Check(!vr.Tick(false, false, true, 2, 4, false, false, false, -19, -5, 12, false),
+            "VR log: two of four meals inside the abysm do not start orcas");
+        Check(!vr.Tick(false, false, false, 4, 4, false, false, false, -19, -5, 12, false),
+            "VR: four meals still require being inside the abysm");
+        Check(vr.Tick(false, false, true, 4, 4, false, false, false, -19, -5, 12, false)
+            && vr.Phase == GamePhase.OrcaAscent, "VR: four meals inside the abysm start orcas");
+        Check(Tick(vr, cave: true, orcas: true) && vr.Phase == GamePhase.BloopAwakening,
+            "VR: cave and completed orca ascent start Bloop");
         return checks;
     }
 

@@ -47,8 +47,8 @@ namespace Anadromo.Config
         [Range(0.2f, 5f)]
         public float mouthRadius = 1f;
 
-        [Tooltip("Comidas necesarias en el abismo para avanzar de fase.")]
-        [Min(1)]
+        [Tooltip("Comidas necesarias en el abismo para avanzar de fase. 0 desactiva el requisito.")]
+        [Min(0)]
         public int requiredAbysmMeals = 5;
 
         // ───────────────────── Medusa Guía ──────────────────────────────────

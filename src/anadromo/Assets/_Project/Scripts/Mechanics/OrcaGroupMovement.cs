@@ -15,12 +15,14 @@ public sealed class OrcaGroupMovement : MonoBehaviour
     public float delayMaximo = 1.5f;
     public KeyCode teclaParaIniciar = KeyCode.Alpha4;
     public bool allowKeyboard = true;
+    public bool debugAscent = true;
     readonly List<NaturalSwimPath> pod = new List<NaturalSwimPath>();
     readonly List<float> launchTimes = new List<float>();
     bool prepared, started;
     float elapsed;
     int launched;
     public int MemberCount => pod.Count;
+    public string AscentDebugState => $"iniciado={started}, lanzadas={launched}/{pod.Count}, destinoY={puntoFin.y:F2}";
 
     public void Prepare()
     {
@@ -62,6 +64,9 @@ public sealed class OrcaGroupMovement : MonoBehaviour
             Vector3 target = path.transform.position;
             target.y = Mathf.Max(target.y, puntoFin.y);
             path.Begin(target, Mathf.Max(.1f, velocidad) * Random.Range(1 - variacionVelocidad, 1 + variacionVelocidad));
+            if (debugAscent && (launched == 1 || launched == pod.Count))
+                Debug.Log($"[Orcas] {name}: lanzamiento {launched}/{pod.Count} | " +
+                    $"orca={path.name} | desde={path.transform.position:F2} | hasta={target:F2}", this);
         }
     }
 
@@ -69,9 +74,12 @@ public sealed class OrcaGroupMovement : MonoBehaviour
 
     public void BeginAscent(float height)
     {
+        if (debugAscent)
+            Debug.Log($"[Orcas] {name}: BeginAscent recibido | activo={isActiveAndEnabled} | " +
+                $"{AscentDebugState} | alturaSolicitada={height:F2}", this);
         if (started) return;
         Prepare();
-        if (pod.Count == 0) { Debug.LogError("El grupo no tiene orcas generadas.", this); return; }
+        if (pod.Count == 0) { Debug.LogError("[Orcas] El grupo no tiene orcas generadas.", this); return; }
         puntoFin.y = height;
         started = true;
         elapsed = 0;

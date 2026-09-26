@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Anadromo.Act1; // Para integración con corrientes (OceanEnvironment)
 
 namespace Anadromo.Locomotion
@@ -33,6 +34,8 @@ namespace Anadromo.Locomotion
         private float pendingIntensity;
         private float windowIntensity;
         private float lastImpulseTime = float.NegativeInfinity;
+        private InputAction moveStick;
+        private InputAction turnStick;
 
         private void Awake()
         {
@@ -41,6 +44,12 @@ namespace Anadromo.Locomotion
 
         private void OnEnable()
         {
+            moveStick ??= new InputAction("Swim Move", InputActionType.Value,
+                "<XRController>{LeftHand}/primary2DAxis", expectedControlType: "Vector2");
+            turnStick ??= new InputAction("Swim Turn", InputActionType.Value,
+                "<XRController>{RightHand}/primary2DAxis", expectedControlType: "Vector2");
+            moveStick.Enable();
+            turnStick.Enable();
             if (flapDetector != null)
             {
                 flapDetector.OnLeftFlap.AddListener(QueueFlap);
@@ -50,6 +59,8 @@ namespace Anadromo.Locomotion
 
         private void OnDisable()
         {
+            moveStick?.Disable();
+            turnStick?.Disable();
             if (flapDetector != null)
             {
                 flapDetector.OnLeftFlap.RemoveListener(QueueFlap);
@@ -59,15 +70,35 @@ namespace Anadromo.Locomotion
             lastImpulseTime = float.NegativeInfinity;
         }
 
+        private void OnDestroy()
+        {
+            moveStick?.Dispose();
+            turnStick?.Dispose();
+        }
+
         private void FixedUpdate()
         {
             if (settings == null || salmonBody == null || headTransform == null) return;
 
             UpdateBodyPitch();
             UpdateBodyYaw();
-            LimitVelocities();
+            ApplyJoystickMovement();
             ApplyCurrents();
             ProcessPendingFlaps();
+            LimitVelocities();
+        }
+
+        private void ApplyJoystickMovement()
+        {
+            if (rb.isKinematic || moveStick == null) return;
+            Vector2 input = Vector2.ClampMagnitude(moveStick.ReadValue<Vector2>(), 1f);
+            if (input.magnitude <= settings.joystickDeadzone) return;
+
+            // Avance según el visor (incluye subida/bajada al mirar); desplazamiento lateral horizontal.
+            Vector3 right = Vector3.ProjectOnPlane(headTransform.right, Vector3.up).normalized;
+            Vector3 direction = headTransform.forward * input.y + right * input.x;
+            if (direction.sqrMagnitude > 1f) direction.Normalize();
+            rb.AddForce(direction * settings.joystickAcceleration, ForceMode.Acceleration);
         }
 
         private void ApplyCurrents()
@@ -126,7 +157,13 @@ namespace Anadromo.Locomotion
             Vector3 localForward = transform.InverseTransformDirection(headTransform.forward);
             float localYaw = Mathf.Atan2(localForward.x, localForward.z) * Mathf.Rad2Deg;
             float turnAmount = Mathf.Abs(localYaw) - settings.headTurnDeadzone;
-            if (turnAmount > 0f && !rb.isKinematic)
+            float stickTurn = turnStick != null ? turnStick.ReadValue<Vector2>().x : 0f;
+            if (Mathf.Abs(stickTurn) > settings.joystickDeadzone && !rb.isKinematic)
+            {
+                float degrees = stickTurn * settings.joystickTurnSpeed * Time.fixedDeltaTime;
+                rb.MoveRotation(rb.rotation * Quaternion.Euler(0f, degrees, 0f));
+            }
+            else if (turnAmount > 0f && !rb.isKinematic)
             {
                 float speedRatio = Mathf.Clamp01(turnAmount / settings.headTurnFullSpeedAngle);
                 float degrees = Mathf.Sign(localYaw) * speedRatio *

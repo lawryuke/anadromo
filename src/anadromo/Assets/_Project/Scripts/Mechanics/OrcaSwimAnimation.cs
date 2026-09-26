@@ -15,9 +15,10 @@ public sealed class OrcaSwimAnimation : MonoBehaviour
 
     public void Initialize()
     {
+        // Unity can restore renderer references after a script reload, but not this native block.
+        block ??= new MaterialPropertyBlock();
         if (surfaces != null) return;
         surfaces = GetComponentsInChildren<Renderer>();
-        block = new MaterialPropertyBlock();
         phase = Random.value * Mathf.PI * 4;
         cadence = Random.Range(.92f, 1.08f);
         glidePhase = Random.value * Mathf.PI * 2;
@@ -49,5 +50,5 @@ public sealed class OrcaSwimAnimation : MonoBehaviour
         }
     }
 
-    void OnDisable() { if (surfaces != null) Apply(0); }
+    void OnDisable() { if (surfaces != null) { Initialize(); Apply(0); } }
 }

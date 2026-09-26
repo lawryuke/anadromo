@@ -13,6 +13,7 @@ namespace Anadromo.Mechanics
         public string[] edibleTags = { "Food_PlayerOnly", "Food_PlayerOnly_First" };
         public UnityEvent OnPreyConsumed = new UnityEvent();
         public bool consumptionEnabled = true;
+        public Transform mouthTarget;
         public int TotalConsumed { get; private set; }
         public string LastConsumedTag { get; private set; }
         public LayerMask biteBlockingLayers = ~0;
@@ -30,6 +31,21 @@ namespace Anadromo.Mechanics
         }
 
         public int ConsumedWithTag(string tag) => consumed.TryGetValue(tag, out int count) ? count : 0;
+        void FixedUpdate()
+        {
+            if (mouthTarget != null)
+            {
+                mouth.center = transform.InverseTransformPoint(mouthTarget.position);
+                // The tracked headset moves independently of the root Rigidbody.
+                // Query its current mouth position as well as receiving physics trigger callbacks.
+                if (consumptionEnabled)
+                    foreach (var nearby in Physics.OverlapSphere(mouthTarget.position, WorldMouthRadius,
+                        ~0, QueryTriggerInteraction.Collide))
+                        TryEat(nearby);
+            }
+        }
+        float WorldMouthRadius => mouth.radius * Mathf.Max(Mathf.Abs(transform.lossyScale.x),
+            Mathf.Abs(transform.lossyScale.y), Mathf.Abs(transform.lossyScale.z));
         void OnTriggerEnter(Collider other) => TryEat(other);
         void OnTriggerStay(Collider other) => TryEat(other);
 
@@ -44,8 +60,7 @@ namespace Anadromo.Mechanics
             if (edibleTags != null) foreach (string allowed in edibleTags) edible |= tag == allowed;
             if (!edible) return false;
             Vector3 origin = transform.TransformPoint(mouth.center);
-            float radius = mouth.radius * Mathf.Max(Mathf.Abs(transform.lossyScale.x),
-                Mathf.Abs(transform.lossyScale.y), Mathf.Abs(transform.lossyScale.z));
+            float radius = WorldMouthRadius;
             Vector3 delta = other.ClosestPoint(origin) - origin;
             if (delta.sqrMagnitude > radius * radius) return false;
             if (delta.sqrMagnitude > .000001f)
@@ -57,6 +72,9 @@ namespace Anadromo.Mechanics
             TotalConsumed++;
             LastConsumedTag = tag;
             consumed[tag] = ConsumedWithTag(tag) + 1;
+            if (Anadromo.Logic.LevelManager.Instance != null && Anadromo.Logic.LevelManager.Instance.debugPhases)
+                Debug.Log($"[Comida] {name}: consumido={tag} | total={TotalConsumed} | " +
+                    $"totalDeEsteTag={ConsumedWithTag(tag)} | fase={Anadromo.Logic.LevelManager.Instance.currentPhase}", this);
             if (energy != null) energy.RestoreEnergy(value);
             OnPreyConsumed.Invoke();
             return true;

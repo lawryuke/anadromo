@@ -14,6 +14,16 @@ namespace Anadromo.Locomotion
         [Range(1f, 300f)]
         public float forwardForceMultiplier = 6f; // Reducido muchísimo de 80 a 6 para evitar "teletransporte"
 
+        [Header("Joysticks VR")]
+        [Tooltip("Aceleración al mover el joystick izquierdo, en m/s².")]
+        [Min(0f)] public float joystickAcceleration = 12f;
+
+        [Tooltip("Velocidad de giro con el joystick derecho, en grados por segundo.")]
+        [Min(0f)] public float joystickTurnSpeed = 90f;
+
+        [Tooltip("Zona muerta de ambos joysticks.")]
+        [Range(0f, 0.5f)] public float joystickDeadzone = 0.15f;
+
         [Header("Giro con el visor")]
         [Tooltip("Ángulo horizontal del visor desde el que empieza a girar el XR Origin.")]
         [Range(0f, 45f)]

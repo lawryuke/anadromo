@@ -13,6 +13,9 @@ MonoBehaviour:
   m_Name: SwimSettings
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.SwimSettings
   forwardForceMultiplier: 6
+  joystickAcceleration: 12
+  joystickTurnSpeed: 90
+  joystickDeadzone: 0.15
   headTurnDeadzone: 15
   headTurnFullSpeedAngle: 30
   headTurnMaxSpeed: 60

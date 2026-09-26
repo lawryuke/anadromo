@@ -16,7 +16,7 @@ MonoBehaviour:
   playerSprintSpeed: 1.2
   mouseSensitivity: 0.05
   mouthRadius: 0.35
-  requiredAbysmMeals: 4
+  requiredAbysmMeals: 0
   jellyfishSpeed: 2
   jellyfishWaitsForAbysm: 1
   cameraPitchLimit: 85

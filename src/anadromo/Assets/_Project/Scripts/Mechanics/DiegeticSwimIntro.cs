@@ -31,6 +31,18 @@ namespace Anadromo.Mechanics
         static readonly int IntroVelocity = Shader.PropertyToID("IntroVelocity");
         float SprintSpeed => GameSettings.I ? GameSettings.I.playerSprintSpeed : 1.2f;
 
+        public void BindPlayer(Transform root, Camera camera)
+        {
+            playerBody = root.GetComponent<Rigidbody>();
+            viewer = camera;
+            if (overlay != null)
+            {
+                var canvas = overlay.GetComponent<Canvas>();
+                canvas.worldCamera = viewer;
+                canvas.planeDistance = viewer.nearClipPlane + .02f;
+            }
+        }
+
         void Awake()
         {
             overlay = new GameObject("Fundido de entrada", typeof(Canvas), typeof(CanvasGroup));
@@ -85,7 +97,7 @@ namespace Anadromo.Mechanics
             }
             curtain.alpha = 0;
             Revealed = true;
-            if (manager.autoStart) manager.StartGame();
+            if (manager.autoStart || manager.UsesVRPlayer) manager.StartGame();
         }
 
         public void Launch()
@@ -119,7 +131,9 @@ namespace Anadromo.Mechanics
                 Vector3 delta = Vector3.forward * ForwardSpeed * Time.fixedDeltaTime;
                 groupRoot.position += delta;
                 foreach (var group in groups) group.TranslateIntroFrame(delta);
-                playerBody.MovePosition(playerBody.position + delta);
+                // A desktop player can already be carried by groupRoot; XR usually is a separate root.
+                if (!playerBody.transform.IsChildOf(groupRoot))
+                    playerBody.MovePosition(playerBody.position + delta);
             }
             else
             {

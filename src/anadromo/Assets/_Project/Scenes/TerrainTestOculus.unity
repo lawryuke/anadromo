@@ -12357,6 +12357,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d99149afd34f8a448759ecf9724ffbf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.LocomotionModeManager
+  flapController: {fileID: 1957787342}
+  debugVuelo: {fileID: 0}
+  toggleKey: 282
+  startInVRMode: 1
 --- !u!114 &1957787340
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12393,6 +12397,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1697b3de425527c4ea6be565a9cf085a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.FlapSwimController
+  flapDetector: {fileID: 1662313130}
+  settings: {fileID: 11400000, guid: a7bd6cda1687f6340854ea2d96a56823, type: 2}
+  headTransform: {fileID: 2113199537}
+  salmonBody: {fileID: 358671818}
+  applyOceanCurrents: 1
 --- !u!54 &1957787343
 Rigidbody:
   m_ObjectHideFlags: 0
