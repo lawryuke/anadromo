@@ -44,9 +44,24 @@ namespace Anadromo.AI
             Vector2 mouseDelta=mouse!=null ? mouse.delta.ReadValue() : Vector2.zero;
             if(shakeReady>0 || (Mathf.Abs(mouseDelta.x)<=50 && !alternating)) return;
             float strength=alternating ? 35 : 25;
+            ShakeLampreys(strength);
+            shakeReady=.12f;
+        }
+        public void ShakeLampreys(float strength)
+        {
             var attached=new List<Object>(attachedLampreys);
             foreach(var parasite in attached) if(parasite is Esc2Lamprey lamprey) lamprey.ReduceGrip(strength);
-            shakeReady=.12f;
+        }
+        public int GetLampreySlot()
+        {
+            int slot=0;
+            while(true)
+            {
+                bool used=false;
+                foreach(var item in attachedLampreys) if(item is Esc2Lamprey l && l.AttachmentSlot==slot) used=true;
+                if(!used) return slot;
+                slot++;
+            }
         }
         void FixedUpdate() { if (body) SampleMotion(Time.fixedDeltaTime); }
         public void SampleMotion(float dt)
@@ -74,6 +89,10 @@ namespace Anadromo.AI
             if (dead && desktopMovement) desktopMovement.enabled = movementWasEnabled;
             foreach (var school in FindObjectsByType<PiranhaSchool>(FindObjectsSortMode.None))
                 if (school.target == this) school.ResetFish();
+            attachedLampreys.Clear(); lastSide=0; lastSideAt=-10; shakeReady=0;
+            foreach(var passage in FindObjectsByType<Esc2SharkPassage>(FindObjectsSortMode.None))
+                if(passage.target==this) passage.ResetPassage();
+            if(desktopMovement) { desktopMovement.externalSpeedMultiplier=1; desktopMovement.SyncLookRotation(); }
             onHealthChanged.Invoke(Health);
         }
         public void AddLamprey(Object source) { if(source) attachedLampreys.Add(source); if(desktopMovement) desktopMovement.externalSpeedMultiplier=SpeedMultiplier; }
@@ -92,6 +111,7 @@ namespace Anadromo.AI
                 GUI.DrawTexture(new Rect(0,Screen.height-12,Screen.width,12),Texture2D.whiteTexture);
                 GUI.color = Color.white;
             }
+            if(attachedLampreys.Count>0) GUI.Box(new Rect(18,76,330,48),"Lampreas adheridas: "+attachedLampreys.Count+"\nAlterna A / D o sacude el ratón para soltarlas");
             if(!Alive) GUI.Box(new Rect(Screen.width/2-200,Screen.height/2-30,400,60),"Los depredadores te alcanzaron.\nR: volver al inicio del encuentro");
         }
     }

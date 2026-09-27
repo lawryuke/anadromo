@@ -66,6 +66,10 @@ visual de cámara al recibir daño y un pulso rojo en los bordes de pantalla.
 
 ## 3. Tiburón — peligro de paso
 
+**Integración en la escena final `esc2`:** consulta [Tiburón en esc2](esc2-tiburon.md)
+para la ruta anterior a zona A, configuración, pruebas y duplicación. Los
+apartados siguientes describen las rutas del escenario MVP original.
+
 ### Comportamiento implementado
 
 El tiburón no caza al jugador ni cambia su recorrido para seguirlo. Es un

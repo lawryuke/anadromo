@@ -13,6 +13,8 @@ namespace Anadromo.AI
         public Vector3 attachOffset=new Vector3(.35f,-.25f,.65f);
         PiranhaSchool school;
         Transform cameraTransform;
+        int attachmentSlot;
+        public int AttachmentSlot => attachmentSlot;
         Vector3 home,previous;
         float stunTimer,drainTimer;
         MaterialPropertyBlock tint;
@@ -31,7 +33,7 @@ namespace Anadromo.AI
             if(State==BehaviourState.Stunned)
             {
                 stunTimer-=dt;
-                if(stunTimer<=0) { State=BehaviourState.Chill; Grip=maxGrip; home=school.Clamp(transform.position); }
+                if(stunTimer<=0) { State=BehaviourState.Chill; Grip=maxGrip; }
             }
             else if(State==BehaviourState.Attached)
             {
@@ -46,7 +48,7 @@ namespace Anadromo.AI
                 else if(State==BehaviourState.Chasing && (!school.Contains(target)||Vector3.Distance(previous,target)>detectionRadius*2||!school.ClearPath(previous,target))) State=BehaviourState.Chill;
                 if(State==BehaviourState.Chasing)
                 {
-                    Vector3 delta=(target-previous).normalized*chaseSpeed*dt; float allowed=delta.magnitude;
+                    Vector3 delta=Vector3.MoveTowards(previous,target,chaseSpeed*dt)-previous; float allowed=delta.magnitude;
                     foreach(var hit in Physics.SphereCastAll(previous,.15f,delta.normalized,allowed,school.obstacleLayers,QueryTriggerInteraction.Ignore))
                         if(school.IsObstacle(hit.collider)) allowed=Mathf.Min(allowed,Mathf.Max(0,hit.distance-.02f));
                     transform.position=school.Clamp(previous+delta.normalized*allowed);
@@ -55,15 +57,16 @@ namespace Anadromo.AI
             }
             if(body)
             {
+                if(tint==null) tint=new MaterialPropertyBlock();
                 Color c=State==BehaviourState.Attached?new Color(1,.12f,.1f):State==BehaviourState.Chasing?new Color(1,.68f,.12f):State==BehaviourState.Stunned?Color.gray:new Color(.7f,.3f,.75f);
                 tint.SetColor("_BaseColor",c); tint.SetColor("_Color",c); body.SetPropertyBlock(tint);
             }
         }
         void LateUpdate() { if(State==BehaviourState.Attached) StickToPlayer(); }
-        void StickToPlayer() { if(cameraTransform) transform.SetPositionAndRotation(cameraTransform.TransformPoint(attachOffset),cameraTransform.rotation); else if(Target) transform.position=Target.transform.position; }
+        void StickToPlayer() { if(cameraTransform) transform.SetPositionAndRotation(cameraTransform.position+cameraTransform.rotation*new Vector3((attachmentSlot%2==0?1:-1)*Mathf.Abs(attachOffset.x),attachOffset.y-(attachmentSlot/2)*.12f,attachOffset.z),cameraTransform.rotation); else if(Target) transform.position=Target.transform.position; }
         void Attach(PiranhaPlayerTarget player)
         {
-            State=BehaviourState.Attached; Grip=maxGrip; drainTimer=drainInterval; player.AddLamprey(this); StickToPlayer();
+            State=BehaviourState.Attached; Grip=maxGrip; drainTimer=drainInterval; attachmentSlot=player.GetLampreySlot(); player.AddLamprey(this); StickToPlayer();
         }
         public void ReduceGrip(float amount)
         {
@@ -71,15 +74,17 @@ namespace Anadromo.AI
             Grip=Mathf.Max(0,Grip-amount);
             if(Grip>0) return;
             Target.RemoveLamprey(this); State=BehaviourState.Stunned; stunTimer=stunDuration; drainTimer=drainInterval;
-            if(Target.desktopMovement) transform.position=Target.desktopMovement.transform.position+Target.desktopMovement.transform.forward*2;
-            home=school.Clamp(transform.position);
+            Vector3 origin=Target.transform.position;
+            Vector3 destination=school.Clamp(origin+Target.transform.forward*1.5f);
+            transform.position=school.MoveWithoutObstacles(origin,destination,.15f);
+
         }
         public void ResetLamprey()
         {
             if(State==BehaviourState.Attached && Target) Target.RemoveLamprey(this);
             State=BehaviourState.Chill; Grip=maxGrip; stunTimer=0; drainTimer=drainInterval;
-            home=school?school.Clamp(home):home; transform.position=home;
+            transform.position=home;
         }
-        void OnDisable() { if(State==BehaviourState.Attached && Target) Target.RemoveLamprey(this); }
+        void OnDisable() { if(State==BehaviourState.Attached) ResetLamprey(); }
     }
 }

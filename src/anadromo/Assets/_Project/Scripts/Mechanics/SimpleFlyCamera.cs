@@ -31,6 +31,13 @@ public class SimpleFlyCamera : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
+    public void SyncLookRotation()
+    {
+        pitch=transform.eulerAngles.x;
+        if(pitch>180) pitch-=360;
+        yaw=transform.eulerAngles.y;
+    }
+
     private void Update()
     {
         var keyboard = Keyboard.current;

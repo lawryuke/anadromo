@@ -23,13 +23,27 @@ namespace Anadromo.AI
                 if (IsObstacle(hit.collider)) return false;
             return true;
         }
+        public Vector3 MoveWithoutObstacles(Vector3 from, Vector3 to, float radius)
+        {
+            Vector3 delta=to-from;
+            float distance=delta.magnitude;
+            if(distance<.00001f) return from;
+            foreach(var hit in Physics.SphereCastAll(from,radius,delta/distance,distance,obstacleLayers,QueryTriggerInteraction.Ignore))
+                if(IsObstacle(hit.collider)) distance=Mathf.Min(distance,Mathf.Max(0,hit.distance-.02f));
+            return from+delta.normalized*distance;
+        }
         public void Alert(Esc2Piranha source)
         {
             // Hierarchy membership makes Ctrl+D and prefab instances work without lists.
             foreach (var fish in GetComponentsInChildren<Esc2Piranha>())
                 if (Vector3.Distance(source.transform.position,fish.transform.position) <= alertRadius && ClearPath(source.transform.position,fish.transform.position)) fish.BeginAttack();
         }
-        public void ResetFish() { foreach (var fish in GetComponentsInChildren<Esc2Piranha>()) fish.ResetFish(); }
+        public void ResetFish()
+        {
+            foreach(var fish in GetComponentsInChildren<Esc2Piranha>(true)) fish.ResetFish();
+            foreach(var fish in GetComponentsInChildren<Esc2Anglerfish>(true)) fish.ResetFish();
+            foreach(var fish in GetComponentsInChildren<Esc2Lamprey>(true)) fish.ResetLamprey();
+        }
         void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.cyan; Gizmos.matrix = transform.localToWorldMatrix;
