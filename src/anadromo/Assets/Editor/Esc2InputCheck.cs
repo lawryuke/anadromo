@@ -49,6 +49,8 @@ public static class Esc2InputCheck
         if(!SessionState.GetBool(KeyName,false)) return;
         if(mode==PlayModeStateChange.EnteredPlayMode)
         {
+            foreach(var energy in UnityEngine.Object.FindObjectsByType<Anadromo.Systems.EnergySystem>(FindObjectsSortMode.None)) energy.enabled=false;
+
             stage=0; press=0; sawAngler=false; failure=null; started=Time.time; wallStart=EditorApplication.timeSinceStartup;
             Application.runInBackground=true;
             EditorWindow.GetWindow(Type.GetType("UnityEditor.GameView,UnityEditor")).Focus();

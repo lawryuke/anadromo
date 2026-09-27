@@ -11,13 +11,16 @@ namespace Anadromo.Systems
         [SerializeField] private float sprintDecayMultiplier = 3f;
 
         [Header("Events")]
-        public UnityEvent<float> OnEnergyChanged;
-        public UnityEvent OnEnergyDepleted;
+        public UnityEvent<float> OnEnergyChanged = new UnityEvent<float>();
+        public UnityEvent OnEnergyDepleted = new UnityEvent();
 
         private float currentEnergy;
         private bool isSprinting;
 
-        private void Start()
+        public float CurrentEnergy => currentEnergy;
+        public float MaxEnergy => maxEnergy;
+
+        private void Awake()
         {
             currentEnergy = maxEnergy;
             OnEnergyChanged?.Invoke(GetEnergyPercentage());
@@ -31,8 +34,10 @@ namespace Anadromo.Systems
 
         public void SetEnergy(float value)
         {
+            bool wasAlive = currentEnergy > 0;
             currentEnergy = Mathf.Clamp(value, 0f, maxEnergy);
             OnEnergyChanged?.Invoke(GetEnergyPercentage());
+            if(wasAlive && currentEnergy<=0) OnEnergyDepleted?.Invoke();
         }
 
         public void SetSprinting(bool sprinting)
@@ -42,26 +47,19 @@ namespace Anadromo.Systems
 
         public void ConsumeEnergy(float amount)
         {
-            if (currentEnergy <= 0f) return;
-
-            currentEnergy = Mathf.Clamp(currentEnergy - amount, 0f, maxEnergy);
-            OnEnergyChanged?.Invoke(GetEnergyPercentage());
-
-            if (currentEnergy <= 0f)
-            {
-                OnEnergyDepleted?.Invoke();
-            }
+            if (currentEnergy <= 0f || amount <= 0f) return;
+            SetEnergy(currentEnergy-amount);
         }
 
         public void RestoreEnergy(float amount)
         {
-            currentEnergy = Mathf.Clamp(currentEnergy + amount, 0f, maxEnergy);
-            OnEnergyChanged?.Invoke(GetEnergyPercentage());
+            if(amount<=0) return;
+            SetEnergy(currentEnergy+amount);
         }
 
         public float GetEnergyPercentage()
         {
-            return currentEnergy / maxEnergy;
+            return currentEnergy / Mathf.Max(.001f,maxEnergy);
         }
     }
 }

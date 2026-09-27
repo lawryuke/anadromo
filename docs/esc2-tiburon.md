@@ -1,5 +1,9 @@
 # Tiburón en esc2
 
+> Actualizacion: en la escena final esc2, vida/comida se han unificado en
+> [energia vital](esc2-energia-vital.md). Las cantidades de dano indicadas
+> abajo descuentan energia; la barra de salud y los bordes rojos se retiraron.
+
 La escena final `Assets/_Project/Scenes/esc2.unity` contiene un paso de
 tiburón antes de la zona A. No necesita cargar `Esc2_Enemigos_MVP`.
 

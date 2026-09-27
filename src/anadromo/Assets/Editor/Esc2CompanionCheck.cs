@@ -46,7 +46,9 @@ public static class Esc2CompanionCheck
     static void Mode(PlayModeStateChange mode)
     {
         if(!SessionState.GetBool(Key,false)) return;
-        if(mode==PlayModeStateChange.EnteredPlayMode) { stage=0; since=Time.time; EditorApplication.update+=Tick; }
+        if(mode==PlayModeStateChange.EnteredPlayMode) {
+            foreach(var energy in UnityEngine.Object.FindObjectsByType<Anadromo.Systems.EnergySystem>(FindObjectsSortMode.None)) energy.enabled=false;
+ stage=0; since=Time.time; EditorApplication.update+=Tick; }
         if(mode==PlayModeStateChange.EnteredEditMode)
         {
             EditorApplication.update-=Tick; Application.logMessageReceived-=Log;

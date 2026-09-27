@@ -22,7 +22,7 @@ public static class Esc2PiranhaValidation
             {
                 var school=root.AddComponent<PiranhaSchool>(); school.zoneSize=Vector3.one*20;
                 var go=new GameObject("Player fixture"); go.transform.SetParent(root.transform,false);
-                var player=go.AddComponent<PiranhaPlayerTarget>(); InvokeLifecycle(player,"Awake"); school.target=player;
+                var player=go.AddComponent<PiranhaPlayerTarget>(); InvokeLifecycle(go.GetComponent<Anadromo.Systems.EnergySystem>(),"Awake"); InvokeLifecycle(player,"Awake"); school.target=player;
                 Func<string,Vector3,Esc2Piranha> make=(name,offset)=>
                 {
                     var f=new GameObject(name); f.transform.SetParent(root.transform,false); f.transform.localPosition=offset;

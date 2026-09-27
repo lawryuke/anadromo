@@ -2800,6 +2800,7 @@ Transform:
   - {fileID: 1110125299}
   - {fileID: 1091681329}
   - {fileID: 2094205508}
+  - {fileID: 631002078}
   m_Father: {fileID: 1927145293}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &588231787
@@ -2818,7 +2819,7 @@ MonoBehaviour:
   zoneSize: {x: 8.753441, y: 2.6, z: 10.129219}
   obstacleLayers:
     serializedVersion: 2
-    m_Bits: 4294967291
+    m_Bits: 1019
   alertRadius: 20
 --- !u!4 &588723611 stripped
 Transform:
@@ -2939,19 +2940,19 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 588231786}
     m_Modifications:
     - target: {fileID: 981349768559209438, guid: 44dea0f060ba1884fb5843dd1accb615, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.5
+      value: -2.07672
       objectReference: {fileID: 0}
     - target: {fileID: 981349768559209438, guid: 44dea0f060ba1884fb5843dd1accb615, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.5
+      value: 1.12839
       objectReference: {fileID: 0}
     - target: {fileID: 981349768559209438, guid: 44dea0f060ba1884fb5843dd1accb615, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 12
+      value: -12.762511
       objectReference: {fileID: 0}
     - target: {fileID: 981349768559209438, guid: 44dea0f060ba1884fb5843dd1accb615, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2959,15 +2960,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 981349768559209438, guid: 44dea0f060ba1884fb5843dd1accb615, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 981349768559209438, guid: 44dea0f060ba1884fb5843dd1accb615, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 981349768559209438, guid: 44dea0f060ba1884fb5843dd1accb615, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 981349768559209438, guid: 44dea0f060ba1884fb5843dd1accb615, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -2989,11 +2990,20 @@ PrefabInstance:
       propertyPath: target
       value:
       objectReference: {fileID: 1221495010}
+    - target: {fileID: 5871501091899263614, guid: 44dea0f060ba1884fb5843dd1accb615, type: 3}
+      propertyPath: obstacleLayers.m_Bits
+      value: 1019
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 44dea0f060ba1884fb5843dd1accb615, type: 3}
+--- !u!4 &631002078 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 981349768559209438, guid: 44dea0f060ba1884fb5843dd1accb615, type: 3}
+  m_PrefabInstance: {fileID: 631002077}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &662708773
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4661,6 +4671,9 @@ GameObject:
   - component: {fileID: 1221495004}
   - component: {fileID: 1221495003}
   - component: {fileID: 1221495010}
+  - component: {fileID: 1221495013}
+  - component: {fileID: 1221495012}
+  - component: {fileID: 1221495011}
   m_Layer: 0
   m_Name: KM_Player
   m_TagString: Player
@@ -4875,12 +4888,66 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d89d5dbd3e3c97448a39962290be72db, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.AI.PiranhaPlayerTarget
-  maxHealth: 100
+  showDebugStatus: 0
   desktopMovement: {fileID: 1221495007}
   onHealthChanged:
     m_PersistentCalls:
       m_Calls: []
   onDeath:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &1221495011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1221495001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58f7cae6ed13c5f40a52ce7065f2bf89, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Systems.EnergyVisualFeedback
+  maximumVignette: 0.48
+--- !u!114 &1221495012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1221495001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4eb8470bed69a5e48a11cd9883d2926c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Systems.PlayerEnergyController
+  criticalThreshold: 0.3
+  exhaustedSwimMultiplier: 0.55
+  exhaustedTurnMultiplier: 0.7
+  exhaustedCurrentMultiplier: 1.5
+  impactDuration: 0.35
+  recoveryDuration: 0.45
+  collisionDamage: 12
+  collisionSpeedThreshold: 1.5
+--- !u!114 &1221495013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1221495001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1067dd669950f10ebf817c98f1dbc7b, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Systems.EnergySystem
+  maxEnergy: 100
+  passiveDecayRate: 1
+  sprintDecayMultiplier: 3
+  OnEnergyChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnEnergyDepleted:
     m_PersistentCalls:
       m_Calls: []
 --- !u!1 &1273077958
@@ -13311,4 +13378,3 @@ SceneRoots:
   - {fileID: 1430937690}
   - {fileID: 1927145293}
   - {fileID: 1859647766}
-  - {fileID: 631002077}

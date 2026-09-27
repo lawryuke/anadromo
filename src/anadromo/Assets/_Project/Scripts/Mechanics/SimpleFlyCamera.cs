@@ -16,6 +16,7 @@ public class SimpleFlyCamera : MonoBehaviour
     private float pitch = 0f;
     private float yaw = 0f;
     private Rigidbody rb;
+    private Anadromo.Systems.PlayerEnergyController energy;
 
     private void Start()
     {
@@ -29,6 +30,7 @@ public class SimpleFlyCamera : MonoBehaviour
         Cursor.visible = false;
 
         rb = GetComponent<Rigidbody>();
+        energy=GetComponent<Anadromo.Systems.PlayerEnergyController>();
     }
 
     public void SyncLookRotation()
@@ -57,6 +59,7 @@ public class SimpleFlyCamera : MonoBehaviour
         {
             Vector2 mouseDelta = mouse.delta.ReadValue();
             float sens = GameSettings.I ? GameSettings.I.mouseSensitivity : mouseSensitivity;
+            sens *= energy ? energy.TurnMultiplier : 1f;
             yaw += mouseDelta.x * sens;
             pitch -= mouseDelta.y * sens;
             
@@ -70,7 +73,7 @@ public class SimpleFlyCamera : MonoBehaviour
         if (!allowTranslation) return;
         float baseSpeed = GameSettings.I ? GameSettings.I.playerSpeed : movementSpeed;
         float sprintSpeed = GameSettings.I ? GameSettings.I.playerSprintSpeed : fastMovementSpeed;
-        float currentSpeed = (keyboard.leftShiftKey.isPressed ? sprintSpeed : baseSpeed) * Mathf.Clamp(externalSpeedMultiplier,.25f,1f);
+        float currentSpeed = (keyboard.leftShiftKey.isPressed ? sprintSpeed : baseSpeed) * Mathf.Clamp(externalSpeedMultiplier,.25f,1f) * (energy ? energy.SwimMultiplier : 1f);
         Vector3 direction = Vector3.zero;
 
         if (keyboard.wKey.isPressed) direction += transform.forward;
@@ -81,14 +84,16 @@ public class SimpleFlyCamera : MonoBehaviour
         if (keyboard.qKey.isPressed) direction -= transform.up;
 
         direction.Normalize();
+        if(energy) energy.Energy.SetSprinting(keyboard.leftShiftKey.isPressed && direction.sqrMagnitude>0);
+        Vector3 current=externalVelocity*(energy ? energy.CurrentMultiplier : 1f);
 
         if (rb != null && !rb.isKinematic)
         {
-            rb.linearVelocity = direction * currentSpeed + externalVelocity;
+            rb.linearVelocity = direction * currentSpeed + current;
         }
         else
         {
-            transform.position += (direction * currentSpeed + externalVelocity) * Time.deltaTime;
+            transform.position += (direction * currentSpeed + current) * Time.deltaTime;
         }
     }
 }

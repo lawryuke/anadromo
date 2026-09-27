@@ -38,6 +38,8 @@ public static class Esc2SharkCheck
         if(!SessionState.GetBool(KeyName,false)) return;
         if(mode==PlayModeStateChange.EnteredPlayMode)
         {
+            foreach(var energy in UnityEngine.Object.FindObjectsByType<Anadromo.Systems.EnergySystem>(FindObjectsSortMode.None)) energy.enabled=false;
+
             stage=0; started=Time.time; wallStart=EditorApplication.timeSinceStartup;
             Application.runInBackground=true; EditorApplication.update+=Tick;
         }

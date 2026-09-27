@@ -1,5 +1,9 @@
 # Esc2 — Mecánicas de lamprea, tiburón, piraña y pez linterna
 
+> Actualizacion: en la escena final esc2, vida/comida se han unificado en
+> [energia vital](esc2-energia-vital.md). Las cantidades de dano indicadas
+> abajo descuentan energia; la barra de salud y los bordes rojos se retiraron.
+
 Documento de comportamiento y diseño del MVP `Esc2_Enemigos_MVP`.
 Los valores descritos corresponden a los scripts y a la configuración del
 generador de la escena; son parámetros de prueba, no un balance definitivo.

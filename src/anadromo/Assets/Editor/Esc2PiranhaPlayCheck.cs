@@ -40,6 +40,8 @@ public static class Esc2PiranhaPlayCheck
         if(!SessionState.GetBool(Key,false)) return;
         if(state==PlayModeStateChange.EnteredPlayMode)
         {
+            foreach(var energy in UnityEngine.Object.FindObjectsByType<Anadromo.Systems.EnergySystem>(FindObjectsSortMode.None)) energy.enabled=false;
+
             start=EditorApplication.timeSinceStartup; stage=0; failure=null;
             SessionState.SetInt(Key+"FPS",Application.targetFrameRate); Application.targetFrameRate=30;
             EditorApplication.update+=Tick;

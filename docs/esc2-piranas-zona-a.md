@@ -1,5 +1,9 @@
 # Pirañas en esc2 — zona A
 
+> Actualizacion: en la escena final esc2, vida/comida se han unificado en
+> [energia vital](esc2-energia-vital.md). Las cantidades de dano indicadas
+> abajo descuentan energia; la barra de salud y los bordes rojos se retiraron.
+
 La escena `Assets/_Project/Scenes/esc2.unity` contiene dos pirañas de
 primitivas 3D en la cámara de entrada A. No necesitan cargar el escenario MVP.
 
