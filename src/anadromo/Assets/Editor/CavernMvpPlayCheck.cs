@@ -76,6 +76,7 @@ public static class CavernMvpPlayCheck
                 Require(world.GetComponentsInChildren<CavernAngler>().Length == 2,"Dos peces linterna serializados");
                 Require(world.GetComponentsInChildren<CavernLamprey>().Length == 4,"Cuatro lampreas serializadas");
                 Require(world.player.Health == 100,"Inicio seguro sin daño");
+                Require(world.player.GetComponentsInChildren<Light>().Length == 0,"Jugador sin iluminación propia en escena guardada");
                 foreach (var renderer in world.GetComponentsInChildren<Renderer>()) Require(renderer.sharedMaterial && renderer.sharedMaterial.shader && renderer.sharedMaterial.shader.isSupported,"Material válido");
                 foreach (var t in world.GetComponentsInChildren<Transform>()) Require(GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(t.gameObject)==0,"Sin scripts perdidos");
                 Directory.CreateDirectory("Logs");
@@ -95,6 +96,7 @@ public static class CavernMvpPlayCheck
             {
                 Require(!oldPlayer && world.player && world.player.Health==100,"Reinicio destruye jugador anterior y restaura salud");
                 Require(world.GetComponentsInChildren<Camera>().Length==1,"Reinicio conserva una sola cámara");
+                Require(world.player.GetComponentsInChildren<Light>().Length == 0,"Reinicio no genera luz propia");
                 var cc = world.player.GetComponent<CharacterController>(); cc.enabled = false;
                 world.player.transform.position = CavernMvpWorld.RoomPosition(7); cc.enabled = true; stage++;
             }

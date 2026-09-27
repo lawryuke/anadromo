@@ -8,7 +8,6 @@ namespace Anadromo.CavernMVP
     public sealed class CavernPlayer : MonoBehaviour
     {
         public Camera view;
-        public Light flashlight;
         public float quietSpeed = 2.4f, sprintSpeed = 6f;
         public float Health { get; private set; } = 100f;
         public Vector3 Velocity { get; private set; }
@@ -46,7 +45,6 @@ namespace Anadromo.CavernMVP
             view.transform.localRotation = Quaternion.Euler(pitch, 0, 0);
             // Shake is visual only; it cannot feed back into the input detector.
             view.transform.localPosition = Vector3.right * (Mathf.Sin(Time.time * 65) * DamagePulse * .045f);
-            if (k.fKey.wasPressedThisFrame) flashlight.enabled = !flashlight.enabled;
             float x = (k.dKey.isPressed ? 1 : 0) - (k.aKey.isPressed ? 1 : 0);
             float z = (k.wKey.isPressed ? 1 : 0) - (k.sKey.isPressed ? 1 : 0);
             float y = (k.eKey.isPressed ? 1 : 0) - (k.qKey.isPressed ? 1 : 0);
@@ -62,14 +60,6 @@ namespace Anadromo.CavernMVP
                 Shake(alternated ? 35 : 25);
                 shakeCooldown = .12f;
             }
-        }
-
-        public bool IsShiningAt(Vector3 position)
-        {
-            Vector3 delta = position - view.transform.position;
-            return flashlight.enabled && delta.magnitude <= flashlight.range &&
-                Vector3.Angle(view.transform.forward, delta) <= flashlight.spotAngle * .5f &&
-                !Physics.Raycast(view.transform.position, delta.normalized, delta.magnitude, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
         }
 
         public void TakeDamage(float damage)

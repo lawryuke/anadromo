@@ -13,14 +13,13 @@ El menú de apertura permite guardar los cambios pendientes de la escena actual.
 | Nadar / mirar | WASD / ratón |
 | Bajar / subir | Q / E |
 | Nadar rápido | Shift izquierdo |
-| Encender o apagar linterna | F |
 | Desprender lampreas | Alternar A/D en menos de 0,6 s o sacudir el ratón horizontalmente |
 | Liberar / capturar cursor | Esc / clic izquierdo |
 | Reiniciar, incluso tras morir o llegar a la salida | R |
 
 La velocidad normal es 2,4 m/s; con Shift es 6 m/s. El ruido se calcula con
 el desplazamiento real: empujar una pared no produce ruido de desplazamiento.
-El HUD muestra salud, ruido, luz, penalización por lampreas, cavernas visitadas
+El HUD muestra salud, ruido, penalización por lampreas, cavernas visitadas
 y un mapa con la posición del jugador. Llegar al marcador de H termina la partida.
 
 ## Mecánicas y recorrido
@@ -31,8 +30,9 @@ y un mapa con la posición del jugador. Llegar al marcador de H termina la parti
   por pez, con 1 s de intervalo. Pierden el ataque tras 3 s sin detección.
 - **Pez linterna (C y G):** señuelo luminoso en reposo; lo apaga al detectar
   al jugador, espera 1,8 s y embiste en la dirección fijada al iniciar el ataque.
-  La linterna, dentro del cono y sin paredes de por medio, cancela el ataque
-  y mantiene apagado el señuelo. Contacto: 25 de daño; después se recupera.
+  El jugador no emite luz: debe esquivar lateralmente o cambiar de altura.
+  Mirarlo o quedarse quieto no cancela la embestida. Contacto: 25 de daño;
+  después se recupera durante 2 s.
 - **Lampreas (D y F):** persiguen, se adhieren junto a la cámara y restan
   15 puntos porcentuales de velocidad cada una (mínimo: 25%). Cada lamprea
   drena 5 de salud cada 2 s. Agarre: 100; A/D alternado resta 35, una sacudida

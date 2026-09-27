@@ -16,11 +16,9 @@ Referencias: [pseudocódigo original](esc2-enemigos-pseudocode.txt),
 | Piraña | Reacciona al movimiento rápido y alerta al cardumen | Pasar despacio sin permanecer cerca; esquivar si se activa |
 | Pez linterna | Atrae con un señuelo y embiste desde la penumbra | Reconocer el apagado del señuelo y apartarse |
 
-**Estado del pez linterna:** la embestida y la evasión ya existen en el MVP,
-pero también sigue implementada la cancelación mediante la linterna del
-jugador. La preferencia de diseño discutida es eliminar esa iluminación y
-centrar el encuentro en escapar. Este documento distingue ambos estados;
-documentar esa preferencia no modifica el código.
+**Pez linterna — opción A implementada:** el jugador no tiene iluminación
+propia. El apagado del señuelo avisa de la embestida; la defensa consiste
+en escapar de su trayectoria. Mirarlo o quedarse quieto no lo detiene.
 
 ## 2. Lamprea — adhesión y desgaste
 
@@ -160,7 +158,7 @@ que permita validar visualmente ese engaño.
 ### Comportamiento implementado
 
 1. **CHILL:** permanece quieto con el señuelo encendido, salvo durante
-   recuperación o deslumbramiento.
+   recuperación.
 2. **DISTURBED:** al detectar al jugador a menos de **8 m**, sin paredes de
    por medio, apaga el señuelo y permanece quieto preparando la emboscada.
 3. Tras **1,8 s**, entra en **ATTACK**. Si durante la preparación pierde la
@@ -174,36 +172,20 @@ que permita validar visualmente ese engaño.
 Después de recuperarse puede preparar otro ataque desde su nueva posición;
 actualmente no regresa a su punto original de emboscada.
 
-### Excepción de luz que todavía existe en el código
+### Defensa implementada: escapar sin luz propia
 
-El prototipo conserva la luz del jugador, encendida inicialmente y
-conmutable con F. Si ilumina directamente al enemigo dentro del alcance
-y cono de luz, sin obstáculos, este vuelve a CHILL, reinicia su contador
-y mantiene apagado el señuelo. Esa comprobación también cancela un ataque
-en curso. Al dejar de recibir luz queda una recuperación de unos 0,8 s.
-
-**Mirar no es la condición:** la condición es iluminar. Con la luz apagada,
-apuntar la cámara al enemigo no lo paraliza.
-
-Esta interacción procedía del pseudocódigo, pero atribuye al salmón una
-fuente de luz que no está justificada en el diseño del protagonista.
-
-### Dirección de diseño discutida: escapar sin luz propia
-
-La preferencia expresada es conservar el engaño y la evasión, eliminando
-el deslumbramiento como defensa del jugador:
-
-- El señuelo se apaga y deja un breve margen reconocible para reaccionar.
+- El señuelo se apaga y deja 1,8 s de preparación para reaccionar.
 - El jugador se aparta lateralmente, cambia de altura o busca cobertura.
-- La embestida mantiene una dirección fija y deja una recuperación si falla.
+- La embestida mantiene una dirección fija y deja 2 s de recuperación.
 - Mirar al pez o quedarse quieto no cancela el ataque.
-- No se necesita un alga luminosa ni una habilidad de iluminación propia.
+- El jugador no tiene una luz propia ni un control F para iluminar.
+- No se necesita un alga luminosa ni una habilidad de iluminación.
 
-La trayectoria fija ya está implementada. **Quitar la luz del jugador y su
-efecto sobre este enemigo sigue pendiente de implementación.** La duración
-del aviso debe probarse con jugadores; 1,8 s es el valor actual, no un ajuste
-definitivo para VR. También falta una señal sonora para que el apagado no
-sea la única advertencia perceptible.
+Se eliminó la cancelación por deslumbramiento del pseudocódigo original.
+La iluminación ambiental y el señuelo del enemigo siguen presentes, pero
+no reinician su contador de ataque. La duración del aviso debe probarse
+con jugadores; 1,8 s no es un ajuste definitivo para VR. También falta una
+señal sonora para que el apagado no sea la única advertencia perceptible.
 
 ### Relación con el GDD
 
@@ -216,7 +198,7 @@ Para conservar ambas respuestas sin confundir al jugador:
 | Amenaza | Señal | Defensa |
 | --- | --- | --- |
 | Pez ciego del GDD | Clics que aumentan y señal crítica | Dejar de moverse a tiempo |
-| Pez linterna propuesto | Se apaga el falso alimento | Apartarse antes de la embestida |
+| Pez linterna del MVP | Se apaga el falso alimento | Apartarse antes de la embestida |
 
 Conviene enseñar los encuentros por separado antes de combinarlos. El pez
 ciego no forma parte de los cuatro enemigos implementados en este MVP.
@@ -245,9 +227,9 @@ Código en `src/anadromo/Assets/_Project/Scripts/CavernMVP/`:
 | `CavernLamprey.cs` | Persecución, adhesión, drenaje, agarre y aturdimiento |
 | `CavernShark.cs` | Recorrido por puntos y daño letal por barrido |
 | `CavernPiranha.cs` | Detección, alerta de cardumen y movimiento con inercia |
-| `CavernAngler.cs` | Señuelo, preparación, deslumbramiento y embestida fija |
+| `CavernAngler.cs` | Señuelo, preparación, embestida fija y recuperación |
 | `CavernEnemy.cs` | Estados comunes, detección, movimiento con obstáculos y contacto |
-| `CavernPlayer.cs` | Salud, velocidad, luz y entrada de sacudidas |
+| `CavernPlayer.cs` | Salud, velocidad y entrada de sacudidas |
 | `CavernMvpWorld.cs` | Distribución de enemigos, valores por escena y activación de tiburones |
 
 Los campos públicos pueden ajustarse en el Inspector. El reinicio reconstruye

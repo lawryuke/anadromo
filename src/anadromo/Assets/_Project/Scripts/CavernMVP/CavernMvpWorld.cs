@@ -113,8 +113,6 @@ namespace Anadromo.CavernMVP
             player.view = cameraObject.AddComponent<Camera>(); player.view.nearClipPlane = .08f; player.view.farClipPlane = 100; player.view.fieldOfView = 75;
             player.view.clearFlags = CameraClearFlags.SolidColor; player.view.backgroundColor = new Color(.015f,.055f,.075f);
             cameraObject.AddComponent<AudioListener>();
-            player.flashlight = cameraObject.AddComponent<Light>(); player.flashlight.type = LightType.Spot; player.flashlight.range = 16; player.flashlight.spotAngle = 46;
-            player.flashlight.intensity = 8; player.flashlight.color = new Color(.8f,.95f,1); player.flashlight.shadows = LightShadows.Soft;
         }
         T Enemy<T>(string label, Vector3 position, Vector3 scale) where T : CavernEnemy
         {
@@ -193,9 +191,9 @@ namespace Anadromo.CavernMVP
             GUI.color = new Color(.02f,.05f,.07f,.9f); GUI.DrawTexture(new Rect(16,16,510,194),white); GUI.color = Color.white;
             GUI.Label(new Rect(30,24,480,32),"ANÁDROMO / LABERINTO · MVP",titleStyle);
             GUI.Label(new Rect(30,61,480,27),player.Zone,textStyle);
-            GUI.Label(new Rect(30,91,480,27),$"Salud {player.Health:0} / 100    Ruido {player.Velocity.magnitude:0.0} m/s    Luz {(player.flashlight.enabled ? "ON" : "OFF")}",textStyle);
+            GUI.Label(new Rect(30,91,480,27),$"Salud {player.Health:0} / 100    Ruido {player.Velocity.magnitude:0.0} m/s",textStyle);
             GUI.Label(new Rect(30,121,480,65),$"Lampreas {player.AttachedCount} · Velocidad {player.SpeedMultiplier:P0}\nCavernas {visited.Count}/8 · Tiempo {elapsed:0}s · Objetivo: llegar a H",textStyle);
-            GUI.Label(new Rect(25,height-88,width-50,80),"WASD nadar · Ratón mirar · Q/E bajar/subir · Shift nadar rápido (ruido)\nF linterna · Alterna A/D rápido o sacude el ratón para soltar lampreas · R reiniciar · Esc cursor\nPirañas: pasa despacio. Pez linterna: ilumínalo. Tiburón: sal del eje del túnel o cambia de altura.",textStyle);
+            GUI.Label(new Rect(25,height-88,width-50,80),"WASD nadar · Ratón mirar · Q/E bajar/subir · Shift nadar rápido (ruido)\nAlterna A/D rápido o sacude el ratón para soltar lampreas · R reiniciar · Esc cursor\nPirañas: pasa despacio. Pez linterna: al apagarse el señuelo, esquiva. Tiburón: sal del eje del túnel o cambia de altura.",textStyle);
             foreach (var pass in passes) if (pass.warning >= 0 || pass.shark)
             {
                 GUI.color = new Color(1,.45f,.2f);

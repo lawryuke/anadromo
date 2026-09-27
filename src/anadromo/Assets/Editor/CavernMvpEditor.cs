@@ -69,9 +69,16 @@ public static class CavernMvpEditor
         Scene previous = SceneManager.GetActiveScene();
         Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Additive);
         int checks = 0;
+        // Additive scenes share the default physics world. Keep the open level's
+        // colliders out of these small fixtures, then restore their exact state.
+        var existingColliders = new List<Collider>();
+        foreach (var collider in UnityEngine.Object.FindObjectsByType<Collider>(FindObjectsSortMode.None))
+            if (collider.enabled) existingColliders.Add(collider);
         Action<bool,string> check = (ok,message) => { if (!ok) throw new InvalidOperationException("Cueva MVP: " + message); checks++; };
         try
         {
+            foreach (var collider in existingColliders) collider.enabled = false;
+            Physics.SyncTransforms();
             SceneManager.SetActiveScene(scene);
             var cells = CavernMvpWorld.WalkableCells();
             var reached = new HashSet<Vector2Int>(); var queue = new Queue<Vector2Int>();
@@ -93,7 +100,6 @@ public static class CavernMvpEditor
                 {
                     var p = make("Test player").AddComponent<CavernPlayer>(); p.gameObject.layer = 2;
                     p.view = make("Test camera").AddComponent<Camera>(); p.view.transform.SetParent(p.transform,false);
-                    p.flashlight = p.view.gameObject.AddComponent<Light>(); p.flashlight.type = LightType.Spot; p.flashlight.range = 16; p.flashlight.spotAngle = 46;
                     var fish = make("Test piranha").AddComponent<CavernPiranha>(); fish.target = p; fish.transform.position = Vector3.forward*4;
                     var ally = make("Test ally").AddComponent<CavernPiranha>(); ally.target = p; ally.transform.position = Vector3.forward*6;
                     fish.school = new[]{fish,ally}; fish.disturbanceDelay = 1;
@@ -103,14 +109,28 @@ public static class CavernMvpEditor
                     fish.transform.position = Vector3.forward*4; fish.noiseThreshold = 0; fish.CheckStatus(.001f); check(fish.State == EnemyState.ATTACK,"Ruido dispara ataque inmediato");
                     var angler = make("Test angler").AddComponent<CavernAngler>(); angler.target = p; angler.transform.position = Vector3.forward*4;
                     angler.lure = angler.gameObject.AddComponent<Light>();
-                    angler.CheckStatus(.1f); angler.Move(.1f); check(angler.State == EnemyState.CHILL && !angler.lure.enabled,"Luz asusta y mantiene señuelo apagado");
-                    p.flashlight.enabled = false;
-                    angler.CheckStatus(1); check(angler.State == EnemyState.DISTURBED,"Emboscada espera a oscuras");
-                    angler.CheckStatus(2); check(angler.State == EnemyState.ATTACK,"Emboscada entra en ataque");
-                    p.flashlight.enabled = true; angler.CheckStatus(.1f); check(angler.State == EnemyState.CHILL,"Linterna cancela ataque");
+                    angler.disturbanceDelay = 1.8f;
                     var wall = GameObject.CreatePrimitive(PrimitiveType.Cube); objects.Add(wall); wall.transform.position = Vector3.forward*2;
-                    Physics.SyncTransforms(); check(!p.IsShiningAt(angler.transform.position),"Linterna no atraviesa paredes");
-                    UnityEngine.Object.DestroyImmediate(wall);
+                    Physics.SyncTransforms(); angler.CheckStatus(.1f); angler.Move(.1f);
+                    check(angler.State == EnemyState.CHILL && angler.lure.enabled,"Pared impide detección; señuelo encendido en reposo");
+                    UnityEngine.Object.DestroyImmediate(wall); Physics.SyncTransforms();
+                    angler.CheckStatus(.1f); angler.Move(.1f);
+                    check(angler.State == EnemyState.DISTURBED && !angler.lure.enabled,"Señuelo apagado avisa de la emboscada");
+                    check(angler.transform.position == Vector3.forward*4,"Preparación inmóvil");
+                    for (int frame = 0; frame < fps*2; frame++) angler.CheckStatus(1f/fps);
+                    check(angler.State == EnemyState.ATTACK,"Mirar y permanecer quieto no cancelan la emboscada");
+                    p.transform.position = Vector3.right*4;
+                    for (int frame = 0; frame < fps; frame++) angler.Move(1f/fps);
+                    check(Mathf.Abs(angler.transform.position.x)<.001f && angler.transform.position.z<0,"Embestida fija permite esquivar lateralmente");
+                    angler.Move(.4f); angler.ExecuteAttack(.4f);
+                    check(angler.State == EnemyState.CHILL && p.Health == 100,"Esquiva evita daño y ataque termina");
+                    Vector3 stopped = angler.transform.position;
+                    angler.CheckStatus(.5f); angler.Move(.5f);
+                    check(angler.transform.position == stopped && !angler.lure.enabled,"Recuperación inmóvil y sin señuelo");
+                    p.transform.position = Vector3.right*40;
+                    angler.CheckStatus(2); angler.Move(.1f);
+                    check(angler.lure.enabled,"Señuelo vuelve tras recuperación");
+                    p.transform.position = Vector3.zero;
                     var lamprey = make("Test lamprey").AddComponent<CavernLamprey>(); lamprey.target = p;
                     var lamprey2 = make("Test lamprey 2").AddComponent<CavernLamprey>(); lamprey2.target = p;
                     lamprey.Attach(); lamprey2.Attach(); check(p.AttachedCount == 2 && Mathf.Abs(p.SpeedMultiplier-.7f)<.001f,"Dos lampreas restan 30% de velocidad");
@@ -127,10 +147,16 @@ public static class CavernMvpEditor
                 }
                 finally { foreach (var go in objects) if (go) UnityEngine.Object.DestroyImmediate(go); }
             }
-            string result = "PASS: Cueva MVP · " + checks + " comprobaciones. Grafo, luz/oclusión, cardumen, agarre/drenaje/sacudidas a 30/60/120 FPS y tiburón letal con barrido.";
+            string result = "PASS: Cueva MVP · " + checks + " comprobaciones. Grafo, emboscada sin luz propia/evasión/oclusión, cardumen, agarre/drenaje/sacudidas a 30/60/120 FPS y tiburón letal con barrido.";
             Directory.CreateDirectory("Logs"); File.WriteAllText("Logs/CavernMvpValidation.txt",result); Debug.Log(result);
         }
-        finally { if (previous.IsValid()) SceneManager.SetActiveScene(previous); EditorSceneManager.CloseScene(scene,true); }
+        finally
+        {
+            foreach (var collider in existingColliders) if (collider) collider.enabled = true;
+            Physics.SyncTransforms();
+            if (previous.IsValid()) SceneManager.SetActiveScene(previous);
+            EditorSceneManager.CloseScene(scene,true);
+        }
     }
 }
 #endif

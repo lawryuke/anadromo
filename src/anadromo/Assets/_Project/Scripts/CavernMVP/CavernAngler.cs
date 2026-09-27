@@ -9,13 +9,10 @@ namespace Anadromo.CavernMVP
         public float attackSpeed = 9;
         Vector3 attackDirection;
         float attackTime, recovery;
-        bool dazzled;
         protected override Color BaseColor => new Color(.35f, .3f, .65f);
         public override void CheckStatus(float dt)
         {
             recovery = Mathf.Max(0, recovery - dt);
-            dazzled = target.IsShiningAt(transform.position);
-            if (dazzled) { State = EnemyState.CHILL; disturbedTimer = 0; recovery = .8f; return; }
             if (recovery > 0) return;
             if (State == EnemyState.CHILL && SeesPlayer(radius)) { State = EnemyState.DISTURBED; disturbedTimer = 0; }
             if (State == EnemyState.DISTURBED)
@@ -27,7 +24,7 @@ namespace Anadromo.CavernMVP
         }
         public override void Move(float dt)
         {
-            bool lit = State == EnemyState.CHILL && !dazzled && recovery <= 0;
+            bool lit = State == EnemyState.CHILL && recovery <= 0;
             if (lure) lure.enabled = lit;
             if (lureBulb) { lureBulb.SetActive(lit); lureBulb.transform.localPosition = new Vector3(Mathf.Sin(Time.time * 3) * .12f, 1, .6f); }
             if (State != EnemyState.ATTACK) return;
