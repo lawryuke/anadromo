@@ -11,6 +11,7 @@ public class SimpleFlyCamera : MonoBehaviour
     [System.NonSerialized] public bool allowTranslation = true;
     [System.NonSerialized] public bool menuLook;
     [System.NonSerialized] public Vector3 externalVelocity;
+    [System.NonSerialized] public float externalSpeedMultiplier = 1f;
 
     private float pitch = 0f;
     private float yaw = 0f;
@@ -62,7 +63,7 @@ public class SimpleFlyCamera : MonoBehaviour
         if (!allowTranslation) return;
         float baseSpeed = GameSettings.I ? GameSettings.I.playerSpeed : movementSpeed;
         float sprintSpeed = GameSettings.I ? GameSettings.I.playerSprintSpeed : fastMovementSpeed;
-        float currentSpeed = keyboard.leftShiftKey.isPressed ? sprintSpeed : baseSpeed;
+        float currentSpeed = (keyboard.leftShiftKey.isPressed ? sprintSpeed : baseSpeed) * Mathf.Clamp(externalSpeedMultiplier,.25f,1f);
         Vector3 direction = Vector3.zero;
 
         if (keyboard.wKey.isPressed) direction += transform.forward;

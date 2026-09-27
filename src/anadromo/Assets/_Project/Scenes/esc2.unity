@@ -163,7 +163,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3e2dce1b8d7f6954ca84e7591dd02ff2, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.AI.ScaredKrillBehavior
   scareDistance: 1
   checkInterval: 0.1
@@ -181,7 +181,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7e65cb922f784beaa5acb373c40418fc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.SwimGroupController
   postHuntDestination: {fileID: 0}
   state: 0
@@ -232,7 +232,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cb0d15da75a413689c2baf391a83d7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 469095472}
   count: 12
@@ -441,7 +441,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a9c5e616066e88347ad6418c1946aee3, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::BloopFishMovement
   puntoInicio: {x: 13.3, y: -15.39, z: 21.1}
   puntoFin: {x: 13.3, y: 120, z: 21.1}
@@ -861,7 +861,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7e65cb922f784beaa5acb373c40418fc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.SwimGroupController
   postHuntDestination: {fileID: 0}
   state: 0
@@ -912,7 +912,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cb0d15da75a413689c2baf391a83d7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 210964975}
   count: 6
@@ -1062,7 +1062,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0559341469d64a21b410c7fef754b604, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: 
   sourceMesh: {fileID: 4300000, guid: 4cc0649e54f0838d93ee89f4adf26904, type: 2}
   subdivisions: 2
@@ -1103,7 +1103,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 57562653fc450e34c923b3a88e546308, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.PredatorEating
   preyTag: Food
   preyLayers:
@@ -1484,7 +1484,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
@@ -1665,7 +1665,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7e65cb922f784beaa5acb373c40418fc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.SwimGroupController
   postHuntDestination: {fileID: 0}
   state: 0
@@ -1716,7 +1716,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cb0d15da75a413689c2baf391a83d7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 469095472}
   count: 3
@@ -2451,7 +2451,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
@@ -3020,7 +3020,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7e65cb922f784beaa5acb373c40418fc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.SwimGroupController
   postHuntDestination: {fileID: 0}
   state: 0
@@ -3071,7 +3071,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cb0d15da75a413689c2baf391a83d7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 469095472}
   count: 2
@@ -3198,6 +3198,76 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!1001 &890378903
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1723103580}
+    m_Modifications:
+    - target: {fileID: 2051963687932458083, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_Name
+      value: Pirana01
+      objectReference: {fileID: 0}
+    - target: {fileID: 2051963687932458083, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_TagString
+      value: Pirana
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.76
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.61
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4278024338206881436, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: attackSpeed
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+--- !u!4 &890378904 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+  m_PrefabInstance: {fileID: 890378903}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &902775675 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7841898233694566802, guid: ffab090c1dfe4744eb1f8c9400b82452, type: 3}
@@ -3257,6 +3327,68 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -7088298972245338821, guid: 125d407ce2cf62c4cab10517962d2ed9, type: 3}
+--- !u!1001 &920133595
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1723103580}
+    m_Modifications:
+    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.6694
+      objectReference: {fileID: 0}
+    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -17.8479
+      objectReference: {fileID: 0}
+    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8727168163215421686, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
+      propertyPath: m_Name
+      value: Pez_Linterna_A_01
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
+--- !u!4 &920133596 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
+  m_PrefabInstance: {fileID: 920133595}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &939245465
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3482,7 +3614,7 @@ PrefabInstance:
     - target: {fileID: 352705319653855518, guid: 29b532df77c042ec8394fd7e217e613d, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 4300000, guid: 445135e59857b4640851024e27279e18, type: 2}
     - target: {fileID: 410463048300404653, guid: 29b532df77c042ec8394fd7e217e613d, type: 3}
       propertyPath: m_LocalPosition.x
       value: -3.962099
@@ -3510,7 +3642,7 @@ PrefabInstance:
     - target: {fileID: 1212450520460029040, guid: 29b532df77c042ec8394fd7e217e613d, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 4300000, guid: 7ebb1fe2d8fdecf4dbd4203353f34357, type: 2}
     - target: {fileID: 2342142131378485443, guid: 29b532df77c042ec8394fd7e217e613d, type: 3}
       propertyPath: m_Name
       value: Seabed Fractured Cliff B (3)
@@ -3518,11 +3650,11 @@ PrefabInstance:
     - target: {fileID: 4780266955347028660, guid: 29b532df77c042ec8394fd7e217e613d, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 4300000, guid: 7ebb1fe2d8fdecf4dbd4203353f34357, type: 2}
     - target: {fileID: 5830578383259330605, guid: 29b532df77c042ec8394fd7e217e613d, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 4300000, guid: 44f7d972a2e59f74a85b5b6c63bb1cd5, type: 2}
     - target: {fileID: 7032143422112495556, guid: 29b532df77c042ec8394fd7e217e613d, type: 3}
       propertyPath: m_LocalScale.x
       value: 2.1865373
@@ -3574,11 +3706,11 @@ PrefabInstance:
     - target: {fileID: 8004946421835902696, guid: 29b532df77c042ec8394fd7e217e613d, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 4300000, guid: 7ebb1fe2d8fdecf4dbd4203353f34357, type: 2}
     - target: {fileID: 8196316205391744842, guid: 29b532df77c042ec8394fd7e217e613d, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 4300000, guid: 7ebb1fe2d8fdecf4dbd4203353f34357, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3972,6 +4104,68 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1086578523}
   m_Mesh: {fileID: 4300000, guid: 4cc0649e54f0838d93ee89f4adf26904, type: 2}
+--- !u!1001 &1091681328
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1723103580}
+    m_Modifications:
+    - target: {fileID: 1019946317981268459, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_Name
+      value: Lamprea_A_01
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.6694
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -17.4479
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+--- !u!4 &1091681329 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+  m_PrefabInstance: {fileID: 1091681328}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1093241631
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4040,6 +4234,76 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 2134501460}
   m_SourcePrefab: {fileID: 100100000, guid: e6507c77a30339f4fa697cefa90c95f1, type: 3}
+--- !u!1001 &1110125298
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1723103580}
+    m_Modifications:
+    - target: {fileID: 2051963687932458083, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_Name
+      value: Pirana02
+      objectReference: {fileID: 0}
+    - target: {fileID: 2051963687932458083, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_TagString
+      value: Pirana
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4278024338206881436, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+      propertyPath: attackSpeed
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+--- !u!4 &1110125299 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
+  m_PrefabInstance: {fileID: 1110125298}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1113205290 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7841898233694566802, guid: ffab090c1dfe4744eb1f8c9400b82452, type: 3}
@@ -4268,6 +4532,7 @@ GameObject:
   - component: {fileID: 1221495005}
   - component: {fileID: 1221495004}
   - component: {fileID: 1221495003}
+  - component: {fileID: 1221495010}
   m_Layer: 0
   m_Name: KM_Player
   m_TagString: Player
@@ -4301,7 +4566,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4746f5b7278e13447b68bd6364ab6cec, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.PlayerFeeding
   mouthRadius: 0.3
   edibleTags:
@@ -4408,7 +4673,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d183ae189a87fd44eb99d4db83251731, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::SimpleFlyCamera
   movementSpeed: 1
   fastMovementSpeed: 1
@@ -4470,6 +4735,26 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1221495001}
   m_Mesh: {fileID: 694107847439892949, guid: 42dadc345a231524c8c312e2222334a9, type: 3}
+--- !u!114 &1221495010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1221495001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d89d5dbd3e3c97448a39962290be72db, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.AI.PiranhaPlayerTarget
+  maxHealth: 100
+  desktopMovement: {fileID: 1221495007}
+  onHealthChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  onDeath:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1273077958
 GameObject:
   m_ObjectHideFlags: 0
@@ -4653,7 +4938,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalCameraData
   m_RenderShadows: 1
   m_RequiresDepthTextureOption: 1
@@ -4916,7 +5201,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5457e49cea13e8e4591c993c578737f7, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.LuzViajera
   waypoints:
   - {fileID: 2125657589}
@@ -4937,7 +5222,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
@@ -5046,7 +5331,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 380cce2b71f74ba19a90068c083ca634, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: 
   glowShader: {fileID: 4800000, guid: d3e4568af90e4e1a867db0e637c78c42, type: 3}
   waterSettings: {fileID: 2100000, guid: ee653ce812e34f619ef2a87d4c915103, type: 2}
@@ -5466,7 +5751,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3e2dce1b8d7f6954ca84e7591dd02ff2, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.AI.ScaredKrillBehavior
   scareDistance: 1
   checkInterval: 0.1
@@ -5484,7 +5769,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7e65cb922f784beaa5acb373c40418fc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.SwimGroupController
   postHuntDestination: {fileID: 0}
   state: 0
@@ -5535,7 +5820,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cb0d15da75a413689c2baf391a83d7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 469095472}
   count: 7
@@ -5692,7 +5977,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7e65cb922f784beaa5acb373c40418fc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.SwimGroupController
   postHuntDestination: {fileID: 0}
   state: 0
@@ -5743,7 +6028,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cb0d15da75a413689c2baf391a83d7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 469095472}
   count: 2
@@ -5776,7 +6061,7 @@ MonoBehaviour:
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fb4ee4743c08339439db7995506d5d93, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.TriggerHuntOnGroupEmpty
   targetSpawner: {fileID: 1570781055}
   swimGroups:
@@ -6113,7 +6398,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
@@ -6176,7 +6461,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3e2dce1b8d7f6954ca84e7591dd02ff2, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.AI.ScaredKrillBehavior
   scareDistance: 1
   checkInterval: 0.1
@@ -6194,7 +6479,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7e65cb922f784beaa5acb373c40418fc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.SwimGroupController
   postHuntDestination: {fileID: 0}
   state: 0
@@ -6245,7 +6530,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cb0d15da75a413689c2baf391a83d7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 469095472}
   count: 12
@@ -6268,6 +6553,61 @@ MonoBehaviour:
   attemptsPerObject: 100
   generated: []
   lastGenerationMessage: 
+--- !u!1 &1723103578
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1723103580}
+  - component: {fileID: 1723103579}
+  m_Layer: 0
+  m_Name: Piranas
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1723103579
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1723103578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e044444e7a41a7845b9b4865f5583e72, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.AI.PiranhaSchool
+  target: {fileID: 1221495010}
+  zoneSize: {x: 6, y: 2.6, z: 7}
+  obstacleLayers:
+    serializedVersion: 2
+    m_Bits: 1019
+  alertRadius: 20
+--- !u!4 &1723103580
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1723103578}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.13769, y: -0.22, z: 15.95}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 890378904}
+  - {fileID: 1110125299}
+  - {fileID: 920133596}
+  - {fileID: 1091681329}
+  - {fileID: 2094205508}
+  m_Father: {fileID: 1927145293}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1736247668 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8072377233892120794, guid: 125d407ce2cf62c4cab10517962d2ed9, type: 3}
@@ -6606,6 +6946,38 @@ Transform:
   - {fileID: 1221495002}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1927145292
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1927145293}
+  m_Layer: 0
+  m_Name: Enemies
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1927145293
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1927145292}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.13769, y: -1.7994, z: 4.5479}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1723103580}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1930611481
 GameObject:
   m_ObjectHideFlags: 0
@@ -6681,7 +7053,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7e65cb922f784beaa5acb373c40418fc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.SwimGroupController
   postHuntDestination: {fileID: 0}
   state: 0
@@ -6732,7 +7104,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cb0d15da75a413689c2baf391a83d7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 469095472}
   count: 4
@@ -6825,7 +7197,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7e65cb922f784beaa5acb373c40418fc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.SwimGroupController
   postHuntDestination: {fileID: 0}
   state: 0
@@ -6876,7 +7248,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cb0d15da75a413689c2baf391a83d7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 210964975}
   count: 7
@@ -6996,7 +7368,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 228d878e999b467306506ef32dab809a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::OrcaGroupMovement
   puntoInicio: {x: 7.1, y: -19.77, z: 22.9}
   puntoFin: {x: 7.1, y: 42, z: 22.9}
@@ -7018,7 +7390,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cb0d15da75a413689c2baf391a83d7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 108478461}
   count: 50
@@ -7068,6 +7440,68 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -3737363606713565607, guid: 125d407ce2cf62c4cab10517962d2ed9, type: 3}
+--- !u!1001 &2094205507
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1723103580}
+    m_Modifications:
+    - target: {fileID: 1019946317981268459, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_Name
+      value: Lamprea_A_02
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.6694
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -17.2979
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+--- !u!4 &2094205508 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4528153370013632453, guid: 2782af90806f53641bb99cd80a0ff82e, type: 3}
+  m_PrefabInstance: {fileID: 2094205507}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2105094315
 GameObject:
   m_ObjectHideFlags: 0
@@ -7308,7 +7742,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7e65cb922f784beaa5acb373c40418fc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.SwimGroupController
   postHuntDestination: {fileID: 0}
   state: 0
@@ -7359,7 +7793,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cb0d15da75a413689c2baf391a83d7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
   sourceObject: {fileID: 210964975}
   count: 7
@@ -7409,7 +7843,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0777d029ed3dffa4692f417d4aba19ca, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: f737fca7a8f544a44b30fffe6a0bb287, type: 2}
   m_DrawDistance: 2
@@ -7534,7 +7968,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0777d029ed3dffa4692f417d4aba19ca, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: 6c72eca4354496f4e95e99b96ea517be, type: 2}
   m_DrawDistance: 100
@@ -7830,7 +8264,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b0fbdabc411ebbf4cb831ad9c88bcb7c, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: 
 --- !u!1 &10000000042
 GameObject:
@@ -12679,7 +13113,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b0fbdabc411ebbf4cb831ad9c88bcb7c, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: 
 --- !u!1 &11000000000
 GameObject:
@@ -12731,7 +13165,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: 
   m_IsGlobal: 1
   priority: 0
@@ -12753,7 +13187,7 @@ MonoBehaviour:
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 41e1f13a5d7e48b7b0d789a14eeaf869, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: 
   viewer: {fileID: 0}
   surface: {fileID: 11000000004}
@@ -12798,4 +13232,5 @@ SceneRoots:
   - {fileID: 1930611482}
   - {fileID: 524796780}
   - {fileID: 1430937690}
+  - {fileID: 1927145293}
   - {fileID: 1859647766}

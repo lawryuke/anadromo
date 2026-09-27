@@ -21,6 +21,7 @@ TagManager:
   - Orca
   - Bloop
   - dead_npc
+  - Pirana
   layers:
   - Default
   - TransparentFX
