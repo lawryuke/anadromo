@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9cbafce57cfd33446b005f30cbe0a189, type: 3}
   m_Name: GameSettings
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Config.GameSettings
-  playerSpeed: 4
-  playerSprintSpeed: 8
+  playerSpeed: 0.7
+  playerSprintSpeed: 1.2
   mouseSensitivity: 0.05
   mouthRadius: 0.35
   requiredAbysmMeals: 4

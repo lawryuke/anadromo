@@ -912,7 +912,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &186648290
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3033,7 +3033,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &652773256
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3107,6 +3107,9 @@ MonoBehaviour:
   headTransform: {fileID: 863163181}
   salmonBody: {fileID: 347118838}
   applyOceanCurrents: 1
+  enableJoystickMovement: 1
+  enableJoystickTurn: 1
+  joystickTurnSpeed: 60
 --- !u!54 &652773260
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3547,7 +3550,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!135 &768065902
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -3642,7 +3645,7 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 768065901}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 3
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
@@ -3739,6 +3742,7 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   consumptionEnabled: 1
+  mouthTarget: {fileID: 0}
   biteBlockingLayers:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -7913,13 +7917,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2121971300}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.2491651, y: -0, z: -0, w: 0.96846104}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.0331, z: 0.1452}
   m_LocalScale: {x: 2.5, y: 2.5, z: 2.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 768065909}
-  m_LocalEulerAnglesHint: {x: 28.856, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2121971302
 MonoBehaviour:
   m_ObjectHideFlags: 0
