@@ -22,7 +22,14 @@ namespace Anadromo.CavernMVP
         float yaw, pitch, lastSideTime = -10, shakeCooldown;
         int lastSide;
 
-        void Awake() { controller = GetComponent<CharacterController>(); yaw = transform.eulerAngles.y; }
+        void Awake() 
+        { 
+            controller = GetComponent<CharacterController>(); 
+            yaw = transform.eulerAngles.y; 
+            
+            // Añade automáticamente nuestro controlador de viñeta para que el usuario no tenga que configurar nada
+            gameObject.AddComponent<DamageVignetteController>();
+        }
         void Start() { Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false; }
         void OnDisable() { Cursor.lockState = CursorLockMode.None; Cursor.visible = true; }
 
