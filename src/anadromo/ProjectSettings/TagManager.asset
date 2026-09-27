@@ -20,6 +20,7 @@ TagManager:
   - Food_Krill_Scary
   - Orca
   - Bloop
+  - dead_npc
   layers:
   - Default
   - TransparentFX

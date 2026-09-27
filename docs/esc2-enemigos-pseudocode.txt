@@ -1,0 +1,337 @@
+
+
+//////////////////////////////////////////////////////////////////////
+// GEMINI //////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+// --- DEFINICIÓN DEL GRAFO (LABERINTO) ---
+// En Unity, esto suele implementarse como un arreglo de Nodos (Waypoints o Rooms)
+// Las transiciones (Túneles) pueden ser Colliders (Triggers) que activan los eventos descritos.
+class Zone {
+    string id;
+    List<Zone> connections;
+    // Lista de spawns o eventos al entrar
+}
+
+// --- MÁQUINA DE ESTADOS Y CLASE BASE ---
+public enum EnemyState { CHILL, DISTURBED, ATTACK }
+
+public abstract class EnemyBase {
+    public EnemyState state = EnemyState.CHILL;
+    
+    // Estos métodos se llamarían dentro del ciclo Update() de Unity
+    public abstract void CheckStatus();
+    public abstract void Move();
+    public abstract void ExecuteAttack();
+}
+
+
+//////////////////////////////////////////////////////////////////////
+// PIRAÑA //////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+// --- PIRAÑA ---
+public class Pirana : EnemyBase {
+    public float normalSpeed, dashSpeed;
+    public float turnSpeedChill = 5f;
+    public float turnSpeedAttack = 0.5f; // Giro lento durante el ataque por inercia
+    public float noiseThreshold = 3f; // Velocidad del jugador que activa el ataque
+
+    public override void CheckStatus() {
+        float distance = Vector3.Distance(target.position, pos);
+        float playerSpeed = target.GetComponent<PlayerController>().currentVelocity.magnitude;
+
+        if (distance <= radius) {
+            // Reacciona al instante si el jugador se mueve rápido
+            if (playerSpeed >= noiseThreshold) {
+                TriggerSwarmAttack();
+            } else {
+                disturbedTimer += Time.deltaTime;
+                if (disturbedTimer >= umbralDist) TriggerSwarmAttack();
+            }
+        } else {
+            disturbedTimer = 0f;
+            if (state != EnemyState.ATTACK) state = EnemyState.CHILL;
+        }
+    }
+
+    private void TriggerSwarmAttack() {
+        state = EnemyState.ATTACK;
+        
+        // Contagia a pirañas en el mismo cuadrante/radio
+        Collider[] hitColliders = Physics.OverlapSphere(pos, 20f);
+        foreach (var hit in hitColliders) {
+            Pirana ally = hit.GetComponent<Pirana>();
+            if (ally != null && ally.state != EnemyState.ATTACK) {
+                ally.state = EnemyState.ATTACK;
+            }
+        }
+    }
+
+    public override void Move() {
+        if (state == EnemyState.ATTACK) {
+            Vector3 targetDir = (target.position - pos).normalized;
+            // Lerp simula la inercia: le cuesta alinearse si el jugador lo esquiva
+            dir = Vector3.Lerp(dir, targetDir, turnSpeedAttack * Time.deltaTime);
+            pos += dir * dashSpeed * Time.deltaTime;
+        } else {
+            // Movimiento normal dentro de su caja
+            dir = Vector3.Lerp(dir, GetRandomDir(), turnSpeedChill * Time.deltaTime);
+            pos += dir * normalSpeed * Time.deltaTime;
+        }
+    }
+    
+    public override void ExecuteAttack() { /* Lógica de daño al contacto */ }
+}
+
+
+//////////////////////////////////////////////////////////////////////
+// PEZ LINTERNA //////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+// --- PEZ LINTERNA ---
+public class PezLinterna : EnemyBase {
+    public Light senueloLight; // Referencia a la luz de su antena
+    public float attackSpeed;
+
+    public override void CheckStatus() {
+        PlayerController player = target.GetComponent<PlayerController>();
+        
+        // Matiz: Si el jugador lo deslumbra, se asusta o reinicia
+        if (player.IsShiningLightAt(pos)) {
+            state = EnemyState.CHILL;
+            senueloLight.enabled = false;
+            disturbedTimer = 0f;
+            return;
+        }
+
+        float distance = Vector3.Distance(target.position, pos);
+
+        if (distance <= radius && state == EnemyState.CHILL) {
+            state = EnemyState.DISTURBED;
+            senueloLight.enabled = false; // Apaga la luz al sentir al jugador
+        }
+        
+        if (state == EnemyState.DISTURBED) {
+            disturbedTimer += Time.deltaTime;
+            if (disturbedTimer >= umbralDist) {
+                state = EnemyState.ATTACK;
+            }
+        }
+    }
+
+    public override void Move() {
+        if (state == EnemyState.CHILL) {
+            // Quieto, imitando comida
+            senueloLight.enabled = true;
+            // TODO: Animar antena simulando un kril
+        } 
+        else if (state == EnemyState.DISTURBED) {
+            // Quieto, camuflado en la oscuridad esperando el momento
+            senueloLight.enabled = false;
+        }
+        else if (state == EnemyState.ATTACK) {
+            // Embestida recta desde la penumbra
+            Vector3 targetDir = (target.position - pos).normalized;
+            pos += targetDir * attackSpeed * Time.deltaTime;
+        }
+    }
+
+    public override void ExecuteAttack() { /* Lógica de daño y reseteo */ }
+} 
+
+
+//////////////////////////////////////////////////////////////////////
+// LAMPREA //////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+// --- LAMPREA ---
+public class Lamprea : EnemyBase {
+    public float maxGrip = 100f;
+    private float currentGrip;
+    
+    public float drainInterval = 2f;
+    private float drainTimer = 0f;
+    
+    public float stunDuration = 3f;
+    private float stunTimer = 0f;
+    
+    private Transform cameraAttachPoint; // Referencia a un punto vacío hijo de la cámara principal
+    private PlayerController playerRef;
+    
+    // Necesitamos ampliar los estados o usar un enum interno
+    private enum LampreaState { CHILL, CHASING, ATTACHED, STUNNED }
+    private LampreaState internalState = LampreaState.CHILL;
+
+    public void Init(Transform attachPoint, PlayerController player) {
+        cameraAttachPoint = attachPoint;
+        playerRef = player;
+        currentGrip = maxGrip;
+    }
+
+    public override void CheckStatus() {
+        if (internalState == LampreaState.STUNNED) {
+            stunTimer -= Time.deltaTime;
+            if (stunTimer <= 0) {
+                internalState = LampreaState.CHILL;
+                currentGrip = maxGrip; // Recupera fuerzas
+            }
+            return;
+        }
+
+        if (internalState == LampreaState.CHILL && Vector3.Distance(pos, playerRef.transform.position) <= radius) {
+            internalState = LampreaState.CHASING;
+        }
+    }
+
+    public override void Move() {
+        if (internalState == LampreaState.CHASING) {
+            // Navegar hacia el jugador
+            Vector3 targetDir = (playerRef.transform.position - pos).normalized;
+            pos += targetDir * normalSpeed * Time.deltaTime;
+        }
+        else if (internalState == LampreaState.ATTACHED) {
+            // Su posición se fuerza al punto de anclaje de la cámara
+            transform.position = cameraAttachPoint.position;
+            transform.rotation = cameraAttachPoint.rotation;
+        }
+        // En STUNNED se queda flotando o cae por gravedad (RigidBody)
+    }
+
+    // Se asume que Unity llama a esto al chocar físicamente
+    void OnCollisionEnter(Collision collision) {
+        if (internalState == LampreaState.CHASING && collision.gameObject.CompareTag("Player")) {
+            AttachToPlayer();
+        }
+    }
+
+    private void AttachToPlayer() {
+        internalState = LampreaState.ATTACHED;
+        drainTimer = drainInterval; // Para que el primer daño no sea inmediato si prefieres, o 0 para que muerda de golpe
+        
+        // Efectos inmediatos
+        playerRef.ApplyCameraShake(0.2f);
+        playerRef.ModifySpeed(-0.15f); // Resta 15% de velocidad
+        playerRef.AddAttachedLamprea(this);
+        
+        // TODO: Activar audio viscoso en bucle (AudioSource.Play)
+    }
+
+    public override void ExecuteAttack() {
+        if (internalState == LampreaState.ATTACHED) {
+            drainTimer -= Time.deltaTime;
+            
+            if (drainTimer <= 0) {
+                drainTimer = drainInterval;
+                
+                playerRef.TakeDamage(5f);
+                playerRef.TriggerBloodVignettePulse();
+                // TODO: Reproducir pico de sonido de succión
+            }
+        }
+    }
+
+    // Método llamado por el jugador cuando se sacude
+    public void ReduceGrip(float amount) {
+        if (internalState != LampreaState.ATTACHED) return;
+        
+        currentGrip -= amount;
+        if (currentGrip <= 0) {
+            DetachFromPlayer();
+        }
+    }
+
+    private void DetachFromPlayer() {
+        internalState = LampreaState.STUNNED;
+        stunTimer = stunDuration;
+        
+        playerRef.ModifySpeed(0.15f); // Devuelve la velocidad
+        playerRef.RemoveAttachedLamprea(this);
+        
+        // TODO: Detener audio en bucle y limpiar pantalla
+        // TODO: Aplicar una pequeña fuerza (AddForce) para separarla visualmente del jugador
+    }
+}
+
+// --- COMPLEMENTO EN EL PLAYER CONTROLLER ---
+public class PlayerController : MonoBehaviour {
+    private List<Lamprea> attachedLampreas = new List<Lamprea>();
+    private float shakeThreshold = 50f; // Cuánto movimiento de ratón o teclas alternas cuenta como sacudida
+    
+    // Este método lo llama tu sistema de inputs en el Update()
+    public void HandleShakeInput(float mouseDeltaX, bool leftRightAlternated) {
+        if (attachedLampreas.Count == 0) return;
+
+        float shakePower = 0f;
+        
+        if (Mathf.Abs(mouseDeltaX) > shakeThreshold) {
+            shakePower = 25f; // Daño al agarre por sacudir el ratón
+        } else if (leftRightAlternated) {
+            shakePower = 35f; // Daño al agarre por pulsar A/D rápido
+        }
+
+        if (shakePower > 0) {
+            // Se usa una lista temporal o un bucle inverso porque la lamprea se eliminará de la lista al soltarse
+            for (int i = attachedLampreas.Count - 1; i >= 0; i--) {
+                attachedLampreas[i].ReduceGrip(shakePower);
+            }
+        }
+    }
+
+    public void AddAttachedLamprea(Lamprea l) { attachedLampreas.Add(l); }
+    public void RemoveAttachedLamprea(Lamprea l) { attachedLampreas.Remove(l); }
+    // ... métodos de ApplyCameraShake, ModifySpeed, etc.
+}
+
+
+//////////////////////////////////////////////////////////////////////
+// TIBURON //////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+public class Tiburon : EnemyBase {
+    public Transform[] waypoints; // Puntos que definen la curva del túnel
+    private int currentWaypointIndex = 0;
+    
+    public float travelSpeed = 15f;
+    public float killDamage = 100f; // Daño letal al contacto
+
+    public override void CheckStatus() {
+        // No cambia de estado, siempre está en CHILL (o en movimiento)
+        // No le importa dónde está el jugador
+    }
+
+    public override void Move() {
+        if (waypoints.Length == 0 || currentWaypointIndex >= waypoints.Length) {
+            // Llegó al final del recorrido
+            Destroy(gameObject);
+            return;
+        }
+
+        Transform targetWaypoint = waypoints[currentWaypointIndex];
+        
+        // Moverse hacia el punto actual
+        Vector3 direction = (targetWaypoint.position - pos).normalized;
+        pos += direction * travelSpeed * Time.deltaTime;
+        
+        // Rotar suavemente hacia donde está nadando
+        transform.forward = Vector3.Lerp(transform.forward, direction, 2f * Time.deltaTime);
+
+        // Si llegó al waypoint, pasar al siguiente
+        if (Vector3.Distance(pos, targetWaypoint.position) < 1f) {
+            currentWaypointIndex++;
+        }
+    }
+
+    public override void ExecuteAttack() {
+        // Se deja vacío porque el daño se aplica por colisión física
+    }
+
+    // Unity detecta el choque automáticamente
+    void OnTriggerEnter(Collider other) {
+        if (other.CompareTag("Player")) {
+            PlayerController player = other.GetComponent<PlayerController>();
+            player.TakeDamage(killDamage);
+        }
+    }
+}
