@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1647479599713520220}
   - component: {fileID: 5470767905874829157}
   m_Layer: 0
-  m_Name: Point Light (1)
+  m_Name: Point Light2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -155,7 +155,7 @@ GameObject:
   - component: {fileID: 4091720305903024012}
   - component: {fileID: 7200793192439910301}
   m_Layer: 0
-  m_Name: Point Light
+  m_Name: Point Light1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -452,7 +452,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6529539636480663231}

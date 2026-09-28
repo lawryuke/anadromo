@@ -103,6 +103,7 @@ GameObject:
   - component: {fileID: 7203014118947068656}
   - component: {fileID: 5893880707993489456}
   - component: {fileID: 609129916586528936}
+  - component: {fileID: 4383704919304689023}
   m_Layer: 0
   m_Name: "Se\xF1uelo"
   m_TagString: Untagged
@@ -120,7 +121,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.12, z: -0.85}
-  m_LocalScale: {x: 0.23, y: 0.23, z: 0.23}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8412148152695550404}
@@ -192,7 +193,7 @@ Light:
   m_Enabled: 0
   serializedVersion: 12
   m_Type: 2
-  m_Color: {r: 0.25, g: 1, b: 0.7, a: 1}
+  m_Color: {r: 0.972549, g: 0.5176471, b: 0.4, a: 1}
   m_Intensity: 0.8
   m_Range: 2.5
   m_SpotAngle: 30
@@ -260,7 +261,36 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.DistantLureGlow
   waterSettings: {fileID: 2100000, guid: d128757a28f33494cb0f7eb53ce4a81e, type: 2}
-  emission: {r: 0.75, g: 3, b: 2.1, a: 1}
+  emission: {r: 1.5825963, g: 0.38240343, b: 0.22386487, a: 1}
+--- !u!114 &4383704919304689023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5611648790680120163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &8727168163215421686
 GameObject:
   m_ObjectHideFlags: 0

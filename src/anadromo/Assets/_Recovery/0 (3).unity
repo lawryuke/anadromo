@@ -615,71 +615,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 715160474}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &52871099
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 52871100}
-  - component: {fileID: 52871101}
-  m_Layer: 0
-  m_Name: Krils
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &52871100
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 52871099}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.21768999, y: 0.28939998, z: -2.8639002}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1322206750}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &52871101
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 52871099}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1cb0d15da75a413689c2baf391a83d7f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
-  sourceObject: {fileID: 8073169212572733070, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
-  count: 3
-  generateOnStart: 1
-  spawnedTag: 
-  markAsPrey: 1
-  targetObject: {fileID: 0}
-  useSourceModelRotation: 1
-  modelRotationOffset: {x: 0, y: 0, z: 0}
-  center: {x: 0, y: 0, z: 0}
-  size: {x: 2, y: 1, z: 2}
-  containWholeObject: 1
-  randomYaw: 1
-  seed: 12345
-  avoidOverlaps: 1
-  obstacleLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  includeTriggers: 0
-  attemptsPerObject: 100
-  generated: []
-  lastGenerationMessage: 
 --- !u!1 &61382701
 GameObject:
   m_ObjectHideFlags: 0
@@ -2147,71 +2082,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1631879731339628706, guid: ffab090c1dfe4744eb1f8c9400b82452, type: 3}
   m_PrefabInstance: {fileID: 255179017}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &255847418
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 255847419}
-  - component: {fileID: 255847420}
-  m_Layer: 0
-  m_Name: Krils
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &255847419
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 255847418}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.29, y: 0.5294, z: -3.83}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 588231786}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &255847420
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 255847418}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1cb0d15da75a413689c2baf391a83d7f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
-  sourceObject: {fileID: 8073169212572733070, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
-  count: 3
-  generateOnStart: 1
-  spawnedTag: 
-  markAsPrey: 1
-  targetObject: {fileID: 0}
-  useSourceModelRotation: 1
-  modelRotationOffset: {x: 0, y: 0, z: 0}
-  center: {x: 0, y: 0, z: 0}
-  size: {x: 4, y: 3, z: 3}
-  containWholeObject: 1
-  randomYaw: 1
-  seed: 12345
-  avoidOverlaps: 1
-  obstacleLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  includeTriggers: 0
-  attemptsPerObject: 100
-  generated: []
-  lastGenerationMessage: 
 --- !u!1 &256263278
 GameObject:
   m_ObjectHideFlags: 0
@@ -3503,71 +3373,11 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 413558315}
   m_Mesh: {fileID: 4300000, guid: 4cc0649e54f0838d93ee89f4adf26904, type: 2}
---- !u!1 &417138339
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 417138340}
-  - component: {fileID: 417138341}
-  m_Layer: 0
-  m_Name: Krils
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &417138340
+--- !u!4 &415666385 stripped
 Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 5620873360308498923, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
+  m_PrefabInstance: {fileID: 1408312009}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 417138339}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0.13080564, y: -0, z: -0, w: 0.991408}
-  m_LocalPosition: {x: 0.26, y: -0.078, z: -2.521}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 641432138}
-  m_LocalEulerAnglesHint: {x: 15.032, y: 0, z: 0}
---- !u!114 &417138341
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 417138339}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1cb0d15da75a413689c2baf391a83d7f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
-  sourceObject: {fileID: 8073169212572733070, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
-  count: 6
-  generateOnStart: 1
-  spawnedTag: 
-  markAsPrey: 1
-  targetObject: {fileID: 0}
-  useSourceModelRotation: 1
-  modelRotationOffset: {x: 0, y: 0, z: 0}
-  center: {x: 0, y: 0, z: 0}
-  size: {x: 1.3, y: 1.3, z: 4}
-  containWholeObject: 1
-  randomYaw: 1
-  seed: 12345
-  avoidOverlaps: 1
-  obstacleLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  includeTriggers: 0
-  attemptsPerObject: 100
-  generated: []
-  lastGenerationMessage: 
 --- !u!1 &419416972
 GameObject:
   m_ObjectHideFlags: 0
@@ -4700,7 +4510,6 @@ Transform:
   - {fileID: 890378904}
   - {fileID: 1110125299}
   - {fileID: 547723062}
-  - {fileID: 255847419}
   m_Father: {fileID: 1927145293}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &588231787
@@ -5229,58 +5038,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 981349768559209438, guid: 44dea0f060ba1884fb5843dd1accb615, type: 3}
   m_PrefabInstance: {fileID: 631002077}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &641432136
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 641432138}
-  - component: {fileID: 641432137}
-  m_Layer: 0
-  m_Name: TunnelF1
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &641432137
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 641432136}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e044444e7a41a7845b9b4865f5583e72, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.AI.PiranhaSchool
-  target: {fileID: 1221495010}
-  zoneSize: {x: 2, y: 2, z: 3}
-  obstacleLayers:
-    serializedVersion: 2
-    m_Bits: 1019
-  alertRadius: 20
---- !u!4 &641432138
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 641432136}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -29.099, y: -11.84, z: 68.018}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 417138340}
-  - {fileID: 647952265}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &643626358
 GameObject:
   m_ObjectHideFlags: 0
@@ -5382,125 +5139,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1631879731339628706, guid: ffab090c1dfe4744eb1f8c9400b82452, type: 3}
   m_PrefabInstance: {fileID: 644775281}
   m_PrefabAsset: {fileID: 0}
---- !u!1001 &647952264
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 641432138}
-    m_Modifications:
-    - target: {fileID: 7203014118947068656, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      propertyPath: 'm_Materials.Array.data[0]'
-      value: 
-      objectReference: {fileID: 2100000, guid: d727a381efc4ef14ba44f1837090e97f, type: 2}
-    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0.19
-      objectReference: {fileID: 0}
-    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -0.34
-      objectReference: {fileID: 0}
-    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8427974969740374326, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      propertyPath: 'm_Materials.Array.data[0]'
-      value: 
-      objectReference: {fileID: 2100000, guid: 8b1a13bee3c5ac34590fb314f6554f2a, type: 2}
-    - target: {fileID: 8639303341302938775, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      propertyPath: attackSpeed
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 8639303341302938775, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      propertyPath: detectionRadius
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8727168163215421686, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      propertyPath: m_Name
-      value: Pez_Linterna1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8727168163215421686, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      propertyPath: m_TagString
-      value: Pez_Linterna
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5611648790680120163, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 647952267}
-  m_SourcePrefab: {fileID: 100100000, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
---- !u!4 &647952265 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8412148152695550404, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-  m_PrefabInstance: {fileID: 647952264}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &647952266 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5611648790680120163, guid: 7123ddde93bb4be46ba489140465dbcc, type: 3}
-  m_PrefabInstance: {fileID: 647952264}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &647952267
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 647952266}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
-  m_UsePipelineSettings: 1
-  m_AdditionalLightsShadowResolutionTier: 2
-  m_CustomShadowLayers: 0
-  m_LightCookieSize: {x: 1, y: 1}
-  m_LightCookieOffset: {x: 0, y: 0}
-  m_SoftShadowQuality: 0
-  m_RenderingLayersMask:
-    serializedVersion: 0
-    m_Bits: 1
-  m_ShadowRenderingLayersMask:
-    serializedVersion: 0
-    m_Bits: 1
-  m_Version: 4
-  m_LightLayerMask: 1
-  m_ShadowLayerMask: 1
-  m_RenderingLayers: 1
-  m_ShadowRenderingLayers: 1
 --- !u!1 &668999625 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -8483780544200691189, guid: 125d407ce2cf62c4cab10517962d2ed9, type: 3}
@@ -6952,6 +6590,38 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3984824829780457055, guid: ff0023aef9178f84591ed0252a42b6f6, type: 3}
   m_PrefabInstance: {fileID: 892372416}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &894897428
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 894897429}
+  m_Layer: 0
+  m_Name: Kril
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &894897429
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 894897428}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.254, z: -3.696}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 415666385}
+  m_Father: {fileID: 1322206750}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &900324494
 GameObject:
   m_ObjectHideFlags: 0
@@ -9923,7 +9593,7 @@ Transform:
   m_GameObject: {fileID: 1308652008}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.0331, z: 0.1452}
   m_LocalScale: {x: 2.5, y: 2.5, z: 2.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -10204,7 +9874,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 52871100}
+  - {fileID: 894897429}
   m_Father: {fileID: 1927145293}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1339965489 stripped
@@ -10916,6 +10586,63 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.ZoneLimit
   center: {x: 0, y: 0, z: 0}
   size: {x: 8, y: 8, z: 8}
+--- !u!1001 &1408312009
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 894897429}
+    m_Modifications:
+    - target: {fileID: 5620873360308498923, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5620873360308498923, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5620873360308498923, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5620873360308498923, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5620873360308498923, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5620873360308498923, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5620873360308498923, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5620873360308498923, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5620873360308498923, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5620873360308498923, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8073169212572733070, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
+      propertyPath: m_Name
+      value: KrilBrillante
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
 --- !u!1 &1412957274
 GameObject:
   m_ObjectHideFlags: 0
@@ -12170,71 +11897,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1677779591}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1551344477
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1551344478}
-  - component: {fileID: 1551344479}
-  m_Layer: 0
-  m_Name: Krils
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1551344478
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1551344477}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.13, y: -0.78, z: 0.31}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1730174766}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1551344479
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1551344477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1cb0d15da75a413689c2baf391a83d7f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.BoxObjectSpawner
-  sourceObject: {fileID: 8073169212572733070, guid: 45b3706a53c7397479579b6b3bc4fbe7, type: 3}
-  count: 8
-  generateOnStart: 1
-  spawnedTag: 
-  markAsPrey: 1
-  targetObject: {fileID: 0}
-  useSourceModelRotation: 1
-  modelRotationOffset: {x: 0, y: 0, z: 0}
-  center: {x: 0, y: 0, z: 0}
-  size: {x: 9, y: 5, z: 9}
-  containWholeObject: 1
-  randomYaw: 1
-  seed: 12345
-  avoidOverlaps: 1
-  obstacleLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  includeTriggers: 0
-  attemptsPerObject: 100
-  generated: []
-  lastGenerationMessage: 
 --- !u!1 &1556607542
 GameObject:
   m_ObjectHideFlags: 0
@@ -13626,7 +13288,6 @@ Transform:
   - {fileID: 920133596}
   - {fileID: 579452186}
   - {fileID: 2140087277}
-  - {fileID: 1551344478}
   m_Father: {fileID: 1927145293}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1736247668 stripped
@@ -14230,7 +13891,7 @@ Transform:
   m_GameObject: {fileID: 1900587007}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -28.46, y: -11.38, z: 62.819}
+  m_LocalPosition: {x: -0.52, y: -13.87, z: 89.39}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -22244,4 +21905,3 @@ SceneRoots:
   - {fileID: 524796780}
   - {fileID: 1430937690}
   - {fileID: 1927145293}
-  - {fileID: 641432138}
