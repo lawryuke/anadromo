@@ -1,327 +1,170 @@
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.XR.Hands;
-using System.Collections.Generic;
 
 namespace Anadromo.Locomotion
 {
-    /// <summary>
-    /// Detecta aleteos de las manos rastreadas por el visor o del bridge legado.
-    /// 
-    /// Algoritmo:
-    ///   1. Lee las muñecas rastreadas respecto al visor, o las muñecas de MediaPipe
-    ///   2. Suaviza las alturas según la fuente de seguimiento
-    ///   3. Calcula velocidad vertical (deltaY / deltaTime)
-    ///   4. Detecta "flap" cuando la velocidad descendente supera el umbral
-    ///   5. Emite eventos OnLeftFlap / OnRightFlap con la intensidad [0-1]
-    ///   6. Aplica cooldown para evitar múltiples detecciones por aleteo
-    /// 
-    /// Velocidad negativa = brazo bajando = FLAP.
-    /// </summary>
+    /// <summary>Movimiento libre de manos en 3D, con filtrado y velocidad proporcional.</summary>
     public class FlapDetector : MonoBehaviour
     {
         public enum TrackingSource { ExternalCamera, QuestHands }
-
-        [Header("Dependencias")]
-        [SerializeField] private TrackingSource trackingSource = TrackingSource.ExternalCamera;
-        [Tooltip("Referencia al receptor de datos de la cámara externa.")]
+        [SerializeField] private TrackingSource trackingSource;
         [SerializeField] private Anadromo.Systems.ExternalCameraReceiver cameraReceiver;
-
-        [Header("Seguimiento XR")]
         [SerializeField] private Transform headTransform;
-        [Tooltip("Raíz XR que convierte las articulaciones del espacio de seguimiento al mundo.")]
         [SerializeField] private Transform xrOrigin;
-
-        [Tooltip("Suavizado de las manos XR; menor que el de MediaPipe para conservar los gestos.")]
-        [Range(0f, 0.99f)] [SerializeField] private float xrSmoothingFactor = 0.45f;
-        [Tooltip("Velocidad descendente mínima de cada muñeca relativa a la cabeza (m/s).")]
-        [Min(0f)] [SerializeField] private float xrFlapVelocityThreshold = 0.15f;
-        [Tooltip("Descenso mínimo para contar un aleteo y descartar temblores (m).")]
-        [Min(0f)] [SerializeField] private float xrMinimumStrokeDistance = 0.1f;
-        [Tooltip("Subida necesaria para preparar el siguiente aleteo (m).")]
-        [Min(0f)] [SerializeField] private float xrRecoveryDistance = 0.07f;
-        [Tooltip("Velocidad descendente a la que el nado alcanza la máxima intensidad (m/s).")]
-        [Min(0.01f)] [SerializeField] private float xrFullIntensitySpeed = 1.2f;
-
-        [Tooltip("Configuración de parámetros de detección. " +
-                 "Crear con: click derecho > Create > Anadromo > Flap Settings")]
         [SerializeField] private FlapSettings settings;
-
-        [Header("Eventos de Aleteo")]
-        [Tooltip("Se dispara al detectar un aleteo del brazo IZQUIERDO. Parámetro: intensidad [0-1].")]
+        [Header("Movimiento libre de manos XR")]
+        [Range(0f, 0.99f)] [SerializeField] private float xrSmoothingFactor = 0.45f;
+        [Tooltip("Velocidad mínima en cualquier dirección (m/s).")]
+        [Min(0.01f)] [SerializeField] private float xrFlapVelocityThreshold = 0.15f;
+        [Tooltip("Desplazamiento mínimo desde el comienzo de cada impulso (m).")]
+        [Min(0.01f)] [SerializeField] private float xrMinimumStrokeDistance = 0.06f;
+        [Tooltip("Velocidad media que produce el impulso máximo (m/s).")]
+        [Min(0.1f)] [SerializeField] private float xrFullIntensitySpeed = 1.2f;
+        [Tooltip("Saltos de tracking superiores a esta velocidad se descartan (m/s).")]
+        [Min(1f)] [SerializeField] private float xrMaximumSampleSpeed = 5f;
         public UnityEvent<float> OnLeftFlap = new UnityEvent<float>();
-
-        [Tooltip("Se dispara al detectar un aleteo del brazo DERECHO. Parámetro: intensidad [0-1].")]
         public UnityEvent<float> OnRightFlap = new UnityEvent<float>();
-
-        // ─── Debug (visibles en Inspector) ───
-        [Header("Debug — Muñeca Izquierda")]
         [SerializeField] private bool leftHandTracked;
-        [SerializeField] private float leftWristRawY;
-        [SerializeField] private float leftWristSmoothedY;
-        [SerializeField] private float leftVelocityY;
-        [SerializeField] private bool leftInCooldown;
-
-        [Header("Debug — Muñeca Derecha")]
         [SerializeField] private bool rightHandTracked;
-        [SerializeField] private float rightWristRawY;
-        [SerializeField] private float rightWristSmoothedY;
-        [SerializeField] private float rightVelocityY;
-        [SerializeField] private bool rightInCooldown;
-
-        [Header("Debug — Contadores")]
         [SerializeField] private int totalLeftFlaps;
         [SerializeField] private int totalRightFlaps;
-
-        // ─── Estado interno ───
-        private float prevLeftSmoothedY;
-        private float prevRightSmoothedY;
-        private float leftCooldownTimer;
-        private float rightCooldownTimer;
-        private bool leftInitialized;
-        private bool rightInitialized;
-        private bool warnedMissing;
+        private ArmState left, right;
         private XRHandSubsystem handSubsystem;
-        private readonly List<XRHandSubsystem> handSubsystems = new List<XRHandSubsystem>();
-        private XRStrokeState leftStroke;
-        private XRStrokeState rightStroke;
+        private readonly List<XRHandSubsystem> subsystems = new List<XRHandSubsystem>();
 
-        private struct XRStrokeState
+        private struct ArmState
         {
-            public bool descending;
-            public bool recovering;
-            public float startY;
-            public float lowestY;
-            public float peakSpeed;
+            public bool initialized;
+            public Vector3 raw, filtered, anchor;
+            public float path, movingTime, idleTime, cooldown;
         }
 
-        // ─── Lifecycle ───
-
-        private void OnEnable()
-        {
-            leftInitialized = false;
-            rightInitialized = false;
-            leftHandTracked = false;
-            rightHandTracked = false;
-            warnedMissing = false;
-            leftStroke = default;
-            rightStroke = default;
-        }
-
+        public bool IsOperational => isActiveAndEnabled && settings != null &&
+            (leftHandTracked || rightHandTracked);
+        private void OnEnable() => ResetState();
+        private void OnDisable() => ResetState();
         private void Update()
         {
-            // Validar dependencias
-            if (settings == null || (trackingSource == TrackingSource.ExternalCamera && cameraReceiver == null) ||
-                (trackingSource == TrackingSource.QuestHands && (headTransform == null || xrOrigin == null)))
-            {
-                if (!warnedMissing)
-                {
-                    Debug.LogWarning("[Anadromo] FlapDetector: revisa FlapSettings y las referencias de la fuente de seguimiento.");
-                    warnedMissing = true;
-                }
-                return;
-            }
-
-            bool leftTracked = TryReadWrist(true, out float leftY);
-            bool rightTracked = TryReadWrist(false, out float rightY);
-            leftHandTracked = leftTracked;
-            rightHandTracked = rightTracked;
-            if (!leftTracked && !rightTracked)
-            {
-                leftInitialized = false;
-                rightInitialized = false;
-                leftStroke = default;
-                rightStroke = default;
-                return;
-            }
-
-            float dt = Time.deltaTime;
-            if (dt <= 0f) return;
-
-            UpdateArm(leftTracked, leftY, dt, ref leftInitialized, ref leftWristRawY,
-                ref leftWristSmoothedY, ref prevLeftSmoothedY, ref leftVelocityY,
-                ref leftCooldownTimer, ref leftInCooldown, ref leftStroke,
-                OnLeftFlap, ref totalLeftFlaps, "izquierdo");
-            UpdateArm(rightTracked, rightY, dt, ref rightInitialized, ref rightWristRawY,
-                ref rightWristSmoothedY, ref prevRightSmoothedY, ref rightVelocityY,
-                ref rightCooldownTimer, ref rightInCooldown, ref rightStroke,
-                OnRightFlap, ref totalRightFlaps, "derecho");
+            if (settings == null || Time.deltaTime <= 0f) return;
+            ProcessArm(true, ref left, ref leftHandTracked, OnLeftFlap, ref totalLeftFlaps);
+            ProcessArm(false, ref right, ref rightHandTracked, OnRightFlap, ref totalRightFlaps);
         }
 
-        private bool TryReadWrist(bool left, out float height)
+        private bool TryReadWrist(bool isLeft, out Pose pose)
         {
-            height = 0f;
-            if (trackingSource == TrackingSource.ExternalCamera)
-            {
-                if (cameraReceiver == null || !cameraReceiver.IsReceiving) return false;
-                height = left ? cameraReceiver.LeftWrist.y : cameraReceiver.RightWrist.y;
-                return true;
-            }
-
-            if (headTransform == null || xrOrigin == null) return false;
+            pose = default;
+            if (trackingSource != TrackingSource.QuestHands) return false;
             if (handSubsystem == null || !handSubsystem.running)
             {
                 handSubsystem = null;
-                SubsystemManager.GetSubsystems(handSubsystems);
-                foreach (var subsystem in handSubsystems)
+                SubsystemManager.GetSubsystems(subsystems);
+                foreach (var subsystem in subsystems)
                     if (subsystem.running) { handSubsystem = subsystem; break; }
             }
             if (handSubsystem == null) return false;
+            var hand = isLeft ? handSubsystem.leftHand : handSubsystem.rightHand;
+            return hand.isTracked && hand.GetJoint(XRHandJointID.Wrist).TryGetPose(out pose);
+        }
 
-            XRHand hand = left ? handSubsystem.leftHand : handSubsystem.rightHand;
-            if (!hand.isTracked || !hand.GetJoint(XRHandJointID.Wrist).TryGetPose(out Pose wristPose))
-                return false;
-
-            // XR Hands entrega articulaciones en espacio de seguimiento.
-            // Restar la cabeza evita contar el movimiento del cuerpo como un aleteo.
-            height = xrOrigin.TransformPoint(wristPose.position).y - headTransform.position.y;
+        /// <summary>Pose mundial para las aletas, incluyendo Camera Offset del XR Origin.</summary>
+        public bool TryGetTrackedWrist(bool isLeft, out Pose pose)
+        {
+            pose = default;
+            if (!isActiveAndEnabled || !TryReadWrist(isLeft, out pose)) return false;
+            var hand = isLeft ? handSubsystem.leftHand : handSubsystem.rightHand;
+            if (hand.GetJoint(XRHandJointID.MiddleProximal).TryGetPose(out Pose middle) &&
+                hand.GetJoint(XRHandJointID.IndexProximal).TryGetPose(out Pose index) &&
+                hand.GetJoint(XRHandJointID.LittleProximal).TryGetPose(out Pose little))
+            {
+                Vector3 forward = middle.position - pose.position;
+                Vector3 normal = Vector3.Cross(forward, index.position - little.position) * (isLeft ? -1f : 1f);
+                if (forward.sqrMagnitude > 0.00001f && normal.sqrMagnitude > 0.00000001f)
+                    pose.rotation = Quaternion.LookRotation(forward, normal);
+            }
+            Transform trackingSpace = headTransform != null ? headTransform.parent : xrOrigin;
+            if (trackingSpace == null) return false;
+            pose = new Pose(trackingSpace.TransformPoint(pose.position), trackingSpace.rotation * pose.rotation);
             return true;
         }
 
-        private void UpdateArm(bool tracked, float height, float dt, ref bool initialized,
-            ref float rawY, ref float smoothedY, ref float previousY, ref float velocityY,
-            ref float cooldownTimer, ref bool inCooldown, ref XRStrokeState stroke,
-            UnityEvent<float> flapEvent,
-            ref int totalFlaps, string label)
+        private void ProcessArm(bool isLeft, ref ArmState arm, ref bool tracked,
+            UnityEvent<float> flapEvent, ref int count)
         {
-            if (!tracked)
+            Vector3 point;
+            bool xr = trackingSource == TrackingSource.QuestHands;
+            if (xr)
             {
-                initialized = false;
-                velocityY = 0f;
-                stroke = default;
-                return;
-            }
-
-            rawY = height;
-            if (!initialized)
-            {
-                smoothedY = previousY = rawY;
-                initialized = true;
-                return;
-            }
-
-            float alpha = trackingSource == TrackingSource.QuestHands ? xrSmoothingFactor : settings.smoothingFactor;
-            // Conservar la respuesta de filtrado a distintas frecuencias del visor.
-            if (trackingSource == TrackingSource.QuestHands) alpha = Mathf.Pow(alpha, dt * 72f);
-            float priorY = smoothedY;
-            smoothedY = Mathf.Lerp(rawY, smoothedY, alpha);
-            velocityY = (smoothedY - previousY) / dt;
-            previousY = smoothedY;
-            UpdateCooldown(ref cooldownTimer, ref inCooldown, dt);
-            if (trackingSource == TrackingSource.QuestHands)
-                DetectXRStroke(priorY, smoothedY, velocityY, ref stroke, ref cooldownTimer,
-                    ref inCooldown, flapEvent, ref totalFlaps, label);
-            else
-                TryDetectFlap(velocityY, ref cooldownTimer, ref inCooldown,
-                    flapEvent, ref totalFlaps, label);
-        }
-
-        // ─── Detección ───
-
-        private void DetectXRStroke(float priorY, float height, float velocityY, ref XRStrokeState stroke,
-            ref float cooldownTimer, ref bool inCooldown, UnityEvent<float> flapEvent,
-            ref int totalFlaps, string label)
-        {
-            if (stroke.recovering)
-            {
-                stroke.lowestY = Mathf.Min(stroke.lowestY, height);
-                if (height - stroke.lowestY >= xrRecoveryDistance)
-                {
-                    stroke.recovering = false;
-                    stroke.descending = false;
-                }
-                return;
-            }
-
-            if (velocityY < -xrFlapVelocityThreshold)
-            {
-                if (!stroke.descending)
-                {
-                    stroke.descending = true;
-                    stroke.startY = priorY;
-                    stroke.peakSpeed = 0f;
-                }
-                stroke.peakSpeed = Mathf.Max(stroke.peakSpeed, -velocityY);
-                if (stroke.startY - height >= xrMinimumStrokeDistance && !inCooldown)
-                {
-                    float normalizedSpeed = Mathf.InverseLerp(
-                        xrFlapVelocityThreshold, xrFullIntensitySpeed, stroke.peakSpeed);
-                    float intensity = Mathf.Lerp(
-                        Mathf.Max(0.3f, settings.minIntensity), settings.maxIntensity,
-                        normalizedSpeed);
-                    flapEvent.Invoke(intensity);
-                    cooldownTimer = settings.flapCooldown;
-                    inCooldown = true;
-                    totalFlaps++;
-                    stroke.recovering = true;
-                    stroke.lowestY = height;
-                    Debug.Log($"[Anadromo] FLAP XR {label} — intensidad: {intensity:F2} (vel: {stroke.peakSpeed:F2} m/s)");
-                }
-            }
-            else if (velocityY >= 0f)
-                stroke.descending = false;
-        }
-
-        private void TryDetectFlap(float velocityY, ref float cooldownTimer,
-                                    ref bool inCooldown, UnityEvent<float> flapEvent,
-                                    ref int totalFlaps, string label)
-        {
-            // Aleteo = velocidad Y negativa (brazo bajando) que supera el umbral
-            if (velocityY < -settings.flapVelocityThreshold && !inCooldown)
-            {
-                // Calcular intensidad normalizada [minIntensity, maxIntensity]
-                float rawIntensity = Mathf.Abs(velocityY) * settings.intensityMultiplier;
-                float intensity = Mathf.Clamp(rawIntensity, settings.minIntensity, settings.maxIntensity);
-
-                // Disparar evento
-                flapEvent?.Invoke(intensity);
-
-                // Activar cooldown
-                cooldownTimer = settings.flapCooldown;
-                inCooldown = true;
-                totalFlaps++;
-
-                Debug.Log($"[Anadromo] 🐟 FLAP {label} — intensidad: {intensity:F2} (vel: {velocityY:F3})");
-            }
-        }
-
-        private void UpdateCooldown(ref float timer, ref bool flag, float dt)
-        {
-            if (timer > 0f)
-            {
-                timer -= dt;
-                flag = true;
+                tracked = TryReadWrist(isLeft, out Pose pose);
+                // Espacio de tracking: el giro de cabeza y la locomoción virtual
+                // no generan movimiento artificial de brazos.
+                point = pose.position;
             }
             else
             {
-                flag = false;
+                tracked = cameraReceiver != null && cameraReceiver.IsReceiving;
+                point = tracked ? (isLeft ? cameraReceiver.LeftWrist : cameraReceiver.RightWrist) : Vector3.zero;
             }
+            float dt = Time.deltaTime;
+            if (!tracked || dt > 0.15f)
+            {
+                arm = default;
+                return;
+            }
+            if (!arm.initialized || (xr && Vector3.Distance(point, arm.raw) / dt > xrMaximumSampleSpeed))
+            {
+                arm = new ArmState { initialized = true, raw = point, filtered = point, anchor = point };
+                return;
+            }
+            arm.raw = point;
+            Vector3 previous = arm.filtered;
+            float retention = xr ? Mathf.Pow(xrSmoothingFactor, dt * 72f) : settings.smoothingFactor;
+            arm.filtered = Vector3.Lerp(point, previous, retention);
+            arm.cooldown = Mathf.Max(0f, arm.cooldown - dt);
+            if (!xr)
+            {
+                float downwardSpeed = (previous.y - arm.filtered.y) / dt;
+                if (downwardSpeed > settings.flapVelocityThreshold && arm.cooldown <= 0f)
+                {
+                    flapEvent.Invoke(Mathf.Clamp(downwardSpeed * settings.intensityMultiplier,
+                        settings.minIntensity, settings.maxIntensity));
+                    arm.cooldown = settings.flapCooldown;
+                    count++;
+                }
+                return;
+            }
+            float distance = Vector3.Distance(previous, arm.filtered);
+            if (distance / dt < xrFlapVelocityThreshold)
+            {
+                arm.idleTime += dt;
+                if (arm.idleTime >= 0.12f)
+                {
+                    arm.anchor = arm.filtered;
+                    arm.path = arm.movingTime = 0f;
+                }
+                return;
+            }
+            arm.idleTime = 0f;
+            arm.path += distance;
+            arm.movingTime += dt;
+            if (arm.cooldown > 0f || arm.movingTime < 0.08f ||
+                Vector3.Distance(arm.anchor, arm.filtered) < xrMinimumStrokeDistance) return;
+            float speed = arm.path / arm.movingTime;
+            float intensity = Mathf.Lerp(Mathf.Max(0.25f, settings.minIntensity), settings.maxIntensity,
+                Mathf.InverseLerp(xrFlapVelocityThreshold, xrFullIntensitySpeed, speed));
+            flapEvent.Invoke(intensity);
+            count++;
+            arm.anchor = arm.filtered;
+            arm.path = arm.movingTime = 0f;
+            arm.cooldown = settings.flapCooldown;
         }
 
-        // ─── API pública ───
-
-        /// <summary>
-        /// Resetea contadores y estado interno del detector.
-        /// Útil al reiniciar un nivel o al cambiar de escena.
-        /// </summary>
         public void ResetState()
         {
-            leftInitialized = false;
-            rightInitialized = false;
-            leftStroke = default;
-            rightStroke = default;
-            leftCooldownTimer = 0f;
-            rightCooldownTimer = 0f;
-            leftInCooldown = false;
-            rightInCooldown = false;
-            totalLeftFlaps = 0;
-            totalRightFlaps = 0;
+            left = right = default;
+            leftHandTracked = rightHandTracked = false;
+            totalLeftFlaps = totalRightFlaps = 0;
         }
-
-        /// <summary>
-        /// Devuelve true si el detector está recibiendo datos y operativo.
-        /// </summary>
-        public bool IsOperational =>
-            settings != null && (leftInitialized || rightInitialized);
     }
 }

@@ -904,6 +904,7 @@ GameObject:
   m_Component:
   - component: {fileID: 186648293}
   - component: {fileID: 186648290}
+  - component: {fileID: 186648294}
   m_Layer: 0
   m_Name: PoseBridge
   m_TagString: Untagged
@@ -929,9 +930,9 @@ MonoBehaviour:
   xrOrigin: {fileID: 652773262}
   xrSmoothingFactor: 0.45
   xrFlapVelocityThreshold: 0.15
-  xrMinimumStrokeDistance: 0.1
-  xrRecoveryDistance: 0.07
+  xrMinimumStrokeDistance: 0.06
   xrFullIntensitySpeed: 1.2
+  xrMaximumSampleSpeed: 5
   settings: {fileID: 11400000, guid: 952bcda9d3d099e48b1c4a44f3364b72, type: 2}
   OnLeftFlap:
     m_PersistentCalls:
@@ -939,16 +940,27 @@ MonoBehaviour:
   OnRightFlap:
     m_PersistentCalls:
       m_Calls: []
-  leftWristRawY: 0
-  leftWristSmoothedY: 0
-  leftVelocityY: 0
-  leftInCooldown: 0
-  rightWristRawY: 0
-  rightWristSmoothedY: 0
-  rightVelocityY: 0
-  rightInCooldown: 0
+  leftHandTracked: 0
+  rightHandTracked: 0
   totalLeftFlaps: 0
   totalRightFlaps: 0
+--- !u!114 &186648294
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 186648289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d6e4278ab134cd4bcfdb12a805e3f79, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.SalmonFinHands
+  detector: {fileID: 186648290}
+  swimController: {fileID: 652773259}
+  finMaterial: {fileID: 2100000, guid: d3352378e37732c4ea8e5dc3ac1b2a74, type: 2}
+  finLength: 0.28
+  rotationOffset: {x: 0, y: 0, z: 0}
 --- !u!4 &186648293
 Transform:
   m_ObjectHideFlags: 0

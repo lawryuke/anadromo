@@ -71,6 +71,15 @@ public class MigrateTerrainTestVisuales
                 swim.enableJoystickTurn = false;
             }
 
+            var fins = poseBridge.GetComponent<SalmonFinHands>();
+            if (fins == null) fins = poseBridge.AddComponent<SalmonFinHands>();
+            var finProperties = new SerializedObject(fins);
+            finProperties.FindProperty("detector").objectReferenceValue = detector;
+            finProperties.FindProperty("swimController").objectReferenceValue = swim;
+            finProperties.FindProperty("finMaterial").objectReferenceValue =
+                AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Art/Materials/SalmonMat.mat");
+            finProperties.ApplyModifiedPropertiesWithoutUndo();
+
             var actionReceiver = poseBridge.GetComponent<PoseActionReceiver>();
             if (actionReceiver != null) Object.DestroyImmediate(actionReceiver);
             var debugUI = poseBridge.GetComponent<PoseBridgeDebugUI>();
