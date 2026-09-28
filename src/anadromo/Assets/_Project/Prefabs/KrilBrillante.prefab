@@ -41,11 +41,11 @@ Light:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 681183125389167740}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 12
   m_Type: 2
   m_Color: {r: 0.9716981, g: 0.5190465, b: 0.3987629, a: 1}
-  m_Intensity: 0.1
+  m_Intensity: 0.07
   m_Range: 1
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -135,7 +135,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 681183125389167740}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6eca05fa0003d2c46be52dafbbc5e272, type: 3}
   m_Name: 
@@ -183,11 +183,11 @@ Light:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1341727170422840159}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 12
   m_Type: 2
   m_Color: {r: 0.9716981, g: 0.5190465, b: 0.3987629, a: 1}
-  m_Intensity: 0.1
+  m_Intensity: 0.07
   m_Range: 1
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -277,7 +277,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1341727170422840159}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6eca05fa0003d2c46be52dafbbc5e272, type: 3}
   m_Name: 
@@ -421,7 +421,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c76a517252d9ac4b815aa8b064495aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.DistantLureGlow
-  waterSettings: {fileID: 2100000, guid: d128757a28f33494cb0f7eb53ce4a81e, type: 2}
+  waterSettings: {fileID: 2100000, guid: ee653ce812e34f619ef2a87d4c915103, type: 2}
   emission: {r: 0.608393, g: 0.19188735, b: 0.0947027, a: 1}
 --- !u!1 &8073169212572733070
 GameObject:
@@ -435,6 +435,7 @@ GameObject:
   - component: {fileID: 6761338966069648445}
   - component: {fileID: 3064504314088905085}
   - component: {fileID: 1730648442304823263}
+  - component: {fileID: 893012001234567890}
   m_Layer: 0
   m_Name: KrilBrillante
   m_TagString: Food_PlayerOnly
@@ -612,7 +613,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c76a517252d9ac4b815aa8b064495aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.DistantLureGlow
-  waterSettings: {fileID: 2100000, guid: d128757a28f33494cb0f7eb53ce4a81e, type: 2}
+  waterSettings: {fileID: 2100000, guid: ee653ce812e34f619ef2a87d4c915103, type: 2}
   emission: {r: 0.60839295, g: 0.54501873, b: 0.430945, a: 1}
 --- !u!1001 &7584706423091861002
 PrefabInstance:
@@ -680,7 +681,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -4486846978167503711, guid: 7da30f60e305cf2469648b16abaa75ac, type: 3}
       propertyPath: m_Materials.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -4486846978167503711, guid: 7da30f60e305cf2469648b16abaa75ac, type: 3}
       propertyPath: 'm_Materials.Array.data[1]'
@@ -693,10 +694,55 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7da30f60e305cf2469648b16abaa75ac, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7783814354912723628}
   m_SourcePrefab: {fileID: 100100000, guid: 7da30f60e305cf2469648b16abaa75ac, type: 3}
+--- !u!1 &7314729387969915739 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 7da30f60e305cf2469648b16abaa75ac, type: 3}
+  m_PrefabInstance: {fileID: 7584706423091861002}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &7783814354912723628
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7314729387969915739}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: b3fc73e6e8a6bbc4ead60fcc05ddc16b, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!4 &7982897740231143905 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7da30f60e305cf2469648b16abaa75ac, type: 3}
   m_PrefabInstance: {fileID: 7584706423091861002}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &893012001234567890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8073169212572733070}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c76a517252d9ac4b815aa8b064495aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.DistantLureGlow
+  waterSettings: {fileID: 2100000, guid: ee653ce812e34f619ef2a87d4c915103, type: 2}
+  includeChildRenderers: 1
+  emission: {r: 0.608393, g: 0.19188735, b: 0.0947027, a: 1}

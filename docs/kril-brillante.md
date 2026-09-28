@@ -17,6 +17,20 @@ En ese componente, `Emission` controla el color HDR/brillo y `Water Settings`
 apunta a `Esc2-WaterDepthY`. Respeta sus **Luminous objects fade start/end**, ahora
 12/18 m. Brilla sin Point Light y sin revelar terreno. Las paredes opacas lo ocultan.
 
+## Configuración actual en TerrainTestVisuales
+
+El prefab ahora usa el modelo animado `SK_Krill`. Conserva su material original
+y añade `Kril-NaranjaGlow` como segundo material sobre su único submesh.
+`DistantLureGlow` en la raíz, con `Include Child Renderers` activo, envía el color
+y las distancias al modelo. `Water Settings` apunta a
+`TerrainTestVisuales-WaterDepthY`: sus valores **Luminous objects fade start/end**
+controlan la capa luminosa en Play. El material original sigue sujeto a la niebla
+normal. Las dos Point Lights y sus componentes WaterRevealLight están desactivados.
+El color HDR `Emission` de la raíz ajusta el brillo naranja sin iluminar el terreno.
+
+Menú de comprobación: **Anadromo > Kril > Verificar visibilidad luminosa**.
+Comprueba el prefab y la propagación de dos rangos de distancia sin guardar la escena.
+
 ## Sustituir las esferas por un modelo
 
 1. Abre el prefab con doble clic en Project.

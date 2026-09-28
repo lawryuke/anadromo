@@ -28,6 +28,8 @@ Material:
     - _DeepLight: 0.12
     - _DeepY: -18
     - _Density: 0
+    - _LightVisibilityEnd: 40
+    - _LightVisibilityStart: 20
     - _OpenWaterDistance: 60
     - _ShallowY: 7
     - _SurfaceY: 10
