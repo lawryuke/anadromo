@@ -122,6 +122,7 @@ MonoBehaviour:
   - {fileID: 4450480642192535629}
   - {fileID: 7490237086658043737}
   - {fileID: 2484235270683871888}
+  activationZone: {fileID: 0}
   travelSpeed: 15
   warningDuration: 3
   repeatDelay: 18
@@ -131,7 +132,7 @@ MonoBehaviour:
   obstacleRadius: 0.4
   obstacleLayers:
     serializedVersion: 2
-    m_Bits: 4294967291
+    m_Bits: 1019
 --- !u!1 &2672842865646611114
 GameObject:
   m_ObjectHideFlags: 0

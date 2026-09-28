@@ -106,6 +106,10 @@ namespace Anadromo.AI
             attachedLampreys.Clear(); lastSide=0; lastSideAt=-10; shakeReady=0;
             foreach(var passage in FindObjectsByType<Esc2SharkPassage>(FindObjectsSortMode.None))
                 if(passage.target==this) passage.ResetPassage();
+            foreach(var fish in FindObjectsByType<Esc2BlindFish>(FindObjectsSortMode.None))
+                if(fish.target==this) fish.ResetFish();
+            var blindSensor=GetComponent<BlindFishMotionSensor>();
+            if(blindSensor) blindSensor.ResetMotion();
             if(desktopMovement) { desktopMovement.externalSpeedMultiplier=1; desktopMovement.SyncLookRotation(); }
             onHealthChanged.Invoke(Health);
         }
