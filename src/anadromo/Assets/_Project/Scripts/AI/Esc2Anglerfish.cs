@@ -41,7 +41,7 @@ namespace Anadromo.AI
                 delta=transform.position-previous;
                 float u=delta.sqrMagnitude<.00001f?0:Mathf.Clamp01(Vector3.Dot(player.transform.position-previous,delta)/delta.sqrMagnitude);
                 if(cooldown<=0 && Vector3.Distance(previous+delta*u,player.transform.position)<=contactRadius && school.ClearPath(transform.position,player.transform.position))
-                { player.TakeDamage(damage); cooldown=recoveryDuration; State=BehaviourState.Recover; }
+                { player.TakeDamage(damage); cooldown=recoveryDuration; State=BehaviourState.Recover; GetComponentInChildren<PredatorNaturalMotion>()?.Bite(); }
                 else if(attackElapsed>=1.3f || delta.magnitude<attackSpeed*dt*.5f) { State=BehaviourState.Recover; cooldown=recoveryDuration; }
                 else if(attackSpeed>0 && delta.sqrMagnitude>0) transform.rotation=Quaternion.LookRotation(direction);
             }
