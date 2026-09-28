@@ -23,6 +23,7 @@ TagManager:
   - dead_npc
   - Pirana
   - Pez_Linterna
+  - Lamprea
   layers:
   - Default
   - TransparentFX
