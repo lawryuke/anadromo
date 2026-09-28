@@ -6,11 +6,12 @@ namespace Anadromo.AI
     // A reusable crossing, independent from schools: never steers towards the player.
     public sealed class Esc2SharkPassage : MonoBehaviour
     {
-        public enum PassageState { Waiting, Warning, Crossing, Cooldown }
+        public enum PassageState { Waiting, Warning, Crossing, Cooldown, Finished }
         public PiranhaPlayerTarget target;
         public Transform shark;
         public Transform[] waypoints;
         public ZoneLimit activationZone;
+        public bool triggerOnlyOnce = true;
         public float travelSpeed=15, warningDuration=3, repeatDelay=18, activationRadius=4;
         public float contactRadius=.5f, bodyHalfLength=.75f, obstacleRadius=.4f;
         public LayerMask obstacleLayers=Physics.DefaultRaycastLayers;
@@ -72,7 +73,11 @@ namespace Anadromo.AI
                 return;
             }
             cooldown=Mathf.Max(0,cooldown-dt);
-            if(State==PassageState.Cooldown) { if(cooldown<=0) State=PassageState.Waiting; return; }
+            if(State==PassageState.Cooldown) { 
+                if(cooldown<=0) State = triggerOnlyOnce ? PassageState.Finished : PassageState.Waiting; 
+                return; 
+            }
+            if(State==PassageState.Finished) return;
             float budget=Mathf.Max(0,travelSpeed)*dt;
             while(budget>0 && waypoint<waypoints.Length)
             {

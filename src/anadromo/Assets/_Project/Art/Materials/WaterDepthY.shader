@@ -10,6 +10,8 @@ Shader "Anadromo/Water Depth Y"
         _Density ("Water haze (not depth darkening)", Range(0, 0.1)) = 0.025
         _VisibilityStart ("Visibility fade start (metres)", Float) = 5
         _VisibilityEnd ("Visibility fade end (metres)", Float) = 10
+        _LightVisibilityStart ("Luminous objects fade start (metres)", Float) = 12
+        _LightVisibilityEnd ("Luminous objects fade end (metres)", Float) = 18
         _DeepLight ("Light remaining at depth", Range(0, 1)) = 0.12
         _OpenWaterDistance ("Open water sampling distance", Float) = 60
     }
@@ -23,14 +25,50 @@ Shader "Anadromo/Water Depth Y"
             #pragma vertex Vert
             #pragma fragment Frag
             #pragma target 3.5
+            // Match URP lighting variants so player builds retain additional-light shadows.
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS
+            #pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
             CBUFFER_START(UnityPerMaterial)
                 float _SurfaceY, _ShallowY, _DeepY, _Density, _DeepLight, _OpenWaterDistance;
                 float _VisibilityStart, _VisibilityEnd;
+                float _LightVisibilityStart, _LightVisibilityEnd;
                 float4 _ShallowColor, _DeepColor;
             CBUFFER_END
+
+            // Supplied per camera by WaterVisibilityFeature, never shared between scenes.
+            int _WaterRevealCount;
+            float4 _WaterRevealPositionRadius[16];
+            float4 _WaterRevealSettings[16]; // strength, additional-light index
+
+            float LocalReveal(float3 pointWS, float3 cameraWS)
+            {
+                float reveal = 0;
+                #if defined(ADDITIONAL_LIGHT_CALCULATE_SHADOWS)
+                for (int i = 0; i < _WaterRevealCount; i++)
+                {
+                    float4 sphere = _WaterRevealPositionRadius[i];
+                    float3 toLight = sphere.xyz - pointWS;
+                    float radial = 1 - smoothstep(0.0, sphere.w, length(toLight));
+                    float farFade = 1 - saturate((distance(cameraWS, sphere.xyz) - _LightVisibilityStart)
+                        / max(0.01, _LightVisibilityEnd - _LightVisibilityStart));
+                    if (radial * farFade <= 0) continue;
+                    int lightIndex = (int)_WaterRevealSettings[i].y;
+                    half4 shadowParams = GetAdditionalLightShadowParams(lightIndex);
+                    // No allocated shadow slice: fail closed instead of revealing through walls.
+                    if (shadowParams.w < 0) continue;
+                    half shadow = AdditionalLightRealtimeShadow(lightIndex, pointWS, SafeNormalize(toLight),
+                        shadowParams, GetAdditionalLightShadowSamplingData(lightIndex));
+                    reveal = max(reveal, radial * farFade * shadow * _WaterRevealSettings[i].x);
+                }
+                #endif
+                return saturate(reveal);
+            }
 
             float DepthBlend(float worldY)
             {
@@ -86,6 +124,9 @@ Shader "Anadromo/Water Depth Y"
                 haze = 1.0 - (1.0 - haze) * (1.0 - visibilityFade);
                 // Darkness depends on world Y, not view-space Z or camera pitch.
                 float3 lit = source.rgb * lerp(1.0, _DeepLight, depth);
+                float reveal = sky ? 0 : LocalReveal(pointWS, cameraWS);
+                haze *= 1 - reveal;
+                lit = lerp(lit, source.rgb, reveal);
                 return half4(sky ? waterColor : lerp(lit, waterColor, haze), source.a);
             }
             ENDHLSL

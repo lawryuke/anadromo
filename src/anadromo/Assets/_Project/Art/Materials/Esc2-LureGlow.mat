@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Esc2-WaterDepthY
-  m_Shader: {fileID: 4800000, guid: 7a9c1e2f4b8d4632a1f97302e653ce81, type: 3}
+  m_Name: Esc2-LureGlow
+  m_Shader: {fileID: 4800000, guid: d3e4568af90e4e1a867db0e637c78c42, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -25,18 +25,10 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _DeepLight: 0.09
-    - _DeepY: -18
-    - _Density: 0
-    - _LightVisibilityEnd: 7
-    - _LightVisibilityStart: 4
-    - _OpenWaterDistance: 60
-    - _ShallowY: 7
-    - _SurfaceY: 10
-    - _VisibilityEnd: 7
-    - _VisibilityStart: 4
+    - _Cull: 2
+    - _Halo: 0
     m_Colors:
-    - _DeepColor: {r: 0.07450981, g: 0.3372549, b: 0.38823533, a: 1}
-    - _ShallowColor: {r: 0.0748042, g: 0.33901057, b: 0.38679248, a: 1}
+    - _Color: {r: 0.75, g: 3, b: 2.1, a: 1}
+    - _Visibility: {r: 12, g: 18, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

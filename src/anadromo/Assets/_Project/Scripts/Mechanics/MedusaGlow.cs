@@ -8,7 +8,7 @@ namespace Anadromo.Mechanics
     public sealed class MedusaGlow : MonoBehaviour
     {
         public Shader glowShader;
-        [Tooltip("Material que controla Start/End de la visibilidad submarina.")]
+        [Tooltip("Material del agua: usa Luminous objects fade start/end, independientes del terreno.")]
         public Material waterSettings;
         [Min(0.01f)] public float bodyDiameter = 0.24f;
         [Min(0.01f)] public float haloDiameter = 1.2f;
@@ -61,6 +61,8 @@ namespace Anadromo.Mechanics
         void LateUpdate()
         {
             if (!body || !halo) return;
+            body.SetActive(sourceLight.isActiveAndEnabled);
+            halo.SetActive(sourceLight.isActiveAndEnabled);
             float pulse = 1 + pulseAmount * Mathf.Sin(Time.time * pulseSpeed * Mathf.PI * 2);
             body.transform.localScale = Vector3.one * bodyDiameter * pulse;
             halo.transform.localScale = Vector3.one * haloDiameter * pulse;
@@ -69,8 +71,8 @@ namespace Anadromo.Mechanics
             bodyMaterial.SetColor("_Color", color);
             color.a = haloOpacity;
             haloMaterial.SetColor("_Color", color);
-            float start = waterSettings ? waterSettings.GetFloat("_VisibilityStart") : 5;
-            float end = waterSettings ? waterSettings.GetFloat("_VisibilityEnd") : 10;
+            float start = waterSettings ? waterSettings.GetFloat("_LightVisibilityStart") : 12;
+            float end = waterSettings ? waterSettings.GetFloat("_LightVisibilityEnd") : 18;
             if (debugIgnoreDistanceFade) { start = 9999; end = 10000; }
             bodyMaterial.SetVector("_Visibility", new Vector4(start, end, 0, 0));
             haloMaterial.SetVector("_Visibility", new Vector4(start, end, 0, 0));
@@ -78,8 +80,8 @@ namespace Anadromo.Mechanics
 
         public string VisibilityDebug(Camera camera)
         {
-            float start = waterSettings ? waterSettings.GetFloat("_VisibilityStart") : 5;
-            float end = waterSettings ? waterSettings.GetFloat("_VisibilityEnd") : 10;
+            float start = waterSettings ? waterSettings.GetFloat("_LightVisibilityStart") : 12;
+            float end = waterSettings ? waterSettings.GetFloat("_LightVisibilityEnd") : 18;
             float distance = Vector3.Distance(camera.transform.position, transform.position);
             float fade = debugIgnoreDistanceFade ? 1 : 1 - Mathf.Clamp01((distance - start) / Mathf.Max(0.01f, end - start));
             bool layerVisible = (camera.cullingMask & (1 << gameObject.layer)) != 0;
