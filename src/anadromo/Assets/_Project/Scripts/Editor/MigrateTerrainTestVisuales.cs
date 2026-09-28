@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 using Anadromo.Locomotion;
+using Anadromo.Systems;
 
 public class MigrateTerrainTestVisuales 
 {
@@ -40,16 +41,51 @@ public class MigrateTerrainTestVisuales
         if (poseBridge != null)
         {
             poseBridge.SetActive(true);
-            Debug.Log("Enabled PoseBridge");
-            
-            // Add PoseActionReceiver if not present
-            var receiver = poseBridge.GetComponent<PoseActionReceiver>();
-            if (receiver == null)
+            var detector = poseBridge.GetComponent<FlapDetector>();
+            if (detector != null && xrOrigin != null)
             {
-                receiver = poseBridge.AddComponent<PoseActionReceiver>();
-                receiver.udpPort = 5065;
-                Debug.Log("Added PoseActionReceiver to PoseBridge");
+                Transform head = null;
+                foreach (var child in xrOrigin.GetComponentsInChildren<Transform>(true))
+                {
+                    if (child.name == "Main Camera") head = child;
+                }
+
+                if (head == null)
+                {
+                    Debug.LogError("XR Origin no tiene cámara de visor.");
+                    return;
+                }
+
+                var serialized = new SerializedObject(detector);
+                serialized.FindProperty("trackingSource").enumValueIndex = 1;
+                serialized.FindProperty("cameraReceiver").objectReferenceValue = null;
+                serialized.FindProperty("headTransform").objectReferenceValue = head;
+                serialized.FindProperty("xrOrigin").objectReferenceValue = xrOrigin.transform;
+                serialized.ApplyModifiedPropertiesWithoutUndo();
             }
+
+            var swim = xrOrigin != null ? xrOrigin.GetComponent<FlapSwimController>() : null;
+            if (swim != null)
+            {
+                swim.enableJoystickMovement = false;
+                swim.enableJoystickTurn = false;
+            }
+
+            var fins = poseBridge.GetComponent<SalmonFinHands>();
+            if (fins == null) fins = poseBridge.AddComponent<SalmonFinHands>();
+            var finProperties = new SerializedObject(fins);
+            finProperties.FindProperty("detector").objectReferenceValue = detector;
+            finProperties.FindProperty("swimController").objectReferenceValue = swim;
+            finProperties.FindProperty("finMaterial").objectReferenceValue =
+                AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Art/Materials/SalmonMat.mat");
+            finProperties.ApplyModifiedPropertiesWithoutUndo();
+
+            var actionReceiver = poseBridge.GetComponent<PoseActionReceiver>();
+            if (actionReceiver != null) Object.DestroyImmediate(actionReceiver);
+            var debugUI = poseBridge.GetComponent<PoseBridgeDebugUI>();
+            if (debugUI != null) Object.DestroyImmediate(debugUI);
+            var cameraReceiver = poseBridge.GetComponent<ExternalCameraReceiver>();
+            if (cameraReceiver != null) Object.DestroyImmediate(cameraReceiver);
         }
 
         EditorSceneManager.SaveScene(scene);

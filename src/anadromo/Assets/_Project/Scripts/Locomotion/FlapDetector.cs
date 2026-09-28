@@ -1,199 +1,170 @@
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.XR.Hands;
 
 namespace Anadromo.Locomotion
 {
-    /// <summary>
-    /// Detecta aleteos verticales de los brazos del jugador a partir de los datos
-    /// de pose recibidos por ExternalCameraReceiver (cámara + MediaPipe).
-    /// 
-    /// Algoritmo:
-    ///   1. Lee la posición Y de cada muñeca desde ExternalCameraReceiver
-    ///   2. Aplica filtro pasa-bajos para suavizar ruido de cámara
-    ///   3. Calcula velocidad vertical (deltaY / deltaTime)
-    ///   4. Detecta "flap" cuando la velocidad descendente supera el umbral
-    ///   5. Emite eventos OnLeftFlap / OnRightFlap con la intensidad [0-1]
-    ///   6. Aplica cooldown para evitar múltiples detecciones por aleteo
-    /// 
-    /// Coordenadas: Y=1 es arriba, Y=0 es abajo. Velocidad negativa = brazo bajando = FLAP.
-    /// </summary>
+    /// <summary>Movimiento libre de manos en 3D, con filtrado y velocidad proporcional.</summary>
     public class FlapDetector : MonoBehaviour
     {
-        [Header("Dependencias")]
-        [Tooltip("Referencia al receptor de datos de la cámara externa.")]
+        public enum TrackingSource { ExternalCamera, QuestHands }
+        [SerializeField] private TrackingSource trackingSource;
         [SerializeField] private Anadromo.Systems.ExternalCameraReceiver cameraReceiver;
-
-        [Tooltip("Configuración de parámetros de detección. " +
-                 "Crear con: click derecho > Create > Anadromo > Flap Settings")]
+        [SerializeField] private Transform headTransform;
+        [SerializeField] private Transform xrOrigin;
         [SerializeField] private FlapSettings settings;
-
-        [Header("Eventos de Aleteo")]
-        [Tooltip("Se dispara al detectar un aleteo del brazo IZQUIERDO. Parámetro: intensidad [0-1].")]
+        [Header("Movimiento libre de manos XR")]
+        [Range(0f, 0.99f)] [SerializeField] private float xrSmoothingFactor = 0.45f;
+        [Tooltip("Velocidad mínima en cualquier dirección (m/s).")]
+        [Min(0.01f)] [SerializeField] private float xrFlapVelocityThreshold = 0.15f;
+        [Tooltip("Desplazamiento mínimo desde el comienzo de cada impulso (m).")]
+        [Min(0.01f)] [SerializeField] private float xrMinimumStrokeDistance = 0.06f;
+        [Tooltip("Velocidad media que produce el impulso máximo (m/s).")]
+        [Min(0.1f)] [SerializeField] private float xrFullIntensitySpeed = 1.2f;
+        [Tooltip("Saltos de tracking superiores a esta velocidad se descartan (m/s).")]
+        [Min(1f)] [SerializeField] private float xrMaximumSampleSpeed = 5f;
         public UnityEvent<float> OnLeftFlap = new UnityEvent<float>();
-
-        [Tooltip("Se dispara al detectar un aleteo del brazo DERECHO. Parámetro: intensidad [0-1].")]
         public UnityEvent<float> OnRightFlap = new UnityEvent<float>();
-
-        // ─── Debug (visibles en Inspector) ───
-        [Header("Debug — Muñeca Izquierda")]
-        [SerializeField] private float leftWristRawY;
-        [SerializeField] private float leftWristSmoothedY;
-        [SerializeField] private float leftVelocityY;
-        [SerializeField] private bool leftInCooldown;
-
-        [Header("Debug — Muñeca Derecha")]
-        [SerializeField] private float rightWristRawY;
-        [SerializeField] private float rightWristSmoothedY;
-        [SerializeField] private float rightVelocityY;
-        [SerializeField] private bool rightInCooldown;
-
-        [Header("Debug — Contadores")]
+        [SerializeField] private bool leftHandTracked;
+        [SerializeField] private bool rightHandTracked;
         [SerializeField] private int totalLeftFlaps;
         [SerializeField] private int totalRightFlaps;
+        private ArmState left, right;
+        private XRHandSubsystem handSubsystem;
+        private readonly List<XRHandSubsystem> subsystems = new List<XRHandSubsystem>();
 
-        // ─── Estado interno ───
-        private float prevLeftSmoothedY;
-        private float prevRightSmoothedY;
-        private float leftCooldownTimer;
-        private float rightCooldownTimer;
-        private bool initialized;
-        private bool warnedMissing;
-
-        // ─── Lifecycle ───
-
-        private void OnEnable()
+        private struct ArmState
         {
-            initialized = false;
-            warnedMissing = false;
+            public bool initialized;
+            public Vector3 raw, filtered, anchor;
+            public float path, movingTime, idleTime, cooldown;
         }
 
+        public bool IsOperational => isActiveAndEnabled && settings != null &&
+            (leftHandTracked || rightHandTracked);
+        private void OnEnable() => ResetState();
+        private void OnDisable() => ResetState();
         private void Update()
         {
-            // Validar dependencias
-            if (cameraReceiver == null || settings == null)
-            {
-                if (!warnedMissing)
-                {
-                    Debug.LogWarning("[Anadromo] FlapDetector: Asigna ExternalCameraReceiver y FlapSettings en el Inspector.");
-                    warnedMissing = true;
-                }
-                return;
-            }
-
-            // No procesar si no hay datos de la cámara
-            if (!cameraReceiver.IsReceiving)
-            {
-                return;
-            }
-
-            // Leer posiciones Y de las muñecas (crudas)
-            leftWristRawY = cameraReceiver.LeftWrist.y;
-            rightWristRawY = cameraReceiver.RightWrist.y;
-
-            // Primer frame con datos: inicializar
-            if (!initialized)
-            {
-                leftWristSmoothedY = leftWristRawY;
-                rightWristSmoothedY = rightWristRawY;
-                prevLeftSmoothedY = leftWristSmoothedY;
-                prevRightSmoothedY = rightWristSmoothedY;
-                initialized = true;
-                return;
-            }
-
-            float dt = Time.deltaTime;
-            if (dt <= 0f) return;
-
-            // ─── Suavizado (low-pass filter) ───
-            // Lerp entre el valor nuevo y el anterior. Alpha alto = más suavizado.
-            float alpha = settings.smoothingFactor;
-            leftWristSmoothedY = Mathf.Lerp(leftWristRawY, leftWristSmoothedY, alpha);
-            rightWristSmoothedY = Mathf.Lerp(rightWristRawY, rightWristSmoothedY, alpha);
-
-            // ─── Velocidad vertical ───
-            leftVelocityY = (leftWristSmoothedY - prevLeftSmoothedY) / dt;
-            rightVelocityY = (rightWristSmoothedY - prevRightSmoothedY) / dt;
-
-            // Guardar para siguiente frame
-            prevLeftSmoothedY = leftWristSmoothedY;
-            prevRightSmoothedY = rightWristSmoothedY;
-
-            // ─── Cooldowns ───
-            UpdateCooldown(ref leftCooldownTimer, ref leftInCooldown, dt);
-            UpdateCooldown(ref rightCooldownTimer, ref rightInCooldown, dt);
-
-            // ─── Detección de aleteos ───
-            // Velocidad negativa = brazo bajando = aleteo (power stroke)
-            TryDetectFlap(
-                leftVelocityY, ref leftCooldownTimer, ref leftInCooldown,
-                OnLeftFlap, ref totalLeftFlaps, "izquierdo"
-            );
-
-            TryDetectFlap(
-                rightVelocityY, ref rightCooldownTimer, ref rightInCooldown,
-                OnRightFlap, ref totalRightFlaps, "derecho"
-            );
+            if (settings == null || Time.deltaTime <= 0f) return;
+            ProcessArm(true, ref left, ref leftHandTracked, OnLeftFlap, ref totalLeftFlaps);
+            ProcessArm(false, ref right, ref rightHandTracked, OnRightFlap, ref totalRightFlaps);
         }
 
-        // ─── Detección ───
-
-        private void TryDetectFlap(float velocityY, ref float cooldownTimer,
-                                    ref bool inCooldown, UnityEvent<float> flapEvent,
-                                    ref int totalFlaps, string label)
+        private bool TryReadWrist(bool isLeft, out Pose pose)
         {
-            // Aleteo = velocidad Y negativa (brazo bajando) que supera el umbral
-            if (velocityY < -settings.flapVelocityThreshold && !inCooldown)
+            pose = default;
+            if (trackingSource != TrackingSource.QuestHands) return false;
+            if (handSubsystem == null || !handSubsystem.running)
             {
-                // Calcular intensidad normalizada [minIntensity, maxIntensity]
-                float rawIntensity = Mathf.Abs(velocityY) * settings.intensityMultiplier;
-                float intensity = Mathf.Clamp(rawIntensity, settings.minIntensity, settings.maxIntensity);
-
-                // Disparar evento
-                flapEvent?.Invoke(intensity);
-
-                // Activar cooldown
-                cooldownTimer = settings.flapCooldown;
-                inCooldown = true;
-                totalFlaps++;
-
-                Debug.Log($"[Anadromo] 🐟 FLAP {label} — intensidad: {intensity:F2} (vel: {velocityY:F3})");
+                handSubsystem = null;
+                SubsystemManager.GetSubsystems(subsystems);
+                foreach (var subsystem in subsystems)
+                    if (subsystem.running) { handSubsystem = subsystem; break; }
             }
+            if (handSubsystem == null) return false;
+            var hand = isLeft ? handSubsystem.leftHand : handSubsystem.rightHand;
+            return hand.isTracked && hand.GetJoint(XRHandJointID.Wrist).TryGetPose(out pose);
         }
 
-        private void UpdateCooldown(ref float timer, ref bool flag, float dt)
+        /// <summary>Pose mundial para las aletas, incluyendo Camera Offset del XR Origin.</summary>
+        public bool TryGetTrackedWrist(bool isLeft, out Pose pose)
         {
-            if (timer > 0f)
+            pose = default;
+            if (!isActiveAndEnabled || !TryReadWrist(isLeft, out pose)) return false;
+            var hand = isLeft ? handSubsystem.leftHand : handSubsystem.rightHand;
+            if (hand.GetJoint(XRHandJointID.MiddleProximal).TryGetPose(out Pose middle) &&
+                hand.GetJoint(XRHandJointID.IndexProximal).TryGetPose(out Pose index) &&
+                hand.GetJoint(XRHandJointID.LittleProximal).TryGetPose(out Pose little))
             {
-                timer -= dt;
-                flag = true;
+                Vector3 forward = middle.position - pose.position;
+                Vector3 normal = Vector3.Cross(forward, index.position - little.position) * (isLeft ? -1f : 1f);
+                if (forward.sqrMagnitude > 0.00001f && normal.sqrMagnitude > 0.00000001f)
+                    pose.rotation = Quaternion.LookRotation(forward, normal);
+            }
+            Transform trackingSpace = headTransform != null ? headTransform.parent : xrOrigin;
+            if (trackingSpace == null) return false;
+            pose = new Pose(trackingSpace.TransformPoint(pose.position), trackingSpace.rotation * pose.rotation);
+            return true;
+        }
+
+        private void ProcessArm(bool isLeft, ref ArmState arm, ref bool tracked,
+            UnityEvent<float> flapEvent, ref int count)
+        {
+            Vector3 point;
+            bool xr = trackingSource == TrackingSource.QuestHands;
+            if (xr)
+            {
+                tracked = TryReadWrist(isLeft, out Pose pose);
+                // Espacio de tracking: el giro de cabeza y la locomoción virtual
+                // no generan movimiento artificial de brazos.
+                point = pose.position;
             }
             else
             {
-                flag = false;
+                tracked = cameraReceiver != null && cameraReceiver.IsReceiving;
+                point = tracked ? (isLeft ? cameraReceiver.LeftWrist : cameraReceiver.RightWrist) : Vector3.zero;
             }
+            float dt = Time.deltaTime;
+            if (!tracked || dt > 0.15f)
+            {
+                arm = default;
+                return;
+            }
+            if (!arm.initialized || (xr && Vector3.Distance(point, arm.raw) / dt > xrMaximumSampleSpeed))
+            {
+                arm = new ArmState { initialized = true, raw = point, filtered = point, anchor = point };
+                return;
+            }
+            arm.raw = point;
+            Vector3 previous = arm.filtered;
+            float retention = xr ? Mathf.Pow(xrSmoothingFactor, dt * 72f) : settings.smoothingFactor;
+            arm.filtered = Vector3.Lerp(point, previous, retention);
+            arm.cooldown = Mathf.Max(0f, arm.cooldown - dt);
+            if (!xr)
+            {
+                float downwardSpeed = (previous.y - arm.filtered.y) / dt;
+                if (downwardSpeed > settings.flapVelocityThreshold && arm.cooldown <= 0f)
+                {
+                    flapEvent.Invoke(Mathf.Clamp(downwardSpeed * settings.intensityMultiplier,
+                        settings.minIntensity, settings.maxIntensity));
+                    arm.cooldown = settings.flapCooldown;
+                    count++;
+                }
+                return;
+            }
+            float distance = Vector3.Distance(previous, arm.filtered);
+            if (distance / dt < xrFlapVelocityThreshold)
+            {
+                arm.idleTime += dt;
+                if (arm.idleTime >= 0.12f)
+                {
+                    arm.anchor = arm.filtered;
+                    arm.path = arm.movingTime = 0f;
+                }
+                return;
+            }
+            arm.idleTime = 0f;
+            arm.path += distance;
+            arm.movingTime += dt;
+            if (arm.cooldown > 0f || arm.movingTime < 0.08f ||
+                Vector3.Distance(arm.anchor, arm.filtered) < xrMinimumStrokeDistance) return;
+            float speed = arm.path / arm.movingTime;
+            float intensity = Mathf.Lerp(Mathf.Max(0.25f, settings.minIntensity), settings.maxIntensity,
+                Mathf.InverseLerp(xrFlapVelocityThreshold, xrFullIntensitySpeed, speed));
+            flapEvent.Invoke(intensity);
+            count++;
+            arm.anchor = arm.filtered;
+            arm.path = arm.movingTime = 0f;
+            arm.cooldown = settings.flapCooldown;
         }
 
-        // ─── API pública ───
-
-        /// <summary>
-        /// Resetea contadores y estado interno del detector.
-        /// Útil al reiniciar un nivel o al cambiar de escena.
-        /// </summary>
         public void ResetState()
         {
-            initialized = false;
-            leftCooldownTimer = 0f;
-            rightCooldownTimer = 0f;
-            leftInCooldown = false;
-            rightInCooldown = false;
-            totalLeftFlaps = 0;
-            totalRightFlaps = 0;
+            left = right = default;
+            leftHandTracked = rightHandTracked = false;
+            totalLeftFlaps = totalRightFlaps = 0;
         }
-
-        /// <summary>
-        /// Devuelve true si el detector está recibiendo datos y operativo.
-        /// </summary>
-        public bool IsOperational =>
-            cameraReceiver != null && settings != null && cameraReceiver.IsReceiving && initialized;
     }
 }

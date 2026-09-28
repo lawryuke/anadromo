@@ -34,13 +34,15 @@ namespace Anadromo.Locomotion
         [Min(0f)] public float joystickTurnSpeed = 60f;
         [System.NonSerialized] public Vector3 externalVelocity;
 
-        // ─── Variables de estado para retrasar la evaluación ───
-        private float leftFlapTimer = 0f;
-        private float rightFlapTimer = 0f;
-        private bool leftFlapPending = false;
-        private bool rightFlapPending = false;
-        private float storedLeftIntensity = 0f;
-        private float storedRightIntensity = 0f;
+        // Un brazo impulsa en el siguiente paso físico; el segundo solo completa
+        // la intensidad de ese ciclo para no duplicar la velocidad.
+        private float pendingIntensity;
+        private float windowIntensity;
+        private float lastImpulseTime = float.NegativeInfinity;
+        private bool headTurnInitialized;
+        private float headNeutralYaw;
+        private float headTurnSpeed;
+        private bool headTurnFastZone;
 
         private void Awake()
         {
@@ -49,6 +51,7 @@ namespace Anadromo.Locomotion
 
         private void OnEnable()
         {
+            headTurnInitialized = false;
             if (flapDetector != null)
             {
                 flapDetector.OnLeftFlap.AddListener(HandleLeftFlap);
@@ -63,16 +66,20 @@ namespace Anadromo.Locomotion
                 flapDetector.OnLeftFlap.RemoveListener(HandleLeftFlap);
                 flapDetector.OnRightFlap.RemoveListener(HandleRightFlap);
             }
+            pendingIntensity = windowIntensity = 0f;
+            lastImpulseTime = float.NegativeInfinity;
+            headTurnInitialized = false;
         }
 
         private void FixedUpdate()
         {
             if (settings == null || salmonBody == null || headTransform == null) return;
 
-            UpdateBodyPitch();
-            LimitVelocities();
+            UpdateHeadTurn();
+            UpdateBodyOrientation();
             ApplyCurrents();
             ProcessPendingFlaps();
+            LimitVelocities();
             if (!rb.isKinematic)
             {
                 rb.AddForce(externalVelocity * rb.linearDamping, ForceMode.Acceleration);
@@ -112,55 +119,35 @@ namespace Anadromo.Locomotion
 
         private void HandleLeftFlap(float intensity)
         {
-            leftFlapPending = true;
-            leftFlapTimer = 0f;
-            storedLeftIntensity = intensity;
+            QueueFlap(intensity);
         }
 
         private void HandleRightFlap(float intensity)
         {
-            rightFlapPending = true;
-            rightFlapTimer = 0f;
-            storedRightIntensity = intensity;
+            QueueFlap(intensity);
+        }
+
+        private void QueueFlap(float intensity)
+        {
+            if (rb.isKinematic || float.IsNaN(intensity) || float.IsInfinity(intensity)) return;
+            pendingIntensity = Mathf.Max(pendingIntensity, Mathf.Clamp01(intensity));
         }
 
         private void ProcessPendingFlaps()
         {
-            if (rb.isKinematic) return;
+            float intensity = pendingIntensity;
+            pendingIntensity = 0f;
+            if (rb.isKinematic || intensity <= 0f) return;
 
-            float dt = Time.fixedDeltaTime;
-
-            if (leftFlapPending) leftFlapTimer += dt;
-            if (rightFlapPending) rightFlapTimer += dt;
-
-            // CASO 1: Ambos brazos han aleteado dentro de la ventana de simultaneidad
-            if (leftFlapPending && rightFlapPending)
+            if (Time.fixedTime - lastImpulseTime > settings.simultaneityWindow)
             {
-                // Avance frontal
-                float avgIntensity = (storedLeftIntensity + storedRightIntensity) * 0.5f;
-                ApplyForwardImpulse(avgIntensity);
-
-                // Consumir
-                leftFlapPending = false;
-                rightFlapPending = false;
-                return;
+                lastImpulseTime = Time.fixedTime;
+                windowIntensity = 0f;
             }
-
-            // CASO 2: Solo el izquierdo aleteó y ya pasó la ventana de espera
-            if (leftFlapPending && leftFlapTimer > settings.simultaneityWindow)
-            {
-                ApplyRotationTorque(storedLeftIntensity, 1f); // Rotar Derecha
-                ApplyForwardImpulse(storedLeftIntensity * settings.forwardOnSingleFlapRatio);
-                leftFlapPending = false;
-            }
-
-            // CASO 3: Solo el derecho aleteó y ya pasó la ventana de espera
-            if (rightFlapPending && rightFlapTimer > settings.simultaneityWindow)
-            {
-                ApplyRotationTorque(storedRightIntensity, -1f); // Rotar Izquierda
-                ApplyForwardImpulse(storedRightIntensity * settings.forwardOnSingleFlapRatio);
-                rightFlapPending = false;
-            }
+            float additionalIntensity = Mathf.Max(0f, intensity - windowIntensity);
+            windowIntensity = Mathf.Max(windowIntensity, intensity);
+            if (additionalIntensity > 0f)
+                ApplyForwardImpulse(additionalIntensity * settings.forwardOnSingleFlapRatio);
         }
 
         // ─── Aplicación de Fuerzas ───
@@ -170,41 +157,84 @@ namespace Anadromo.Locomotion
             if (salmonBody == null) return;
             
             // Avanzar en la dirección frontal del cuerpo del salmón
-            Vector3 force = salmonBody.forward * (intensity * settings.forwardForceMultiplier);
-            rb.AddForce(force, ForceMode.Impulse);
+            Vector3 deltaVelocity = salmonBody.forward *
+                (intensity * settings.forwardForceMultiplier / rb.mass);
+            Vector3 cappedVelocity = Vector3.ClampMagnitude(
+                rb.linearVelocity + deltaVelocity, settings.maxLinearVelocity);
+            rb.AddForce((cappedVelocity - rb.linearVelocity) * rb.mass, ForceMode.Impulse);
         }
 
-        private void ApplyRotationTorque(float intensity, float direction)
+        private void UpdateHeadTurn()
         {
-            // Rotar en el eje Y global (Yaw)
-            Vector3 torque = Vector3.up * (intensity * settings.rotationTorqueMultiplier * direction);
-            rb.AddTorque(torque, ForceMode.Impulse);
+            var headset = UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.Head);
+            if (rb.isKinematic || !headset.isValid ||
+                !headset.TryGetFeatureValue(UnityEngine.XR.CommonUsages.isTracked, out bool tracked) || !tracked)
+            {
+                headTurnInitialized = false;
+                headTurnSpeed = 0f;
+                headTurnFastZone = false;
+                return;
+            }
+
+            // X negativo en el espacio del XR Origin es la izquierda visible para el jugador.
+            Vector3 localForward = transform.InverseTransformDirection(headTransform.forward);
+            if (localForward.x * localForward.x + localForward.z * localForward.z < 0.01f)
+            {
+                headTurnSpeed = 0f;
+                return;
+            }
+            float localYaw = Mathf.Atan2(localForward.x, localForward.z) * Mathf.Rad2Deg;
+
+            // Calibrar el frente físico al activar el nado o recuperar el tracking.
+            // La rotación virtual del XR Origin no modifica esta referencia local.
+            if (!headTurnInitialized)
+            {
+                headTurnInitialized = true;
+                headNeutralYaw = localYaw;
+                headTurnSpeed = 0f;
+                headTurnFastZone = false;
+                return;
+            }
+
+            float yaw = Mathf.DeltaAngle(headNeutralYaw, localYaw);
+            float angle = Mathf.Abs(yaw);
+            if (angle <= settings.headTurnDeadzone)
+            {
+                // Detener inmediatamente al volver a la zona de mirada libre.
+                headTurnSpeed = 0f;
+                headTurnFastZone = false;
+                return;
+            }
+
+            float fastAngle = Mathf.Max(settings.headTurnDeadzone + 1f, settings.headTurnFastAngle);
+            // Dos grados de histéresis evitan alternar velocidades por temblores.
+            headTurnFastZone = headTurnFastZone ? angle >= fastAngle - 2f : angle >= fastAngle;
+            float targetSpeed = Mathf.Sign(yaw) * (headTurnFastZone
+                ? settings.headTurnMaxSpeed : Mathf.Min(settings.headTurnSlowSpeed, settings.headTurnMaxSpeed));
+            if (Mathf.Sign(headTurnSpeed) != Mathf.Sign(targetSpeed)) headTurnSpeed = 0f;
+            headTurnSpeed = Mathf.MoveTowards(headTurnSpeed, targetSpeed,
+                settings.headTurnAcceleration * Time.fixedDeltaTime);
+
+            // Giro negativo = izquierda de la pantalla; positivo = derecha.
+            QuestSwimInput.TurnAroundHead(transform, headTransform, rb,
+                headTurnSpeed * Time.fixedDeltaTime);
         }
 
         // ─── Movimiento del Cuerpo ───
 
-        private void UpdateBodyPitch()
+        private void UpdateBodyOrientation()
         {
-            // Queremos que el SalmonBody siga el Yaw (eje Y) del propio SalmonBody
-            // (que es manejado por la rotación física del Rigidbody del XR Origin)
-            // pero que siga el Pitch (arriba/abajo) de la cabeza (headTransform).
-
-            // 1. Obtener el pitch del headset (convirtiéndolo a -180...180)
-            float headPitch = headTransform.eulerAngles.x;
-            if (headPitch > 180f) headPitch -= 360f;
-
-            // Restringir el pitch máximo para que el salmón no se voltee por completo
+            // El visor gira dentro del XR Origin; el cuerpo debe seguir su orientación
+            // local para que el próximo aleteo avance hacia donde mira el jugador.
+            Quaternion localHeadRotation = Quaternion.Inverse(transform.rotation) * headTransform.rotation;
+            float headPitch = Mathf.DeltaAngle(0f, localHeadRotation.eulerAngles.x);
+            float headYaw = Mathf.DeltaAngle(0f, localHeadRotation.eulerAngles.y);
             headPitch = Mathf.Clamp(headPitch, -settings.maxPitchAngle, settings.maxPitchAngle);
-
-            // 2. Obtener la rotación actual del cuerpo (su yaw viene del padre XR Origin, su pitch es local)
-            float currentBodyPitch = salmonBody.localEulerAngles.x;
-            if (currentBodyPitch > 180f) currentBodyPitch -= 360f;
-
-            // 3. Interpolar suavemente
-            float newPitch = Mathf.Lerp(currentBodyPitch, headPitch, Time.fixedDeltaTime * settings.pitchLerpSpeed);
-
-            // 4. Aplicar (mantenemos yaw y roll local en 0, ya que el Rigidbody del XR Origin controla el yaw)
-            salmonBody.localEulerAngles = new Vector3(newPitch, 0f, 0f);
+            float bodyPitch = Mathf.DeltaAngle(0f, salmonBody.localEulerAngles.x);
+            float bodyYaw = Mathf.DeltaAngle(0f, salmonBody.localEulerAngles.y);
+            float newPitch = Mathf.LerpAngle(bodyPitch, headPitch, Time.fixedDeltaTime * settings.pitchLerpSpeed);
+            float newYaw = Mathf.LerpAngle(bodyYaw, headYaw, Time.fixedDeltaTime * settings.headYawLerpSpeed);
+            salmonBody.localRotation = Quaternion.Euler(newPitch, newYaw, 0f);
         }
 
         private void LimitVelocities()

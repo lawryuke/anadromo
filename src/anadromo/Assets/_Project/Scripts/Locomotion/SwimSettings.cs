@@ -18,9 +18,25 @@ namespace Anadromo.Locomotion
         [Range(1f, 50f)]
         public float rotationTorqueMultiplier = 4f; // Reducido de 15 a 4
 
-        [Tooltip("Si es > 0, un aleteo individual también empuja levemente hacia adelante.")]
+        [Tooltip("Escala del impulso de un aleteo individual; 1 permite avanzar con una sola mano.")]
         [Range(0f, 1f)]
-        public float forwardOnSingleFlapRatio = 0.1f;
+        public float forwardOnSingleFlapRatio = 1f;
+
+        [Header("Giro con el visor")]
+        [Tooltip("Ángulo horizontal de la cabeza desde el que empieza a girar el XR Origin.")]
+        [Range(0f, 45f)] public float headTurnDeadzone = 15f;
+
+        [Tooltip("Ángulo desde el frente calibrado que activa el giro rápido.")]
+        [Range(16f, 90f)] public float headTurnFastAngle = 35f;
+
+        [Tooltip("Velocidad continua de la zona de giro lento, en grados por segundo.")]
+        [Range(1f, 90f)] public float headTurnSlowSpeed = 20f;
+
+        [Tooltip("Suavizado de cambios de velocidad de giro, en grados por segundo al cuadrado.")]
+        [Min(1f)] public float headTurnAcceleration = 120f;
+
+        [Tooltip("Velocidad máxima del giro por cabeza, en grados por segundo.")]
+        [Range(1f, 180f)] public float headTurnMaxSpeed = 60f;
 
         [Header("Velocidades Máximas")]
         [Tooltip("Velocidad lineal máxima permitida (m/s).")]
@@ -35,6 +51,10 @@ namespace Anadromo.Locomotion
         [Tooltip("Velocidad a la que el cuerpo del salmón (pitch) iguala la inclinación de la cabeza del jugador.")]
         [Range(0.5f, 10f)]
         public float pitchLerpSpeed = 3f;
+
+        [Tooltip("Velocidad a la que el cuerpo orienta el avance hacia el giro horizontal del visor.")]
+        [Range(0.5f, 15f)]
+        public float headYawLerpSpeed = 6f;
 
         [Tooltip("Restricción del pitch (inclinación) máximo hacia arriba/abajo en grados.")]
         [Range(30f, 90f)]

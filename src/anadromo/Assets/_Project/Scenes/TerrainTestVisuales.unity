@@ -903,16 +903,15 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 186648293}
-  - component: {fileID: 186648291}
   - component: {fileID: 186648290}
-  - component: {fileID: 186648292}
+  - component: {fileID: 186648294}
   m_Layer: 0
   m_Name: PoseBridge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &186648290
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -925,7 +924,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfc56dc4e08e08f41986bde1d6a39216, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.FlapDetector
-  cameraReceiver: {fileID: 186648291}
+  trackingSource: 1
+  cameraReceiver: {fileID: 0}
+  headTransform: {fileID: 863163181}
+  xrOrigin: {fileID: 652773262}
+  xrSmoothingFactor: 0.45
+  xrFlapVelocityThreshold: 0.15
+  xrMinimumStrokeDistance: 0.06
+  xrFullIntensitySpeed: 1.2
+  xrMaximumSampleSpeed: 5
   settings: {fileID: 11400000, guid: 952bcda9d3d099e48b1c4a44f3364b72, type: 2}
   OnLeftFlap:
     m_PersistentCalls:
@@ -933,17 +940,11 @@ MonoBehaviour:
   OnRightFlap:
     m_PersistentCalls:
       m_Calls: []
-  leftWristRawY: 0
-  leftWristSmoothedY: 0
-  leftVelocityY: 0
-  leftInCooldown: 0
-  rightWristRawY: 0
-  rightWristSmoothedY: 0
-  rightVelocityY: 0
-  rightInCooldown: 0
+  leftHandTracked: 0
+  rightHandTracked: 0
   totalLeftFlaps: 0
   totalRightFlaps: 0
---- !u!114 &186648291
+--- !u!114 &186648294
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -952,32 +953,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 186648289}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 81800ffb63e32ef438a4e0554670724d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Systems.ExternalCameraReceiver
-  udpPort: 5555
-  autoStart: 1
-  isReceiving: 0
-  lastPacketTime: 0
-  packetsPerSecond: 0
-  timeSinceLastPacket: 0
---- !u!114 &186648292
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 186648289}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 264d6f6c5e6cbf94aa6141158929f3da, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Systems.PoseBridgeDebugUI
-  receiver: {fileID: 186648291}
-  flapDetector: {fileID: 186648290}
-  showInBuild: 0
-  showLandmarkValues: 1
-  toggleKey: 284
+  m_Script: {fileID: 11500000, guid: 9d6e4278ab134cd4bcfdb12a805e3f79, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.SalmonFinHands
+  detector: {fileID: 186648290}
+  swimController: {fileID: 652773259}
+  finMaterial: {fileID: 2100000, guid: d3352378e37732c4ea8e5dc3ac1b2a74, type: 2}
+  finLength: 0.28
+  rotationOffset: {x: 0, y: 0, z: 0}
 --- !u!4 &186648293
 Transform:
   m_ObjectHideFlags: 0
@@ -3080,7 +3063,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &652773256
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3154,8 +3137,8 @@ MonoBehaviour:
   headTransform: {fileID: 863163181}
   salmonBody: {fileID: 347118838}
   applyOceanCurrents: 1
-  enableJoystickMovement: 1
-  enableJoystickTurn: 1
+  enableJoystickMovement: 0
+  enableJoystickTurn: 0
   joystickTurnSpeed: 60
 --- !u!54 &652773260
 Rigidbody:
@@ -3597,7 +3580,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!135 &768065902
 SphereCollider:
   m_ObjectHideFlags: 0
