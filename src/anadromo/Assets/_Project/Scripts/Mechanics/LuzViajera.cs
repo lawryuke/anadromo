@@ -15,6 +15,9 @@ namespace Anadromo.Mechanics
         
         [Tooltip("¿Vuelve a empezar desde el principio cuando llega al final?")]
         public bool loop = true;
+        
+        [Tooltip("Si loop es falso, ¿desaparece la medusa al llegar al final del camino?")]
+        public bool disappearOnFinish = true;
 
         [Header("Activación")]
         [Tooltip("Si es true, la medusa estará oculta y no iniciará su recorrido hasta que el jugador entre en Abysm_Mid (se sobreescribe con GameSettings).")]
@@ -121,6 +124,10 @@ namespace Anadromo.Mechanics
                     {
                         routeStatus = "Recorrido terminado";
                         enabled = false; // Detener el script para que se quede quieta
+                        if (disappearOnFinish)
+                        {
+                            SetVisualsActive(false);
+                        }
                     }
                 }
             }
