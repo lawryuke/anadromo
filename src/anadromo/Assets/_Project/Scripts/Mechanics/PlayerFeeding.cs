@@ -19,11 +19,13 @@ namespace Anadromo.Mechanics
         public LayerMask biteBlockingLayers = ~0;
         readonly Dictionary<string, int> consumed = new Dictionary<string, int>();
         EnergySystem energy;
+        PlayerEnergyController vital;
         SphereCollider mouth;
 
         void Awake()
         {
             energy = GetComponentInParent<EnergySystem>();
+            vital=GetComponentInParent<PlayerEnergyController>();
             mouth = GetComponent<SphereCollider>();
             mouth.isTrigger = true;
             float radius = GameSettings.I ? GameSettings.I.mouthRadius : mouthRadius;
@@ -43,6 +45,7 @@ namespace Anadromo.Mechanics
         {
             if (!consumptionEnabled || !isActiveAndEnabled || other == null || !other.enabled ||
                 other.transform.IsChildOf(transform.root)) return false;
+            if(vital && !vital.HasEnergy) return false;
             Prey prey = other.GetComponentInParent<Prey>();
             if (prey == null || !prey.isActiveAndEnabled || prey.IsConsumed) return false;
             string tag = prey.tag;
@@ -63,7 +66,8 @@ namespace Anadromo.Mechanics
             TotalConsumed++;
             LastConsumedTag = tag;
             consumed[tag] = ConsumedWithTag(tag) + 1;
-            if (energy != null) energy.RestoreEnergy(value);
+            if(vital) vital.ConsumeKrill(value);
+            else if (energy != null) energy.RestoreEnergy(value);
             OnPreyConsumed.Invoke();
             return true;
         }

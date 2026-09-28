@@ -191,7 +191,7 @@ namespace Anadromo.CavernMVP
             GUI.color = new Color(.02f,.05f,.07f,.9f); GUI.DrawTexture(new Rect(16,16,510,194),white); GUI.color = Color.white;
             GUI.Label(new Rect(30,24,480,32),"ANÁDROMO / LABERINTO · MVP",titleStyle);
             GUI.Label(new Rect(30,61,480,27),player.Zone,textStyle);
-            GUI.Label(new Rect(30,91,480,27),$"Salud {player.Health:0} / 100    Ruido {player.Velocity.magnitude:0.0} m/s",textStyle);
+            GUI.Label(new Rect(30,91,480,27),$"Ruido {player.Velocity.magnitude:0.0} m/s",textStyle);
             GUI.Label(new Rect(30,121,480,65),$"Lampreas {player.AttachedCount} · Velocidad {player.SpeedMultiplier:P0}\nCavernas {visited.Count}/8 · Tiempo {elapsed:0}s · Objetivo: llegar a H",textStyle);
             GUI.Label(new Rect(25,height-88,width-50,80),"WASD nadar · Ratón mirar · Q/E bajar/subir · Shift nadar rápido (ruido)\nAlterna A/D rápido o sacude el ratón para soltar lampreas · R reiniciar · Esc cursor\nPirañas: pasa despacio. Pez linterna: al apagarse el señuelo, esquiva. Tiburón: sal del eje del túnel o cambia de altura.",textStyle);
             foreach (var pass in passes) if (pass.warning >= 0 || pass.shark)
@@ -216,16 +216,10 @@ namespace Anadromo.CavernMVP
             }
             Vector2 dot = MapPoint(new Vector2(player.transform.position.x/Cell,player.transform.position.z/Cell),map);
             GUI.color = Color.yellow; GUI.DrawTexture(new Rect(dot.x-3,dot.y-3,6,6),white); GUI.color = Color.white;
-            if (player.DamagePulse > 0)
-            {
-                GUI.color = new Color(1,0,0,player.DamagePulse*.5f);
-                GUI.DrawTexture(new Rect(0,0,width,10),white); GUI.DrawTexture(new Rect(0,height-10,width,10),white);
-                GUI.DrawTexture(new Rect(0,0,10,height),white); GUI.DrawTexture(new Rect(width-10,0,10,height),white); GUI.color = Color.white;
-            }
             if (!player.Active)
             {
                 GUI.color = new Color(.02f,.05f,.07f,.95f); GUI.DrawTexture(new Rect(width/2-240,height/2-70,480,140),white); GUI.color = Color.white;
-                GUI.Label(new Rect(width/2-220,height/2-50,440,90),player.Finished ? "SALIDA ALCANZADA\nR para volver a probar las mecánicas" : "HAS MUERTO\nR para reiniciar desde el umbral",titleStyle);
+                GUI.Label(new Rect(width/2-220,height/2-50,440,90),player.Finished ? "SALIDA ALCANZADA\nR para volver a probar las mecánicas" : "ENERGIA AGOTADA\nR para reiniciar desde el umbral",titleStyle);
             }
             GUI.matrix = Matrix4x4.identity;
         }
