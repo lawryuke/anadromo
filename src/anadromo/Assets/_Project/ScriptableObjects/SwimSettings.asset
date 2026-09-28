@@ -14,9 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.SwimSettings
   forwardForceMultiplier: 6
   rotationTorqueMultiplier: 4
-  forwardOnSingleFlapRatio: 0.1
+  forwardOnSingleFlapRatio: 1
+  headTurnDeadzone: 15
+  headTurnFastAngle: 35
+  headTurnSlowSpeed: 20
+  headTurnAcceleration: 120
+  headTurnMaxSpeed: 60
   maxLinearVelocity: 6
   maxAngularVelocity: 3
   pitchLerpSpeed: 3
+  headYawLerpSpeed: 6
   maxPitchAngle: 80
   simultaneityWindow: 0.15

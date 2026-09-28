@@ -55,17 +55,6 @@ namespace Anadromo.Locomotion
             if (autoStart) StartReceiving();
         }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void AutoInitialize()
-        {
-            if (FindFirstObjectByType<PoseActionReceiver>() != null) return;
-            // Auto-instanciar al iniciar el juego
-            var go = new GameObject("PoseActionReceiver_Auto");
-            var instance = go.AddComponent<PoseActionReceiver>();
-            DontDestroyOnLoad(go);
-            Debug.Log("[Anadromo] PoseActionReceiver auto-instanciado.");
-        }
-
         private void OnDestroy()
         {
             StopReceiving();

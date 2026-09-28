@@ -1,5 +1,13 @@
 # Anádromo — Pose Bridge (MediaPipe → Unity)
 
+## Nado con Oculus, sin cámara externa
+
+La escena `Assets/_Project/Scenes/TerrainTestVisuales.unity` usa el seguimiento óptico de manos del visor Oculus para detectar aleteos. Activa el seguimiento de manos en el visor, deja los mandos y ejecuta la escena en Quest; no hace falta iniciar este bridge de Python. `FlapDetector` mide el descenso de cada muñeca respecto de la cabeza: una sola mano ya impulsa hacia delante y dos aleteos casi simultáneos forman un mismo impulso. Un descenso lento da un impulso suave; uno rápido da un impulso mayor. Los umbrales de recorrido y velocidad se ajustan en `PoseBridge > FlapDetector`.
+
+El proyecto usa OpenXR y XR Hands; la función `Hand Tracking Subsystem` está activa para Android y para Standalone (Play en Unity con Quest Link). Si el visor pierde una mano, el detector espera a recuperarla sin generar un aleteo artificial. Al activarse el nado, la dirección de la cabeza establece el frente: mira al frente en ese momento. Hasta 15° a cada lado solo miras; entre 15° y 35° giras continuamente a 20°/s; desde 35° giras a 60°/s. Las velocidades cambian suavemente y el giro se detiene al regresar a la zona central. Para evitar oscilaciones, al regresar desde la zona rápida se cambia a lenta por debajo de 33°. Izquierda gira a la izquierda y derecha a la derecha. Perder el tracking del visor detiene el giro; recuperarlo calibra nuevamente el frente. Mirar arriba o abajo cambia la inclinación del nado. Los ajustes del giro y del impulso están en `SwimSettings.asset`.
+
+El bridge descrito a continuación queda disponible para escenas que todavía usan MediaPipe.
+
 Bridge de visión por computadora que captura los movimientos de los brazos del jugador
 mediante una webcam y envía los datos de pose a Unity en tiempo real vía UDP.
 
