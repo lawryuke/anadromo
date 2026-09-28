@@ -1,4 +1,5 @@
 using UnityEngine;
+using Anadromo.Mechanics;
 
 namespace Anadromo.AI
 {
@@ -9,6 +10,7 @@ namespace Anadromo.AI
         public PiranhaPlayerTarget target;
         public Transform shark;
         public Transform[] waypoints;
+        public ZoneLimit activationZone;
         public float travelSpeed=15, warningDuration=3, repeatDelay=18, activationRadius=4;
         public float contactRadius=.5f, bodyHalfLength=.75f, obstacleRadius=.4f;
         public LayerMask obstacleLayers=Physics.DefaultRaycastLayers;
@@ -40,6 +42,10 @@ namespace Anadromo.AI
         bool PlayerNearRoute()
         {
             Vector3 p=target.transform.position;
+            if (activationZone != null)
+            {
+                return activationZone.Contains(p);
+            }
             for(int i=1;i<waypoints.Length;i++)
             {
                 Vector3 a=waypoints[i-1].position,d=waypoints[i].position-a;

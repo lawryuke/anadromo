@@ -39,8 +39,11 @@ namespace Anadromo.Systems
             if(!player || !vignette) return;
             float exhaustion=1-player.Fraction;
             float impact=player.ImpactPulse,recovery=player.RecoveryPulse;
+            // color negro para cansancio y naranja cuando come kril
             var shade=Color.Lerp(new Color(.015f,.035f,.07f),new Color(1,.62f,.16f),recovery);
-            shade=Color.Lerp(shade,Color.white,impact);
+            // color amarillo enfermizo, naranja para comer
+            // var shade = Color.Lerp(new Color(0.36f, 0.41f, 0.06f), new Color(1, 0.62f, 0.16f), recovery);
+            shade =Color.Lerp(shade,Color.white,impact);
             vignette.color.Override(shade);
             vignette.intensity.Override(Mathf.Clamp(exhaustion*maximumVignette+impact*.18f+recovery*.08f,0,.65f));
             color.saturation.Override(-100*exhaustion);
