@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using Anadromo.Systems;
+using Anadromo.Mechanics;
 
 namespace Anadromo.AI
 {
@@ -24,10 +24,24 @@ namespace Anadromo.AI
         Quaternion spawnRotation;
         Rigidbody body;
 
-        bool movementWasEnabled;
+        LampreyShakeController shakeController;
+        Camera view;
+        public Vector3 ViewPosition
+        {
+            get { if (!view) view = GetComponentInChildren<Camera>(); return view ? view.transform.position : transform.position; }
+        }
         readonly HashSet<Object> attachedLampreys = new HashSet<Object>();
-        int lastSide;
-        float lastSideAt=-10,shakeReady;
+        public int AttachedLampreyCount => attachedLampreys.Count;
+        public float ShakeProgress
+        {
+            get
+            {
+                float grip = 0;
+                foreach (var item in attachedLampreys)
+                    if (item is Esc2Lamprey lamprey) grip = Mathf.Max(grip, lamprey.Grip / Mathf.Max(1, lamprey.maxGrip));
+                return 1 - Mathf.Clamp01(grip);
+            }
+        }
         void Awake()
         {
             body = GetComponent<Rigidbody>(); vital=GetComponent<PlayerEnergyController>();
@@ -36,25 +50,16 @@ namespace Anadromo.AI
             Vital.Energy.OnEnergyChanged.AddListener(EnergyChanged);
             previous = spawn = transform.position; spawnRotation = transform.rotation;
             if (!desktopMovement) desktopMovement = GetComponent<SimpleFlyCamera>();
+            shakeController = GetComponent<LampreyShakeController>();
+            if (!shakeController) shakeController = gameObject.AddComponent<LampreyShakeController>();
         }
         void LateUpdate()
         {
             if (!body) SampleMotion(Time.deltaTime);
-            if (!Alive && Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame) ResetEncounter();
-            var keyboard=Keyboard.current; var mouse=Mouse.current;
-            if (!Alive || attachedLampreys.Count==0 || keyboard==null) return;
-            shakeReady-=Time.deltaTime;
-            int side=keyboard.aKey.wasPressedThisFrame ? -1 : keyboard.dKey.wasPressedThisFrame ? 1 : 0;
-            bool alternating=side!=0 && side!=lastSide && lastSide!=0 && Time.time-lastSideAt<=.6f;
-            if(side!=0) { lastSide=side; lastSideAt=Time.time; }
-            Vector2 mouseDelta=mouse!=null ? mouse.delta.ReadValue() : Vector2.zero;
-            if(shakeReady>0 || (Mathf.Abs(mouseDelta.x)<=50 && !alternating)) return;
-            float strength=alternating ? 35 : 25;
-            ShakeLampreys(strength);
-            shakeReady=.12f;
         }
         public void ShakeLampreys(float strength)
         {
+            if (!Alive || strength <= 0) return;
             var attached=new List<Object>(attachedLampreys);
             foreach(var parasite in attached) if(parasite is Esc2Lamprey lamprey) lamprey.ReduceGrip(strength);
         }
@@ -88,22 +93,19 @@ namespace Anadromo.AI
         }
         void Depleted()
         {
-            movementWasEnabled = desktopMovement && desktopMovement.enabled;
-            if (desktopMovement) desktopMovement.enabled = false;
-            if (body && !body.isKinematic) body.linearVelocity = Vector3.zero;
+            if (shakeController) shakeController.HandleDeath();
             onDeath.Invoke();
         }
         public void ResetEncounter()
         {
-            bool dead = !Alive;
             if (body) { body.position = spawn; body.rotation = spawnRotation; if (!body.isKinematic) body.linearVelocity = Vector3.zero; }
             else transform.SetPositionAndRotation(spawn,spawnRotation);
             previous = spawn; Velocity = Vector3.zero; Vital.ResetEnergy();
             foreach(var lamprey in FindObjectsByType<Esc2Lamprey>(FindObjectsSortMode.None)) if(lamprey.Target==this) lamprey.ResetLamprey();
-            if (dead && desktopMovement) desktopMovement.enabled = movementWasEnabled;
             foreach (var school in FindObjectsByType<PiranhaSchool>(FindObjectsSortMode.None))
                 if (school.target == this) school.ResetFish();
-            attachedLampreys.Clear(); lastSide=0; lastSideAt=-10; shakeReady=0;
+            attachedLampreys.Clear();
+            if (shakeController) shakeController.ResetEncounter();
             foreach(var passage in FindObjectsByType<Esc2SharkPassage>(FindObjectsSortMode.None))
                 if(passage.target==this) passage.ResetPassage();
             foreach(var fish in FindObjectsByType<Esc2BlindFish>(FindObjectsSortMode.None))
@@ -113,15 +115,20 @@ namespace Anadromo.AI
             if(desktopMovement) { desktopMovement.externalSpeedMultiplier=1; desktopMovement.SyncLookRotation(); }
             onHealthChanged.Invoke(Health);
         }
-        public void AddLamprey(Object source) { if(source) attachedLampreys.Add(source); if(desktopMovement) desktopMovement.externalSpeedMultiplier=SpeedMultiplier; }
-        public void RemoveLamprey(Object source) { attachedLampreys.Remove(source); if(desktopMovement) desktopMovement.externalSpeedMultiplier=SpeedMultiplier; }
-        public float SpeedMultiplier => Mathf.Max(.25f,1-.15f*attachedLampreys.Count);
+        public void AddLamprey(Object source)
+        {
+            if (!source || !Alive || !attachedLampreys.Add(source)) return;
+            if (shakeController) shakeController.AttachChanged();
+        }
+        public void RemoveLamprey(Object source)
+        {
+            attachedLampreys.Remove(source);
+            if (shakeController) shakeController.AttachChanged();
+        }
+        public float SpeedMultiplier => Alive && attachedLampreys.Count == 0 ? 1f : 0f;
         void OnGUI()
         {
             if(showDebugStatus) GUI.Box(new Rect(18,18,220,40),"ENERGIA VITAL  "+Mathf.CeilToInt(Health)+" / "+Mathf.CeilToInt(maxHealth));
-            if(UnityEngine.XR.XRSettings.isDeviceActive) return;
-            if(attachedLampreys.Count>0) GUI.Box(new Rect(18,76,330,48),"Lampreas adheridas: "+attachedLampreys.Count+"\nAlterna A / D o sacude el ratón para soltarlas");
-            if(!Alive) GUI.Box(new Rect(Screen.width/2-200,Screen.height/2-30,400,60),"Energia agotada.\nR: volver al inicio del encuentro");
         }
     }
 }

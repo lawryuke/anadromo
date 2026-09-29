@@ -8609,8 +8609,13 @@ GameObject:
   - component: {fileID: 1221495012}
   - component: {fileID: 1221495011}
   - component: {fileID: 1221495014}
+  - component: {fileID: 31000000000}
+  - component: {fileID: 31000000001}
+  - component: {fileID: 31000000002}
+  - component: {fileID: 31000000003}
+  - component: {fileID: 31000000100}
   m_Layer: 0
-  m_Name: KM_Player
+  m_Name: XR Origin (VR)
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8626,10 +8631,12 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.4, y: 1.4, z: 1.4}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1308652009}
+  - {fileID: 31000000012}
+  - {fileID: 31000000010}
+  - {fileID: 31000000006}
   m_Father: {fileID: 1900587008}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1221495003
@@ -8664,7 +8671,7 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   consumptionEnabled: 1
-  mouthTarget: {fileID: 0}
+  mouthTarget: {fileID: 1308652009}
   biteBlockingLayers:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -8721,8 +8728,8 @@ Rigidbody:
   m_GameObject: {fileID: 1221495001}
   serializedVersion: 5
   m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_LinearDamping: 3
+  m_AngularDamping: 5
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -8736,9 +8743,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 112
-  m_CollisionDetection: 0
+  m_Interpolate: 1
+  m_Constraints: 80
+  m_CollisionDetection: 2
 --- !u!114 &1221495007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8746,7 +8753,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1221495001}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d183ae189a87fd44eb99d4db83251731, type: 3}
   m_Name: 
@@ -8761,7 +8768,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1221495001}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 3
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -9758,6 +9765,7 @@ GameObject:
   - component: {fileID: 1308652012}
   - component: {fileID: 1308652011}
   - component: {fileID: 1308652010}
+  - component: {fileID: 31000000004}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -9774,11 +9782,11 @@ Transform:
   m_GameObject: {fileID: 1308652008}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.0331, z: 0.1452}
-  m_LocalScale: {x: 2.5, y: 2.5, z: 2.5}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1221495002}
+  m_Father: {fileID: 31000000012}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1308652010
 MonoBehaviour:
@@ -21536,6 +21544,579 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fe2de46cf8f3591459ad9936ff6b8d4b, type: 3}
+--- !u!114 &31000000000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1221495001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d99149afd34f8a448759ecf9724ffbf, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.LocomotionModeManager
+  flapController: {fileID: 31000000002}
+  debugVuelo: {fileID: 1221495007}
+  toggleKey: 282
+  startInVRMode: 1
+--- !u!114 &31000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1221495001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94f90a3e21b7b5d4aa08737be723017e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.FlapFeedback
+  flapDetector: {fileID: 31000000007}
+  flapSound: {fileID: 0}
+  flapSoundVolume: 0.3
+  pitchVariation: 0.15
+  simultaneousFlapSound: {fileID: 0}
+  enableFlash: 0
+  flashColor: {r: 0.2, g: 0.6, b: 1, a: 0.15}
+  flashDuration: 0.12
+--- !u!114 &31000000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1221495001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1697b3de425527c4ea6be565a9cf085a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.FlapSwimController
+  flapDetector: {fileID: 31000000007}
+  settings: {fileID: 11400000, guid: a7bd6cda1687f6340854ea2d96a56823, type: 2}
+  headTransform: {fileID: 1308652009}
+  salmonBody: {fileID: 31000000010}
+  applyOceanCurrents: 1
+  enableJoystickMovement: 0
+  enableJoystickTurn: 0
+  joystickTurnSpeed: 60
+--- !u!114 &31000000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1221495001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0cb9aa70a22847b5925ee5f067c10a9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Unity.XR.CoreUtils::Unity.XR.CoreUtils.XROrigin
+  m_Camera: {fileID: 1308652012}
+  m_OriginBaseGameObject: {fileID: 1221495001}
+  m_CameraFloorOffsetObject: {fileID: 31000000011}
+  m_RequestedTrackingOriginMode: 1
+  m_CameraYOffset: 0
+--- !u!114 &31000000004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1308652008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2fadf230d1919748a9aa21d40f74619, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.XR.TrackedPoseDriver
+  m_TrackingType: 0
+  m_UpdateType: 0
+  m_IgnoreTrackingState: 0
+  m_PositionInput:
+    m_UseReference: 0
+    m_Action:
+      m_Name: HMD Position
+      m_Type: 0
+      m_ExpectedControlType: Vector3
+      m_Id: 3d11c422-bd3f-4440-aec9-bc3f74043bd1
+      m_Processors:
+      m_Interactions:
+      m_SingletonActionBindings:
+      - m_Name:
+        m_Id: ff1fee02-3de6-45ca-be8e-bbb47ef2c063
+        m_Path: <XRHMD>/centerEyePosition
+        m_Interactions:
+        m_Processors:
+        m_Groups:
+        m_Action: HMD Position
+        m_Flags: 0
+      m_Flags: 0
+      m_Priority: 0
+    m_Reference: {fileID: 0}
+  m_RotationInput:
+    m_UseReference: 0
+    m_Action:
+      m_Name: HMD Rotation
+      m_Type: 0
+      m_ExpectedControlType: Quaternion
+      m_Id: ba8a2d7c-6da2-421f-b308-afb8f4954be3
+      m_Processors:
+      m_Interactions:
+      m_SingletonActionBindings:
+      - m_Name:
+        m_Id: ec8d1fbf-95ea-45d7-9034-a432df927a46
+        m_Path: <XRHMD>/centerEyeRotation
+        m_Interactions:
+        m_Processors:
+        m_Groups:
+        m_Action: HMD Rotation
+        m_Flags: 0
+      m_Flags: 0
+      m_Priority: 0
+    m_Reference: {fileID: 0}
+  m_TrackingStateInput:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Tracking State
+      m_Type: 0
+      m_ExpectedControlType: Integer
+      m_Id: 1e2a709d-66f3-4a34-9bb2-8866d602904a
+      m_Processors:
+      m_Interactions:
+      m_SingletonActionBindings: []
+      m_Flags: 0
+      m_Priority: 0
+    m_Reference: {fileID: 0}
+  m_PositionAction:
+    m_Name:
+    m_Type: 0
+    m_ExpectedControlType:
+    m_Id: 2649f465-a4b0-4243-83f3-381f4149a960
+    m_Processors:
+    m_Interactions:
+    m_SingletonActionBindings: []
+    m_Flags: 0
+    m_Priority: 0
+  m_RotationAction:
+    m_Name:
+    m_Type: 0
+    m_ExpectedControlType:
+    m_Id: 8bdfa841-9a06-4117-aca1-8c7d661b083a
+    m_Processors:
+    m_Interactions:
+    m_SingletonActionBindings: []
+    m_Flags: 0
+    m_Priority: 0
+--- !u!1 &31000000005
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 31000000006}
+  - component: {fileID: 31000000007}
+  - component: {fileID: 31000000008}
+  m_Layer: 0
+  m_Name: PoseBridge
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &31000000006
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31000000005}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1221495002}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &31000000007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31000000005}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfc56dc4e08e08f41986bde1d6a39216, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.FlapDetector
+  trackingSource: 1
+  cameraReceiver: {fileID: 0}
+  headTransform: {fileID: 1308652009}
+  xrOrigin: {fileID: 1221495002}
+  settings: {fileID: 11400000, guid: 952bcda9d3d099e48b1c4a44f3364b72, type: 2}
+  xrSmoothingFactor: 0.45
+  xrFlapVelocityThreshold: 0.15
+  xrMinimumStrokeDistance: 0.06
+  xrFullIntensitySpeed: 1.2
+  xrMaximumSampleSpeed: 5
+  OnLeftFlap:
+    m_PersistentCalls:
+      m_Calls: []
+  OnRightFlap:
+    m_PersistentCalls:
+      m_Calls: []
+  leftHandTracked: 0
+  rightHandTracked: 0
+  totalLeftFlaps: 0
+  totalRightFlaps: 0
+--- !u!114 &31000000008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31000000005}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d6e4278ab134cd4bcfdb12a805e3f79, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.SalmonFinHands
+  detector: {fileID: 31000000007}
+  swimController: {fileID: 31000000002}
+  finMaterial: {fileID: 2100000, guid: d3352378e37732c4ea8e5dc3ac1b2a74, type: 2}
+  finLength: 0.28
+  rotationOffset: {x: 0, y: 0, z: 0}
+--- !u!1 &31000000009
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 31000000010}
+  m_Layer: 0
+  m_Name: SalmonBody
+  m_TagString: Untagged
+  m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &31000000010
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31000000009}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1221495002}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &31000000011
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 31000000012}
+  m_Layer: 0
+  m_Name: Camera Offset
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &31000000012
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31000000011}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1308652009}
+  - {fileID: 31000000014}
+  - {fileID: 31000000017}
+  m_Father: {fileID: 1221495002}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &31000000013
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 31000000014}
+  - component: {fileID: 31000000015}
+  m_Layer: 0
+  m_Name: Left Controller
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &31000000014
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31000000013}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 31000000012}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &31000000015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31000000013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2fadf230d1919748a9aa21d40f74619, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.XR.TrackedPoseDriver
+  m_TrackingType: 0
+  m_UpdateType: 0
+  m_IgnoreTrackingState: 0
+  m_PositionInput:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Left Controller Position
+      m_Type: 0
+      m_ExpectedControlType: Vector3
+      m_Id: 7670563a-20d3-44d5-9bbe-6ac2c7e557bc
+      m_Processors:
+      m_Interactions:
+      m_SingletonActionBindings:
+      - m_Name:
+        m_Id: d078c689-e0ba-4fdb-bc3b-9caf8b1c9aaf
+        m_Path: <XRController>{LeftHand}/devicePosition
+        m_Interactions:
+        m_Processors:
+        m_Groups:
+        m_Action: Left Controller Position
+        m_Flags: 0
+      m_Flags: 0
+      m_Priority: 0
+    m_Reference: {fileID: 0}
+  m_RotationInput:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Left Controller Rotation
+      m_Type: 0
+      m_ExpectedControlType: Quaternion
+      m_Id: bcca384a-d673-4e55-8742-546918c8adc7
+      m_Processors:
+      m_Interactions:
+      m_SingletonActionBindings:
+      - m_Name:
+        m_Id: 007e587e-26dd-4dd0-88d9-8f1045c0f8b6
+        m_Path: <XRController>{LeftHand}/deviceRotation
+        m_Interactions:
+        m_Processors:
+        m_Groups:
+        m_Action: Left Controller Rotation
+        m_Flags: 0
+      m_Flags: 0
+      m_Priority: 0
+    m_Reference: {fileID: 0}
+  m_TrackingStateInput:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Tracking State
+      m_Type: 0
+      m_ExpectedControlType: Integer
+      m_Id: cd6994d6-a1b4-4cf1-8a26-a09cd3c35279
+      m_Processors:
+      m_Interactions:
+      m_SingletonActionBindings: []
+      m_Flags: 0
+      m_Priority: 0
+    m_Reference: {fileID: 0}
+  m_PositionAction:
+    m_Name:
+    m_Type: 0
+    m_ExpectedControlType:
+    m_Id: 1d001a57-a90b-43f7-a229-c6c347de3152
+    m_Processors:
+    m_Interactions:
+    m_SingletonActionBindings: []
+    m_Flags: 0
+    m_Priority: 0
+  m_RotationAction:
+    m_Name:
+    m_Type: 0
+    m_ExpectedControlType:
+    m_Id: 784008e3-91e8-43ef-9c11-20912f9d3cf6
+    m_Processors:
+    m_Interactions:
+    m_SingletonActionBindings: []
+    m_Flags: 0
+    m_Priority: 0
+--- !u!1 &31000000016
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 31000000017}
+  - component: {fileID: 31000000018}
+  m_Layer: 0
+  m_Name: Right Controller
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &31000000017
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31000000016}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 31000000012}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &31000000018
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31000000016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2fadf230d1919748a9aa21d40f74619, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.XR.TrackedPoseDriver
+  m_TrackingType: 0
+  m_UpdateType: 0
+  m_IgnoreTrackingState: 0
+  m_PositionInput:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Right Controller Position
+      m_Type: 0
+      m_ExpectedControlType: Vector3
+      m_Id: bee3cfd1-f5b4-4574-a792-a3b6827ea8a0
+      m_Processors:
+      m_Interactions:
+      m_SingletonActionBindings:
+      - m_Name:
+        m_Id: 115510a3-a48d-4de9-baca-9d324d027931
+        m_Path: <XRController>{RightHand}/devicePosition
+        m_Interactions:
+        m_Processors:
+        m_Groups:
+        m_Action: Right Controller Position
+        m_Flags: 0
+      m_Flags: 0
+      m_Priority: 0
+    m_Reference: {fileID: 0}
+  m_RotationInput:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Right Controller Rotation
+      m_Type: 0
+      m_ExpectedControlType: Quaternion
+      m_Id: aa2066c7-e72f-4bec-8e57-b2c5fc4426d8
+      m_Processors:
+      m_Interactions:
+      m_SingletonActionBindings:
+      - m_Name:
+        m_Id: 68066605-b3b1-497c-9bfb-b58ddf175324
+        m_Path: <XRController>{RightHand}/deviceRotation
+        m_Interactions:
+        m_Processors:
+        m_Groups:
+        m_Action: Right Controller Rotation
+        m_Flags: 0
+      m_Flags: 0
+      m_Priority: 0
+    m_Reference: {fileID: 0}
+  m_TrackingStateInput:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Tracking State
+      m_Type: 0
+      m_ExpectedControlType: Integer
+      m_Id: 88bfb9ef-716e-4d55-9e77-90448960c577
+      m_Processors:
+      m_Interactions:
+      m_SingletonActionBindings: []
+      m_Flags: 0
+      m_Priority: 0
+    m_Reference: {fileID: 0}
+  m_PositionAction:
+    m_Name:
+    m_Type: 0
+    m_ExpectedControlType:
+    m_Id: 3504dbbd-3db7-46f4-a961-c2014087aad1
+    m_Processors:
+    m_Interactions:
+    m_SingletonActionBindings: []
+    m_Flags: 0
+    m_Priority: 0
+  m_RotationAction:
+    m_Name:
+    m_Type: 0
+    m_ExpectedControlType:
+    m_Id: cb36ab2a-3835-48ee-83e1-a34f6c61f9ae
+    m_Processors:
+    m_Interactions:
+    m_SingletonActionBindings: []
+    m_Flags: 0
+    m_Priority: 0
+--- !u!114 &31000000100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1221495001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a96b229d98454481ad4c6b8a058ae504, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.LampreyShakeController
+  escapeSeconds: 6
+  gripPerShake: 25
+  minimumTravel: 0.08
+  minimumSpeed: 0.35
+  reversalWindow: 0.65
+  rollDegrees: 2.5
+  rollFrequency: 0.45
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

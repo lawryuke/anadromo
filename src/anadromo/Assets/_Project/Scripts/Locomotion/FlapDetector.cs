@@ -33,6 +33,12 @@ namespace Anadromo.Locomotion
         private ArmState left, right;
         private XRHandSubsystem handSubsystem;
         private readonly List<XRHandSubsystem> subsystems = new List<XRHandSubsystem>();
+        private bool suppressFlaps;
+        public bool SuppressFlaps
+        {
+            get => suppressFlaps;
+            set { if (suppressFlaps == value) return; suppressFlaps = value; ResetState(); }
+        }
 
         private struct ArmState
         {
@@ -47,7 +53,7 @@ namespace Anadromo.Locomotion
         private void OnDisable() => ResetState();
         private void Update()
         {
-            if (settings == null || Time.deltaTime <= 0f) return;
+            if (SuppressFlaps || settings == null || Time.deltaTime <= 0f) return;
             ProcessArm(true, ref left, ref leftHandTracked, OnLeftFlap, ref totalLeftFlaps);
             ProcessArm(false, ref right, ref rightHandTracked, OnRightFlap, ref totalRightFlaps);
         }

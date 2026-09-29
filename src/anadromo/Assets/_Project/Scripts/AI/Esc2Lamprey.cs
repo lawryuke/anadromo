@@ -68,7 +68,7 @@ namespace Anadromo.AI
             }
             else
             {
-                Vector3 target=player.transform.position;
+                Vector3 target=player.ViewPosition;
                 bool detected=school.Contains(target)&&Vector3.Distance(previous,target)<=detectionRadius&&school.ClearPath(previous,target);
                 if(State==BehaviourState.Chill && detected) State=BehaviourState.Chasing;
                 else if(State==BehaviourState.Chasing && (!school.Contains(target)||Vector3.Distance(previous,target)>detectionRadius*2||!school.ClearPath(previous,target))) State=BehaviourState.Chill;
@@ -86,6 +86,8 @@ namespace Anadromo.AI
         void StickToPlayer() { if(cameraTransform) transform.SetPositionAndRotation(cameraTransform.position+cameraTransform.rotation*new Vector3((attachmentSlot%2==0?1:-1)*Mathf.Abs(attachOffset.x),attachOffset.y-(attachmentSlot/2)*.12f,attachOffset.z),cameraTransform.rotation); else if(Target) transform.position=Target.transform.position; }
         void Attach(PiranhaPlayerTarget player)
         {
+            var camera = player.GetComponentInChildren<Camera>();
+            cameraTransform = camera ? camera.transform : player.transform;
             State=BehaviourState.Attached; Grip=maxGrip; drainTimer=drainInterval; attachmentSlot=player.GetLampreySlot(); player.AddLamprey(this); StickToPlayer();
             UpdateFeedingAudio();
         }
@@ -96,7 +98,7 @@ namespace Anadromo.AI
             if(Grip>0) return;
             Target.RemoveLamprey(this); State=BehaviourState.Stunned; stunTimer=stunDuration; drainTimer=drainInterval;
             StopFeedingAudio();
-            Vector3 origin=Target.transform.position;
+            Vector3 origin=Target.ViewPosition;
             Vector3 randomScatter = UnityEngine.Random.insideUnitSphere * 1.5f;
             Vector3 destination=school.Clamp(origin+Target.transform.forward*1.5f + randomScatter);
             transform.position=school.MoveWithoutObstacles(origin,destination,.15f);
