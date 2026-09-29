@@ -199,7 +199,7 @@ MonoBehaviour:
   scareDistance: 1
   checkInterval: 0.1
   scareFromPlayer: 0
-  player: {fileID: 0}
+  player: {fileID: 863163181}
   playerScareDistance: 1
   fleeOffset: {x: 0, y: 0, z: 10}
 --- !u!114 &8343368
@@ -2160,7 +2160,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   groupRoot: {fileID: 263232669}
   initialTarget: {fileID: 112070201}
-  playerMovement: {fileID: 768065906}
+  playerMovement: {fileID: 0}
   debris: {fileID: 10000000022}
   viewer: {fileID: 863163185}
   revealDuration: 3
@@ -2923,7 +2923,6 @@ GameObject:
   - component: {fileID: 652773256}
   - component: {fileID: 652773265}
   - component: {fileID: 652773264}
-  - component: {fileID: 652773263}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -2980,7 +2979,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.ComfortVignette
   targetRigidbody: {fileID: 652773260}
-  volume: {fileID: 0}
+  volume: {fileID: 11000000003}
   velocityForMaxVignette: 5
   angularVelForMaxVignette: 3
   maxVignetteIntensity: 0.4
@@ -3068,21 +3067,6 @@ Transform:
   - {fileID: 347118838}
   m_Father: {fileID: 263232669}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &652773263
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 652773255}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d183ae189a87fd44eb99d4db83251731, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SimpleFlyCamera
-  movementSpeed: 0.7
-  fastMovementSpeed: 1.2
-  mouseSensitivity: 0.05
 --- !u!114 &652773264
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3103,7 +3087,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   consumptionEnabled: 1
-  mouthTarget: {fileID: 0}
+  mouthTarget: {fileID: 863163181}
   biteBlockingLayers:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -5787,7 +5771,7 @@ MonoBehaviour:
   waitAbysmPhase: 1
   showDebug: 0
   logRouteEvents: 1
-  debugCamera: {fileID: 0}
+  debugCamera: {fileID: 863163185}
 --- !u!4 &1208873275
 Transform:
   m_ObjectHideFlags: 0
@@ -7498,7 +7482,7 @@ MonoBehaviour:
   scareDistance: 1
   checkInterval: 0.1
   scareFromPlayer: 0
-  player: {fileID: 0}
+  player: {fileID: 863163181}
   playerScareDistance: 1
   fleeOffset: {x: 0, y: 0, z: 10}
 --- !u!114 &1652384444
@@ -14683,7 +14667,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41e1f13a5d7e48b7b0d789a14eeaf869, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewer: {fileID: 0}
+  viewer: {fileID: 863163185}
   surface: {fileID: 11000000004}
   visibility: 10
   maximumDrift: 0.3
