@@ -41,7 +41,7 @@ Light:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 681183125389167740}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 12
   m_Type: 2
   m_Color: {r: 0.9716981, g: 0.5190465, b: 0.3987629, a: 1}
@@ -183,7 +183,7 @@ Light:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1341727170422840159}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 12
   m_Type: 2
   m_Color: {r: 0.9716981, g: 0.5190465, b: 0.3987629, a: 1}
@@ -422,6 +422,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.DistantLureGlow
   waterSettings: {fileID: 2100000, guid: ee653ce812e34f619ef2a87d4c915103, type: 2}
+  includeChildRenderers: 0
   emission: {r: 0.608393, g: 0.19188735, b: 0.0947027, a: 1}
 --- !u!1 &8073169212572733070
 GameObject:
@@ -453,7 +454,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6529539636480663231}
@@ -510,6 +511,21 @@ MonoBehaviour:
   isStatic: 0
   roamRadius: 0.4
   speed: 0.15
+--- !u!114 &893012001234567890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8073169212572733070}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c76a517252d9ac4b815aa8b064495aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.DistantLureGlow
+  waterSettings: {fileID: 2100000, guid: ee653ce812e34f619ef2a87d4c915103, type: 2}
+  includeChildRenderers: 1
+  emission: {r: 0.608393, g: 0.19188735, b: 0.0947027, a: 1}
 --- !u!1 &8755814227560204173
 GameObject:
   m_ObjectHideFlags: 0
@@ -614,6 +630,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.DistantLureGlow
   waterSettings: {fileID: 2100000, guid: ee653ce812e34f619ef2a87d4c915103, type: 2}
+  includeChildRenderers: 0
   emission: {r: 0.60839295, g: 0.54501873, b: 0.430945, a: 1}
 --- !u!1001 &7584706423091861002
 PrefabInstance:
@@ -731,18 +748,3 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7da30f60e305cf2469648b16abaa75ac, type: 3}
   m_PrefabInstance: {fileID: 7584706423091861002}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &893012001234567890
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8073169212572733070}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c76a517252d9ac4b815aa8b064495aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.DistantLureGlow
-  waterSettings: {fileID: 2100000, guid: ee653ce812e34f619ef2a87d4c915103, type: 2}
-  includeChildRenderers: 1
-  emission: {r: 0.608393, g: 0.19188735, b: 0.0947027, a: 1}
