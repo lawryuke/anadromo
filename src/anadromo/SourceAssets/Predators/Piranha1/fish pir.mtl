@@ -1,0 +1,14 @@
+# Blender 5.0.1 MTL File: 'fish pir.blend'
+# www.blender.org
+
+newmtl Material.002
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd D:/garaskoper/1111/Новая папка/LOU pir_TT_checker_512x512_COLOR_GRID_BaseColor.png
+map_refl D:/garaskoper/1111/Новая папка/LOU pir_TT_checker_512x512_COLOR_GRID_OcclusionRoughnessMetallic.png
+map_Bump -bm 1.000000 D:/garaskoper/1111/Новая папка/LOU pir_TT_checker_512x512_COLOR_GRID_Normal.png

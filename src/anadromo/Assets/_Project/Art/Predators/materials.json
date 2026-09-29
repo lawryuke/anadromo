@@ -1,0 +1,124 @@
+{
+  "materials": [
+    {
+      "name": "PiranhaSkin",
+      "base": "fish01_UV_CC.png",
+      "normal": "",
+      "roughness": 0.36,
+      "color": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "LampreySkin",
+      "base": "Lamprea.png",
+      "normal": "",
+      "roughness": 0.32,
+      "color": [
+        0.74,
+        0.79,
+        0.72,
+        1
+      ]
+    },
+    {
+      "name": "LampreyTeeth",
+      "base": "Hortzak.png",
+      "normal": "",
+      "roughness": 0.3,
+      "color": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "LampreyEye",
+      "base": "Begia_1_Base_Color.png",
+      "normal": "",
+      "roughness": 0.17,
+      "color": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "LampreyEye2",
+      "base": "Begia_1_Base_Color.png",
+      "normal": "",
+      "roughness": 0.17,
+      "color": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "LampreyMouth",
+      "base": "Papilla_Base_Color.png",
+      "normal": "",
+      "roughness": 0.4,
+      "color": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "AnglerBody",
+      "base": "Body_1001_albedo.jpg",
+      "normal": "Body_1001_normal.png",
+      "roughness": 0.46,
+      "color": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "AnglerTeeth",
+      "base": "Teeth_1001_albedo.jpg",
+      "normal": "Teeth_1001_normal.png",
+      "roughness": 0.46,
+      "color": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "AnglerFins",
+      "base": "Fins_1001_albedo.jpg",
+      "normal": "Fins_1001_normal.png",
+      "roughness": 0.46,
+      "color": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "AnglerEyes",
+      "base": "Eyes_1001_albedo.jpg",
+      "normal": "Eyes_1001_normal.png",
+      "roughness": 0.3,
+      "color": [
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  ]
+}
