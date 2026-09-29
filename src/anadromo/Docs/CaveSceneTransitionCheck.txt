@@ -1,0 +1,1 @@
+PASS: 28 level progression checks; cave ending loads esc2; VR_Player starts under a black, text-free fade that clears automatically.

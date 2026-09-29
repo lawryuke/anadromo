@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Anadromo.Mechanics;
 using Anadromo.Config;
+using UnityEngine.SceneManagement;
 
 namespace Anadromo.Logic
 {
@@ -51,6 +52,7 @@ namespace Anadromo.Logic
         bool legacyLeft, legacyCave;
         Rigidbody playerBody;
         bool bodyWasKinematic;
+        bool sceneTransitionStarted;
 
         void Awake()
         {
@@ -283,9 +285,27 @@ namespace Anadromo.Logic
                 case GamePhase.Complete:
                     SetPlayerMovement(false);
                     playerFeeding.consumptionEnabled = false;
+                    StartCoroutine(EnterEsc2());
                     break;
             }
             Debug.Log("Fase: " + currentPhase, this);
+        }
+
+        IEnumerator EnterEsc2()
+        {
+            if (sceneTransitionStarted) yield break;
+            sceneTransitionStarted = true;
+            // Let the final black curtain render before replacing the scene.
+            yield return new WaitForEndOfFrame();
+            const string destination = "Assets/_Project/Scenes/esc2.unity";
+            if (!Application.CanStreamedLevelBeLoaded(destination))
+            {
+                Debug.LogError("esc2 must be enabled in Build Settings for the cave transition.", this);
+                sceneTransitionStarted = false;
+                yield break;
+            }
+            SceneTransitionBridge.ExpectArrival();
+            yield return SceneManager.LoadSceneAsync(destination, LoadSceneMode.Single);
         }
 
         public static bool Contains(ZoneLimit zone, Vector3 worldPoint)

@@ -441,7 +441,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BloopFishMovement
   puntoInicio: {x: 13.3, y: -15.39, z: 21.1}
   puntoFin: {x: 13.3, y: 120, z: 21.1}
-  velocidad: 27
+  velocidad: 23
   teclaParaIniciar: 53
   allowKeyboard: 0
 --- !u!4 &88480908 stripped
@@ -2923,8 +2923,6 @@ GameObject:
   - component: {fileID: 652773256}
   - component: {fileID: 652773265}
   - component: {fileID: 652773264}
-  - component: {fileID: 652773267}
-  - component: {fileID: 652773266}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -3110,47 +3108,11 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
   m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &652773266
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 652773255}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b50c64b8a29f4a7998c2b889a2723e12, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.VRBodyCollider
-  head: {fileID: 863163181}
---- !u!136 &652773267
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 652773255}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.112
-  m_Height: 0.56
-  m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &662708773
 PrefabInstance:

@@ -1,4 +1,5 @@
 using Anadromo.AI;
+using Anadromo.Logic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -21,6 +22,11 @@ namespace Anadromo.Locomotion
                 if (camera) head = camera.transform;
             }
             SyncBody();
+        }
+
+        void Start()
+        {
+            SceneTransitionBridge.FadeInIfExpected(head ? head.GetComponent<Camera>() : null);
         }
 
         void FixedUpdate() => SyncBody();
