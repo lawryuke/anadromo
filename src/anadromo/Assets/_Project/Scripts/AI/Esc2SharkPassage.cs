@@ -6,7 +6,7 @@ namespace Anadromo.AI
     // A reusable crossing, independent from schools: never steers towards the player.
     public sealed class Esc2SharkPassage : MonoBehaviour
     {
-        public enum PassageState { Waiting, Warning, Crossing, Cooldown }
+        public enum PassageState { Waiting, Warning, Crossing, Cooldown, Ending }
         public PiranhaPlayerTarget target;
         public Transform shark;
         public Transform[] waypoints;
@@ -16,10 +16,20 @@ namespace Anadromo.AI
         public float turnSpeed=180f;
         public float contactRadius=.5f, bodyHalfLength=.75f, obstacleRadius=.4f;
         public LayerMask obstacleLayers=Physics.DefaultRaycastLayers;
+        [Header("Audio 3D del recorrido")]
+        public AudioClip passageSound;
+        public bool loopPassageSound;
+        [Range(0f,1f)] public float soundVolume=1f;
+        [Min(.01f)] public float soundMinDistance=3f;
+        [Min(.01f)] public float soundMaxDistance=35f;
+        [Min(0f), Tooltip("Segundos inmóvil al final del recorrido mientras el sonido baja hasta silencio.")]
+        public float endFadeDuration=1.5f;
+        AudioSource passageAudio;
         public PassageState State { get; private set; }
         public float WarningRemaining { get; private set; }
         int waypoint;
         float cooldown;
+        float endElapsed, endStartVolume;
         public bool Configured => target && shark && waypoints!=null && waypoints.Length>=2 && System.Array.TrueForAll(waypoints,p=>p);
 
         void Start()
@@ -57,23 +67,45 @@ namespace Anadromo.AI
             return false;
         }
         void Update() { Tick(Time.deltaTime); }
+        void LateUpdate()
+        {
+            if(!passageAudio) return;
+            if(State==PassageState.Warning && waypoints!=null && waypoints.Length>0 && waypoints[0])
+                passageAudio.transform.position=waypoints[0].position;
+            else if((State==PassageState.Crossing || State==PassageState.Ending) && shark)
+                passageAudio.transform.position=shark.position;
+        }
         public void Tick(float dt)
         {
-            if(!Configured || !target.Alive || dt<=0) return;
+            if(!Configured || !target.Alive) { StopPassageSound(); return; }
+            if(dt<=0) return;
             if(State==PassageState.Waiting)
             {
-                if(PlayerNearRoute()) { State=PassageState.Warning; WarningRemaining=warningDuration; }
+                if(PlayerNearRoute())
+                {
+                    shark.SetPositionAndRotation(waypoints[0].position,Quaternion.LookRotation((waypoints[1].position-waypoints[0].position).normalized));
+                    shark.gameObject.SetActive(true);
+                    State=PassageState.Warning; WarningRemaining=warningDuration;
+                    PlayPassageSound();
+                }
                 return;
             }
             if(State==PassageState.Warning)
             {
                 WarningRemaining-=dt;
                 if(WarningRemaining>0) return;
-                shark.SetPositionAndRotation(waypoints[0].position,Quaternion.LookRotation((waypoints[1].position-waypoints[0].position).normalized));
-                shark.gameObject.SetActive(true); waypoint=1; cooldown=repeatDelay; State=PassageState.Crossing;
+                waypoint=1; cooldown=repeatDelay; State=PassageState.Crossing;
                 return;
             }
             cooldown=Mathf.Max(0,cooldown-dt);
+            if(State==PassageState.Ending)
+            {
+                endElapsed+=dt;
+                float progress=endFadeDuration>0f ? Mathf.Clamp01(endElapsed/endFadeDuration) : 1f;
+                if(passageAudio) passageAudio.volume=endStartVolume*(1f-progress);
+                if(progress>=1f) FinishCrossing();
+                return;
+            }
             if(State==PassageState.Cooldown) { if(cooldown<=0) State=PassageState.Waiting; return; }
             float budget=Mathf.Max(0,travelSpeed)*dt;
             while(budget>0 && waypoint<waypoints.Length)
@@ -97,15 +129,46 @@ namespace Anadromo.AI
                 if(Vector3.Distance(end,waypoints[waypoint].position)<.001f) waypoint++;
                 if(!target.Alive) return;
             }
-            if(waypoint>=waypoints.Length) FinishCrossing();
+            if(waypoint>=waypoints.Length)
+            {
+                shark.position=waypoints[waypoints.Length-1].position;
+                State=PassageState.Ending;
+                endElapsed=0f;
+                endStartVolume=passageAudio ? passageAudio.volume : 0f;
+                if(endFadeDuration<=0f) FinishCrossing();
+            }
         }
-        void FinishCrossing() { shark.gameObject.SetActive(false); State=PassageState.Cooldown; }
+        void PlayPassageSound()
+        {
+            if(!passageSound || !shark) return;
+            if(!passageAudio)
+            {
+                // Keep the emitter under the controller and follow the warning/attack position.
+                var emitter=new GameObject("Passage Audio 3D");
+                emitter.transform.SetParent(transform,false);
+                passageAudio=emitter.AddComponent<AudioSource>();
+            }
+            passageAudio.transform.position=waypoints[0].position;
+            passageAudio.playOnAwake=false;
+            passageAudio.loop=loopPassageSound;
+            passageAudio.spatialBlend=1f;
+            passageAudio.rolloffMode=AudioRolloffMode.Linear;
+            passageAudio.minDistance=Mathf.Max(.01f,soundMinDistance);
+            passageAudio.maxDistance=Mathf.Max(passageAudio.minDistance+.01f,soundMaxDistance);
+            passageAudio.dopplerLevel=0f;
+            passageAudio.volume=soundVolume;
+            passageAudio.clip=passageSound;
+            passageAudio.Play();
+        }
+        void StopPassageSound() { if(passageAudio) passageAudio.Stop(); }
+        void FinishCrossing() { StopPassageSound(); shark.gameObject.SetActive(false); State=PassageState.Cooldown; }
         public void ResetPassage()
         {
-            State=PassageState.Waiting; WarningRemaining=cooldown=0; waypoint=1;
+            StopPassageSound();
+            State=PassageState.Waiting; WarningRemaining=cooldown=endElapsed=endStartVolume=0; waypoint=1;
             if(shark) { if(waypoints!=null && waypoints.Length>0 && waypoints[0]) shark.position=waypoints[0].position; shark.gameObject.SetActive(false); }
         }
-        void OnDisable() { if(Application.isPlaying && shark) shark.gameObject.SetActive(false); }
+        void OnDisable() { StopPassageSound(); if(Application.isPlaying && shark) shark.gameObject.SetActive(false); }
         void OnGUI()
         {
             if(State!=PassageState.Warning || !target || !target.Alive) return;

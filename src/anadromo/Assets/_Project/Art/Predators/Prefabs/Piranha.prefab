@@ -269,6 +269,9 @@ MonoBehaviour:
   biteInterval: 1
   loseInterestDelay: 3
   contactRadius: 0.45
+  disturbedSound: {fileID: 8300000, guid: 99ac42d58610ff04fa8ce7dba8b1762a, type: 3}
+  attackSound: {fileID: 8300000, guid: 99032b7c52c992c4e95b42b31f1ddefa, type: 3}
+  soundVolume: 0.65
 --- !u!1 &4174855264329017273
 GameObject:
   m_ObjectHideFlags: 0

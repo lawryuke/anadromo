@@ -268,6 +268,12 @@ MonoBehaviour:
   repeatDelay: 18
   activationRadius: 4
   turnSpeed: 180
+  passageSound: {fileID: 8300000, guid: ebb646ff9ee33454fafab1d6120a6fa0, type: 3}
+  loopPassageSound: 1
+  soundVolume: 1
+  soundMinDistance: 3
+  soundMaxDistance: 35
+  endFadeDuration: 1.5
   contactRadius: 0.5
   bodyHalfLength: 0.75
   obstacleRadius: 0.4

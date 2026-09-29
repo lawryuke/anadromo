@@ -9,17 +9,53 @@ namespace Anadromo.AI
         public float detectionRadius = 5, disturbanceDelay = 2.5f, noiseThreshold = 6;
         public float normalSpeed = 1, attackSpeed = 9, calmTurn = 5, attackTurn = .5f;
         public float damage = 8, biteInterval = 1, loseInterestDelay = 3, contactRadius = .45f;
+        [Header("Audio por estado")]
+        public AudioClip disturbedSound;
+        public AudioClip attackSound;
+        [Range(0f,1f)] public float soundVolume = .65f;
         public BehaviourState State { get; private set; }
         public PiranhaSchool School { get; private set; }
         Vector3 home, direction, previous;
         float disturbance, lost, biteCooldown, clock;
-        MaterialPropertyBlock tint;
-        void Awake() { home = transform.position; direction = transform.forward; tint = new MaterialPropertyBlock(); }
+        AudioSource stateAudio;
+        BehaviourState audioState;
+        void Awake() { home = transform.position; direction = transform.forward; }
         void OnEnable() { School = GetComponentInParent<PiranhaSchool>(); }
         void OnTransformParentChanged() { School = GetComponentInParent<PiranhaSchool>(); }
-        void Update() { if (School && School.target && School.target.Alive) Tick(Time.deltaTime); }
-        public void BeginAttack() { State = BehaviourState.Attack; lost = 0; }
-        public void ResetFish() { transform.position = home; State = BehaviourState.Chill; disturbance = lost = biteCooldown = 0; }
+        void Update()
+        {
+            if (School && School.target && School.target.Alive) Tick(Time.deltaTime);
+            else StopStateAudio();
+        }
+        public void BeginAttack() { State = BehaviourState.Attack; lost = 0; UpdateStateAudio(); }
+        public void ResetFish() { StopStateAudio(); transform.position = home; State = BehaviourState.Chill; disturbance = lost = biteCooldown = 0; }
+        void UpdateStateAudio()
+        {
+            if (!isActiveAndEnabled || !School || !School.target || !School.target.Alive)
+            { StopStateAudio(); return; }
+            if (stateAudio) stateAudio.volume = soundVolume;
+            if (audioState == State) return;
+            StopStateAudio();
+            audioState = State;
+            AudioClip clip = State == BehaviourState.Disturbed ? disturbedSound : State == BehaviourState.Attack ? attackSound : null;
+            if (!clip) return;
+            if (!stateAudio)
+            {
+                stateAudio = gameObject.AddComponent<AudioSource>();
+                stateAudio.playOnAwake = false;
+                stateAudio.spatialBlend = 1f;
+                stateAudio.rolloffMode = AudioRolloffMode.Linear;
+                stateAudio.minDistance = 1f;
+                stateAudio.maxDistance = 15f;
+                stateAudio.dopplerLevel = 0f;
+            }
+            stateAudio.volume = soundVolume;
+            stateAudio.clip = clip;
+            stateAudio.loop = State == BehaviourState.Attack;
+            stateAudio.Play();
+        }
+        void StopStateAudio() { if (stateAudio) stateAudio.Stop(); audioState = BehaviourState.Chill; }
+        void OnDisable() { StopStateAudio(); }
         public void Tick(float dt)
         {
             var target = School.target; clock += dt; biteCooldown -= dt; previous = transform.position;
@@ -51,12 +87,7 @@ namespace Anadromo.AI
             float t = segment.sqrMagnitude < .00001f ? 0 : Mathf.Clamp01(Vector3.Dot(target.transform.position-previous,segment)/segment.sqrMagnitude);
             if (State == BehaviourState.Attack && biteCooldown <= 0 && Vector3.Distance(previous+segment*t,target.transform.position) <= contactRadius && School.ClearPath(transform.position,target.transform.position))
             { target.TakeDamage(damage); biteCooldown = biteInterval; GetComponentInChildren<PredatorNaturalMotion>()?.Bite(); }
-            if (body)
-            {
-                if (tint == null) tint = new MaterialPropertyBlock();
-                Color c = State == BehaviourState.Attack ? new Color(1,.15f,.1f) : State == BehaviourState.Disturbed ? new Color(1,.7f,.1f) : new Color(.2f,.75f,.4f);
-                tint.SetColor("_BaseColor",c); tint.SetColor("_Color",c); body.SetPropertyBlock(tint);
-            }
+            UpdateStateAudio();
         }
     }
 }
