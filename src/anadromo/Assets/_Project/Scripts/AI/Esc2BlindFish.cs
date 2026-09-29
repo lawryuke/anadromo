@@ -8,6 +8,8 @@ namespace Anadromo.AI
         public PiranhaPlayerTarget target;
         public BlindFishMotionSensor motion;
         public Transform body;
+        [Tooltip("Correccion local del modelo respecto a la direccion de nado. Para un modelo que mira a +X, usa Y = -90.")]
+        public Vector3 bodyRotationOffset;
         public Renderer bodyRenderer;
         public Transform[] patrolPoints;
         public LayerMask obstacleLayers=Physics.DefaultRaycastLayers;
@@ -15,6 +17,11 @@ namespace Anadromo.AI
         public float graceDuration=2, inspectionDuration=3, inspectionDistance=1.5f;
         public float patrolSpeed=.6f, approachSpeed=2.5f, attackSpeed=7, retreatDuration=3;
         public float bodyRadius=.3f, contactRadius=.55f, territoryRadius=12;
+        [Header("Audio de alerta")]
+        public AudioClip alertLoop;
+        [Range(0f,1f)] public float criticalVolume=.75f;
+        [Range(0f,1f)] public float inspectingVolume=1f;
+        AudioSource alertSource;
         public BehaviourState State { get; private set; }
         public float Agitation { get; private set; }
         public Vector3 InspectionPoint { get; private set; }
@@ -33,8 +40,38 @@ namespace Anadromo.AI
             if(!target || !motion || !body || !bodyRenderer)
             { Debug.LogError("Pez ciego: asigna Target, Motion, Body y Body Renderer.",this); enabled=false; return; }
             var camera=target.GetComponentInChildren<Camera>(); view=camera?camera.transform:target.transform;
+            alertSource=body.gameObject.AddComponent<AudioSource>();
+            alertSource.playOnAwake=false;
+            alertSource.loop=true;
+            alertSource.spatialBlend=1f;
+            alertSource.rolloffMode=AudioRolloffMode.Linear;
+            alertSource.minDistance=inspectionDistance;
+            alertSource.maxDistance=Mathf.Max(detectionRadius*2,inspectionDistance+.1f);
+            alertSource.dopplerLevel=0f;
+            alertSource.volume=0f;
             ResetFish();
         }
+        void LateUpdate()
+        {
+            if(!alertSource) return;
+            if(!target || !target.Alive || !alertLoop ||
+                (State!=BehaviourState.Critical && State!=BehaviourState.Inspecting && State!=BehaviourState.Attack))
+            { StopAlertAudio(); return; }
+            // Ramp over the critical grace period; inspection and attack keep full intensity.
+            alertSource.volume=State==BehaviourState.Critical
+                ? criticalVolume*Mathf.Clamp01(StateTime/Mathf.Max(.001f,graceDuration))
+                : inspectingVolume;
+            if(alertSource.clip!=alertLoop) alertSource.clip=alertLoop;
+            if(!alertSource.isPlaying) alertSource.Play();
+        }
+        void StopAlertAudio()
+        {
+            if(!alertSource) return;
+            alertSource.Stop();
+            alertSource.volume=0f;
+        }
+        void OnDisable() { StopAlertAudio(); }
+        void OnDestroy() { if(alertSource) Destroy(alertSource); }
         bool IsWall(Collider c) => c && !c.transform.IsChildOf(transform) && !c.transform.IsChildOf(target.transform.root);
         public bool ClearPath(Vector3 a,Vector3 b)
         {
@@ -83,7 +120,7 @@ namespace Anadromo.AI
                     else
                     {
                         Vector3 look=target.transform.position-body.position;
-                        if(look.sqrMagnitude>.001f) body.rotation=Quaternion.LookRotation(look);
+                        if(look.sqrMagnitude>.001f) body.rotation=FacingRotation(look);
                         if(StateTime>=inspectionDuration) BeginRetreat();
                     }
                     break;
@@ -133,10 +170,11 @@ namespace Anadromo.AI
             foreach(var hit in Physics.SphereCastAll(start,bodyRadius,direction,distance,obstacleLayers,QueryTriggerInteraction.Ignore))
                 if(IsWall(hit.collider)) distance=Mathf.Min(distance,Mathf.Max(0,hit.distance-.02f));
             body.position=start+direction*distance;
-            if(direction.sqrMagnitude>.001f) body.rotation=Quaternion.Slerp(body.rotation,Quaternion.LookRotation(direction),1-Mathf.Exp(-6*dt));
+            if(direction.sqrMagnitude>.001f) body.rotation=Quaternion.Slerp(body.rotation,FacingRotation(direction),1-Mathf.Exp(-6*dt));
             if(lethal && Esc2SharkPassage.SegmentDistance(target.transform.position,start,body.position)<=contactRadius && ClearPath(body.position,target.transform.position))
                 target.TakeDamage(target.maxHealth);
         }
+        Quaternion FacingRotation(Vector3 direction) => Quaternion.LookRotation(direction)*Quaternion.Euler(bodyRotationOffset);
         void ApplyColor()
         {
             if(!bodyRenderer) return;
@@ -150,6 +188,7 @@ namespace Anadromo.AI
         }
         public void ResetFish()
         {
+            StopAlertAudio();
             if(body) body.SetPositionAndRotation(home,homeRotation);
             Agitation=StateTime=lostTime=0; State=BehaviourState.Chill; patrolIndex=0; inspectingAtPoint=false; ApplyColor();
         }

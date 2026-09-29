@@ -14,6 +14,10 @@ namespace Anadromo.Mechanics
         public UnityEvent OnPreyConsumed = new UnityEvent();
         public bool consumptionEnabled = true;
         public Transform mouthTarget;
+        [Header("Audio al comer")]
+        public AudioClip eatingClip;
+        [Range(0f, 1f)] public float eatingVolume = 1f;
+        AudioSource eatingSource;
         public int TotalConsumed { get; private set; }
         public string LastConsumedTag { get; private set; }
         public LayerMask biteBlockingLayers = ~0;
@@ -30,7 +34,13 @@ namespace Anadromo.Mechanics
             mouth.isTrigger = true;
             float radius = GameSettings.I ? GameSettings.I.mouthRadius : mouthRadius;
             mouth.radius = radius;
+            eatingSource = gameObject.AddComponent<AudioSource>();
+            eatingSource.playOnAwake = false;
+            eatingSource.loop = false;
+            eatingSource.spatialBlend = 0f;
         }
+
+        void OnDisable() { if (eatingSource) eatingSource.Stop(); }
 
         public int ConsumedWithTag(string tag) => consumed.TryGetValue(tag, out int count) ? count : 0;
         void FixedUpdate()
@@ -63,6 +73,7 @@ namespace Anadromo.Mechanics
                     if (!hit.transform.IsChildOf(transform.root) && !hit.transform.IsChildOf(prey.transform)) return false;
             float value = prey.energyValue;
             if (!prey.TryConsume()) return false;
+            if (eatingClip) eatingSource.PlayOneShot(eatingClip, eatingVolume);
             TotalConsumed++;
             LastConsumedTag = tag;
             consumed[tag] = ConsumedWithTag(tag) + 1;

@@ -23,6 +23,7 @@ namespace Anadromo.Mechanics
         [Tooltip("Si es true, la medusa estará oculta y no iniciará su recorrido hasta que el jugador entre en Abysm_Mid (se sobreescribe con GameSettings).")]
         public bool waitAbysmPhase = true;
         private bool isMoving = false;
+        public bool IsMoving => isMoving;
 
         /// <summary>Velocidad efectiva: prioriza GameSettings.I si existe.</summary>
         float EffectiveSpeed => GameSettings.I ? GameSettings.I.jellyfishSpeed : speed;
@@ -40,6 +41,8 @@ namespace Anadromo.Mechanics
 
         void Start()
         {
+            // A dynamically created guide may have been started by its warning trigger already.
+            if (isMoving) return;
             routeStartTime = Time.time;
             
             if (waypoints != null && waypoints.Length > 0 && waypoints[0] != null)
@@ -69,6 +72,8 @@ namespace Anadromo.Mechanics
         public void BeginRoute()
         {
             if (isMoving) return;
+            enabled = true;
+            currentWaypointIndex = 0;
             isMoving = true;
             routeStartTime = Time.time;
             SetVisualsActive(true);
@@ -123,6 +128,7 @@ namespace Anadromo.Mechanics
                     else 
                     {
                         routeStatus = "Recorrido terminado";
+                        isMoving = false;
                         enabled = false; // Detener el script para que se quede quieta
                         if (disappearOnFinish)
                         {

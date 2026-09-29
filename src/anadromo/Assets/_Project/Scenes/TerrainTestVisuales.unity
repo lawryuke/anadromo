@@ -3079,6 +3079,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4746f5b7278e13447b68bd6364ab6cec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.PlayerFeeding
+  eatingClip: {fileID: 8300000, guid: e2eaecee1b8329740ab127e6f53cc516, type: 3}
+  eatingVolume: 1
   mouthRadius: 0.3
   edibleTags:
   - Food_PlayerOnly
@@ -3663,6 +3665,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4746f5b7278e13447b68bd6364ab6cec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.PlayerFeeding
+  eatingClip: {fileID: 8300000, guid: e2eaecee1b8329740ab127e6f53cc516, type: 3}
+  eatingVolume: 1
   mouthRadius: 0.3
   edibleTags:
   - Food_PlayerOnly

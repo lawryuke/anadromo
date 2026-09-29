@@ -134,6 +134,11 @@ namespace Anadromo.Logic
                     playerFeeding = mouth.AddComponent<PlayerFeeding>();
                 }
                 playerFeeding.mouthTarget = playerCamera.transform;
+                if (!playerFeeding.eatingClip && oldFeeding != null)
+                {
+                    playerFeeding.eatingClip = oldFeeding.eatingClip;
+                    playerFeeding.eatingVolume = oldFeeding.eatingVolume;
+                }
                 UsesVRPlayer = true;
                 if (oldFeeding != null && oldFeeding != playerFeeding && !oldFeeding.transform.IsChildOf(PlayerRoot))
                     oldFeeding.gameObject.SetActive(false);

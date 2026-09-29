@@ -80,9 +80,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92ecd3b6b97aed546862435bd74452ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.AI.Esc2BlindFish
+  alertLoop: {fileID: 8300000, guid: 501e6115e56dd5a4c9644e52156ef040, type: 3}
+  criticalVolume: 0.75
+  inspectingVolume: 1
   target: {fileID: 0}
   motion: {fileID: 0}
   body: {fileID: 6417444152025677581}
+  bodyRotationOffset: {x: 0, y: -90, z: 0}
   bodyRenderer: {fileID: 6342836718769816790}
   patrolPoints:
   - {fileID: 7340804476659263596}
@@ -289,7 +293,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2225959888061443146, guid: c849a867ec79b4e47818a81528a1eee7, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 2225959888061443146, guid: c849a867ec79b4e47818a81528a1eee7, type: 3}
       propertyPath: m_LocalRotation.x
@@ -297,7 +301,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2225959888061443146, guid: c849a867ec79b4e47818a81528a1eee7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 2225959888061443146, guid: c849a867ec79b4e47818a81528a1eee7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -309,7 +313,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2225959888061443146, guid: c849a867ec79b4e47818a81528a1eee7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: -90
       objectReference: {fileID: 0}
     - target: {fileID: 2225959888061443146, guid: c849a867ec79b4e47818a81528a1eee7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
