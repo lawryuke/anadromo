@@ -60,7 +60,7 @@ namespace Anadromo.AI
             // Comprobar colisión letal usando un segmento (de la cabeza a la cola) para no requerir BoxColliders
             Vector3 sharkForward = transform.forward;
             float distToPlayer = SegmentDistance(
-                player.transform.position, 
+                player.Position,
                 transform.position - sharkForward * bodyHalfLength, 
                 transform.position + sharkForward * bodyHalfLength
             );

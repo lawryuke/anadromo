@@ -12,13 +12,13 @@ namespace Anadromo.Mechanics
         [Tooltip("La medusa que se encenderá y empezará a moverse.")]
         public LuzViajera medusaToWake;
 
-        private Transform player;
+        private PlayerEnergyController player;
 
         void Start()
         {
             // Buscamos al jugador automáticamente al iniciar
             var p = FindAnyObjectByType<PlayerEnergyController>();
-            if (p != null) player = p.transform;
+            if (p != null) player = p;
         }
 
         void Update()
@@ -26,7 +26,7 @@ namespace Anadromo.Mechanics
             if (player == null || activationZone == null || medusaToWake == null) return;
 
             // Revisamos si el jugador entró a la caja matemática
-            if (activationZone.Contains(player.position))
+            if (activationZone.Contains(player.Position))
             {
                 // Despertamos a la medusa
                 medusaToWake.BeginRoute();

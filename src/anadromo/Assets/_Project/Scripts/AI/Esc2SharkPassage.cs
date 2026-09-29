@@ -34,6 +34,7 @@ namespace Anadromo.AI
 
         void Start()
         {
+            target=PiranhaPlayerTarget.Resolve(this,target);
             if(!Configured) { Debug.LogError("Paso de tiburon: asigna jugador, cuerpo y al menos dos puntos de ruta.",this); enabled=false; return; }
             ResetPassage();
         }
@@ -53,7 +54,7 @@ namespace Anadromo.AI
         }
         bool PlayerNearRoute()
         {
-            Vector3 p=target.transform.position;
+            Vector3 p=target.Position;
             if (activationZone != null)
             {
                 return activationZone.Contains(p);
@@ -122,7 +123,7 @@ namespace Anadromo.AI
                 Quaternion rotation=Quaternion.RotateTowards(shark.rotation,Quaternion.LookRotation(direction),Mathf.Max(0f,turnSpeed)*segmentTime);
                 shark.SetPositionAndRotation(end,rotation);
                 // Sweep every leg, including frames that cross more than one waypoint.
-                if(SegmentDistance(target.transform.position,start-direction*bodyHalfLength,end+direction*bodyHalfLength)<=contactRadius && Clear(end,target.transform.position))
+                if(SegmentDistance(target.Position,start-direction*bodyHalfLength,end+direction*bodyHalfLength)<=contactRadius && Clear(end,target.Position))
                     target.TakeDamage(target.maxHealth);
                 budget-=step;
                 if(allowed<step-.001f) { FinishCrossing(); return; }

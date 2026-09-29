@@ -38,7 +38,8 @@ namespace Anadromo.Locomotion
 
         private void Update()
         {
-            if (Input.GetKeyDown(toggleKey))
+            // A rig without desktop controls must never disable its only locomotion mode.
+            if (debugVuelo != null && Input.GetKeyDown(toggleKey))
             {
                 isVRMode = !isVRMode;
                 ApplyMode();

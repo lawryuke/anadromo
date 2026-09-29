@@ -28,6 +28,10 @@ namespace Anadromo.Locomotion
         [SerializeField] private bool applyOceanCurrents = true;
 
         private Rigidbody rb;
+        private Anadromo.Systems.PlayerEnergyController vital;
+        private Anadromo.AI.PiranhaPlayerTarget target;
+        float SwimMultiplier => (vital ? vital.SwimMultiplier : 1f) * (target ? target.SpeedMultiplier : 1f);
+        float TurnMultiplier => vital ? vital.TurnMultiplier : 1f;
         [Header("Controles adicionales Quest")]
         public bool enableJoystickMovement = true;
         public bool enableJoystickTurn = true;
@@ -47,6 +51,8 @@ namespace Anadromo.Locomotion
         private void Awake()
         {
             rb = GetComponent<Rigidbody>();
+            vital = GetComponent<Anadromo.Systems.PlayerEnergyController>();
+            target = GetComponent<Anadromo.AI.PiranhaPlayerTarget>();
         }
 
         private void OnEnable()
@@ -61,6 +67,7 @@ namespace Anadromo.Locomotion
 
         private void OnDisable()
         {
+            if (vital) vital.Energy.SetSprinting(false);
             if (flapDetector != null)
             {
                 flapDetector.OnLeftFlap.RemoveListener(HandleLeftFlap);
@@ -74,6 +81,7 @@ namespace Anadromo.Locomotion
         private void FixedUpdate()
         {
             if (settings == null || salmonBody == null || headTransform == null) return;
+            if (vital && !vital.HasEnergy) return;
 
             UpdateHeadTurn();
             UpdateBodyOrientation();
@@ -82,12 +90,14 @@ namespace Anadromo.Locomotion
             LimitVelocities();
             if (!rb.isKinematic)
             {
-                rb.AddForce(externalVelocity * rb.linearDamping, ForceMode.Acceleration);
+                rb.AddForce(externalVelocity * rb.linearDamping * (vital ? vital.CurrentMultiplier : 1f), ForceMode.Acceleration);
+                if (vital) vital.Energy.SetSprinting(enableJoystickMovement && QuestSwimInput.IsSprinting &&
+                    QuestSwimInput.ReadVelocity(headTransform).sqrMagnitude > 0f);
                 if (UnityEngine.XR.XRSettings.isDeviceActive)
                 {
                     if (enableJoystickMovement)
                     {
-                        Vector3 requested = QuestSwimInput.ReadVelocity(headTransform);
+                        Vector3 requested = QuestSwimInput.ReadVelocity(headTransform) * SwimMultiplier;
                         if (requested.sqrMagnitude > 0f)
                         {
                             Vector3 direction = requested.normalized;
@@ -97,7 +107,7 @@ namespace Anadromo.Locomotion
                     }
                     if (enableJoystickTurn)
                         QuestSwimInput.TurnAroundHead(transform, headTransform, rb,
-                            QuestSwimInput.ReadTurn() * joystickTurnSpeed * Time.fixedDeltaTime);
+                            QuestSwimInput.ReadTurn() * joystickTurnSpeed * TurnMultiplier * Time.fixedDeltaTime);
                 }
             }
         }
@@ -109,7 +119,7 @@ namespace Anadromo.Locomotion
                 try
                 {
                     Vector3 currentForce = OceanEnvironment.PlayerCurrentAt(rb.position);
-                    rb.AddForce(currentForce * rb.linearDamping, ForceMode.Acceleration);
+                    rb.AddForce(currentForce * rb.linearDamping * (vital ? vital.CurrentMultiplier : 1f), ForceMode.Acceleration);
                 }
                 catch { }
             }
@@ -129,7 +139,7 @@ namespace Anadromo.Locomotion
 
         private void QueueFlap(float intensity)
         {
-            if (rb.isKinematic || float.IsNaN(intensity) || float.IsInfinity(intensity)) return;
+            if (rb.isKinematic || (vital && !vital.HasEnergy) || float.IsNaN(intensity) || float.IsInfinity(intensity)) return;
             pendingIntensity = Mathf.Max(pendingIntensity, Mathf.Clamp01(intensity));
         }
 
@@ -158,9 +168,9 @@ namespace Anadromo.Locomotion
             
             // Avanzar en la dirección frontal del cuerpo del salmón
             Vector3 deltaVelocity = salmonBody.forward *
-                (intensity * settings.forwardForceMultiplier / rb.mass);
+                (intensity * settings.forwardForceMultiplier * SwimMultiplier / rb.mass);
             Vector3 cappedVelocity = Vector3.ClampMagnitude(
-                rb.linearVelocity + deltaVelocity, settings.maxLinearVelocity);
+                rb.linearVelocity + deltaVelocity, settings.maxLinearVelocity * SwimMultiplier);
             rb.AddForce((cappedVelocity - rb.linearVelocity) * rb.mass, ForceMode.Impulse);
         }
 
@@ -217,7 +227,7 @@ namespace Anadromo.Locomotion
 
             // Giro negativo = izquierda de la pantalla; positivo = derecha.
             QuestSwimInput.TurnAroundHead(transform, headTransform, rb,
-                headTurnSpeed * Time.fixedDeltaTime);
+                headTurnSpeed * TurnMultiplier * Time.fixedDeltaTime);
         }
 
         // ─── Movimiento del Cuerpo ───
@@ -240,9 +250,10 @@ namespace Anadromo.Locomotion
         private void LimitVelocities()
         {
             // Limitar velocidad lineal
-            if (rb.linearVelocity.sqrMagnitude > settings.maxLinearVelocity * settings.maxLinearVelocity)
+            float maxSpeed = settings.maxLinearVelocity * SwimMultiplier;
+            if (rb.linearVelocity.sqrMagnitude > maxSpeed * maxSpeed)
             {
-                rb.linearVelocity = rb.linearVelocity.normalized * settings.maxLinearVelocity;
+                rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
             }
 
             // Limitar velocidad angular

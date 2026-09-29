@@ -59,7 +59,7 @@ namespace Anadromo.AI
         public void Tick(float dt)
         {
             var target = School.target; clock += dt; biteCooldown -= dt; previous = transform.position;
-            bool detected = School.Contains(target.transform.position) && Vector3.Distance(transform.position,target.transform.position) <= detectionRadius && School.ClearPath(transform.position,target.transform.position);
+            bool detected = School.Contains(target.Position) && Vector3.Distance(transform.position,target.Position) <= detectionRadius && School.ClearPath(transform.position,target.Position);
             if (detected)
             {
                 lost = 0;
@@ -72,9 +72,9 @@ namespace Anadromo.AI
             else
             {
                 disturbance = 0; lost += dt;
-                if (!School.Contains(target.transform.position) || State != BehaviourState.Attack || lost >= loseInterestDelay) State = BehaviourState.Chill;
+                if (!School.Contains(target.Position) || State != BehaviourState.Attack || lost >= loseInterestDelay) State = BehaviourState.Chill;
             }
-            Vector3 destination = State == BehaviourState.Attack ? target.transform.position : School.Clamp(home + new Vector3(Mathf.Sin(clock+home.x),Mathf.Sin(clock*.7f)*.3f,Mathf.Cos(clock+home.z))*1.2f);
+            Vector3 destination = State == BehaviourState.Attack ? target.Position : School.Clamp(home + new Vector3(Mathf.Sin(clock+home.x),Mathf.Sin(clock*.7f)*.3f,Mathf.Cos(clock+home.z))*1.2f);
             direction = Vector3.Slerp(direction,(destination-transform.position).normalized,1-Mathf.Exp(-(State == BehaviourState.Attack ? attackTurn : calmTurn)*dt)).normalized;
             Vector3 delta = School.Clamp(transform.position+direction*(State == BehaviourState.Attack ? attackSpeed : normalSpeed)*dt)-transform.position;
             float allowed = delta.magnitude; Vector3 normal = Vector3.zero;
@@ -84,8 +84,8 @@ namespace Anadromo.AI
             if (normal != Vector3.zero) direction = Vector3.Reflect(direction,normal).normalized;
             if (direction.sqrMagnitude > .01f) transform.rotation = Quaternion.LookRotation(direction);
             Vector3 segment = transform.position-previous;
-            float t = segment.sqrMagnitude < .00001f ? 0 : Mathf.Clamp01(Vector3.Dot(target.transform.position-previous,segment)/segment.sqrMagnitude);
-            if (State == BehaviourState.Attack && biteCooldown <= 0 && Vector3.Distance(previous+segment*t,target.transform.position) <= contactRadius && School.ClearPath(transform.position,target.transform.position))
+            float t = segment.sqrMagnitude < .00001f ? 0 : Mathf.Clamp01(Vector3.Dot(target.Position-previous,segment)/segment.sqrMagnitude);
+            if (State == BehaviourState.Attack && biteCooldown <= 0 && Vector3.Distance(previous+segment*t,target.Position) <= contactRadius && School.ClearPath(transform.position,target.Position))
             { target.TakeDamage(damage); biteCooldown = biteInterval; GetComponentInChildren<PredatorNaturalMotion>()?.Bite(); }
             UpdateStateAudio();
         }

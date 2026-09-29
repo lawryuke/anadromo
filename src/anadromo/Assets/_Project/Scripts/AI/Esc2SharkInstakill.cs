@@ -114,7 +114,7 @@ namespace Anadromo.AI
             // Bloqueamos el eje Y para que el jugador no rote la cabeza de forma extraña en VR
             directionToShark.y = 0; 
             
-            if (directionToShark != Vector3.zero)
+            if (directionToShark != Vector3.zero && !player.GetComponent<Unity.XR.CoreUtils.XROrigin>())
             {
                 player.transform.rotation = Quaternion.LookRotation(directionToShark);
             }

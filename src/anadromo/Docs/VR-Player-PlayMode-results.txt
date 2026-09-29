@@ -1,0 +1,30 @@
+PASS: VR player active
+PASS: One active combat player; desktop remains inactive
+PASS: One active audio listener
+PASS: All three food boxes spawned edible prey
+PASS: Combat position follows offset headset
+PASS: Solid body follows headset separately from trigger mouth
+PASS: Tracked flap event propels VR rigidbody
+PASS: Low energy reduces real flap propulsion
+PASS: Physical mouth trigger consumes spawned krill and restores energy
+PASS: Consumed prey cannot be counted twice
+PASS: Piranha bites offset VR head
+PASS: Lamprey attaches and reduces swimmer speed
+PASS: Attached lamprey drains VR energy
+PASS: VR shake action releases lamprey and restores speed
+PASS: Angler detects and damages offset VR head
+PASS: Tracking noise agitates blind fish to critical state
+PASS: Blind fish attacks VR head after sustained simulated tracking noise (state=Attack, agitation=100)
+PASS: Patrol shark hitbox kills VR player
+PASS: Shark passage activation box uses headset position
+PASS: Backtrack checkout and warning boxes activate medusa
+PASS: Kill box activates cinematic shark against VR player
+PASS: Cinematic shark kills VR player
+PASS: Lethal damage stops VR locomotion
+PASS: Feeding cannot revive a dead player
+PASS: Death instructions render on a VR world-space canvas
+PASS: Encounter reset restores energy and VR locomotion
+PASS: Solid collider blocks wall and applies impact damage
+PASS: VR restart reloads scene with full energy and enabled swimming
+PASS: Restart clears all seven one-shot backtrack traps
+PASS: VR scene integration checks completed (hardware tracking requires headset).

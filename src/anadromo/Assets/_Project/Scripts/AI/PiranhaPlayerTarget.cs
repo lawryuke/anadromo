@@ -20,21 +20,33 @@ namespace Anadromo.AI
         public float Health => Vital.Current;
         public Vector3 Velocity { get; private set; }
         public bool Alive => Health > 0;
+        public Vector3 Position => Vital.Position;
+        public int AttachedLampreyCount => attachedLampreys.Count;
+        public static PiranhaPlayerTarget Resolve(Component owner, PiranhaPlayerTarget assigned)
+        {
+            if (assigned && assigned.enabled && assigned.gameObject.activeInHierarchy && assigned.gameObject.scene == owner.gameObject.scene) return assigned;
+            foreach (var candidate in FindObjectsByType<PiranhaPlayerTarget>(FindObjectsSortMode.None))
+                if (candidate.enabled && candidate.gameObject.activeInHierarchy && candidate.gameObject.scene == owner.gameObject.scene) return candidate;
+            return null;
+        }
         Vector3 previous, spawn;
         Quaternion spawnRotation;
         Rigidbody body;
 
         bool movementWasEnabled;
+        Anadromo.Locomotion.FlapSwimController vrMovement;
+        bool vrMovementWasEnabled;
         readonly HashSet<Object> attachedLampreys = new HashSet<Object>();
         int lastSide;
         float lastSideAt=-10,shakeReady;
         void Awake()
         {
             body = GetComponent<Rigidbody>(); vital=GetComponent<PlayerEnergyController>();
+            vrMovement = GetComponent<Anadromo.Locomotion.FlapSwimController>();
             if(!vital) vital=gameObject.AddComponent<PlayerEnergyController>();
             Vital.Energy.OnEnergyDepleted.AddListener(Depleted);
             Vital.Energy.OnEnergyChanged.AddListener(EnergyChanged);
-            previous = spawn = transform.position; spawnRotation = transform.rotation;
+            previous = Position; spawn = transform.position; spawnRotation = transform.rotation;
             if (!desktopMovement) desktopMovement = GetComponent<SimpleFlyCamera>();
         }
         void LateUpdate()
@@ -72,8 +84,8 @@ namespace Anadromo.AI
         void FixedUpdate() { if (body) SampleMotion(Time.fixedDeltaTime); }
         public void SampleMotion(float dt)
         {
-            Velocity = (transform.position-previous)/Mathf.Max(dt,.0001f);
-            previous = transform.position;
+            Velocity = (Position-previous)/Mathf.Max(dt,.0001f);
+            previous = Position;
         }
         public void TakeDamage(float amount)
         {
@@ -90,7 +102,10 @@ namespace Anadromo.AI
         {
             movementWasEnabled = desktopMovement && desktopMovement.enabled;
             if (desktopMovement) desktopMovement.enabled = false;
-            if (body && !body.isKinematic) body.linearVelocity = Vector3.zero;
+            vrMovementWasEnabled = vrMovement && vrMovement.enabled;
+            if (vrMovement) vrMovement.enabled = false;
+            Vital.Energy.SetSprinting(false);
+            if (body && !body.isKinematic) { body.linearVelocity = Vector3.zero; body.angularVelocity = Vector3.zero; }
             onDeath.Invoke();
         }
         public void ResetEncounter()
@@ -98,9 +113,10 @@ namespace Anadromo.AI
             bool dead = !Alive;
             if (body) { body.position = spawn; body.rotation = spawnRotation; if (!body.isKinematic) body.linearVelocity = Vector3.zero; }
             else transform.SetPositionAndRotation(spawn,spawnRotation);
-            previous = spawn; Velocity = Vector3.zero; Vital.ResetEnergy();
+            previous = Position; Velocity = Vector3.zero; Vital.ResetEnergy();
             foreach(var lamprey in FindObjectsByType<Esc2Lamprey>(FindObjectsSortMode.None)) if(lamprey.Target==this) lamprey.ResetLamprey();
             if (dead && desktopMovement) desktopMovement.enabled = movementWasEnabled;
+            if (dead && vrMovement) vrMovement.enabled = vrMovementWasEnabled;
             foreach (var school in FindObjectsByType<PiranhaSchool>(FindObjectsSortMode.None))
                 if (school.target == this) school.ResetFish();
             attachedLampreys.Clear(); lastSide=0; lastSideAt=-10; shakeReady=0;

@@ -24,13 +24,13 @@ namespace Anadromo.AI
         void Tick(float dt)
         {
             var player=school.target; previous=transform.position; cooldown-=dt;
-            bool detected=school.Contains(player.transform.position) && Vector3.Distance(previous,player.transform.position)<=detectionRadius && school.ClearPath(previous,player.transform.position);
+            bool detected=school.Contains(player.Position) && Vector3.Distance(previous,player.Position)<=detectionRadius && school.ClearPath(previous,player.Position);
             if(cooldown>0) { State=BehaviourState.Recover; }
             else if(State==BehaviourState.Chill && detected) { State=BehaviourState.Disturbed; timer=0; }
             else if(State==BehaviourState.Disturbed)
             {
                 if(!detected) { State=BehaviourState.Chill; timer=0; }
-                else { timer+=dt; if(timer>=attackDelay) { State=BehaviourState.Attack; attackElapsed=0; direction=(player.transform.position-previous).normalized; } }
+                else { timer+=dt; if(timer>=attackDelay) { State=BehaviourState.Attack; attackElapsed=0; direction=(player.Position-previous).normalized; } }
             }
             if(State==BehaviourState.Attack)
             {
@@ -40,8 +40,8 @@ namespace Anadromo.AI
                     if(school.IsObstacle(hit.collider)) max=Mathf.Min(max,Mathf.Max(0,hit.distance-.02f));
                 transform.position=school.Clamp(transform.position+direction*max);
                 delta=transform.position-previous;
-                float u=delta.sqrMagnitude<.00001f?0:Mathf.Clamp01(Vector3.Dot(player.transform.position-previous,delta)/delta.sqrMagnitude);
-                if(cooldown<=0 && Vector3.Distance(previous+delta*u,player.transform.position)<=contactRadius && school.ClearPath(transform.position,player.transform.position))
+                float u=delta.sqrMagnitude<.00001f?0:Mathf.Clamp01(Vector3.Dot(player.Position-previous,delta)/delta.sqrMagnitude);
+                if(cooldown<=0 && Vector3.Distance(previous+delta*u,player.Position)<=contactRadius && school.ClearPath(transform.position,player.Position))
                 { player.TakeDamage(damage); cooldown=recoveryDuration; State=BehaviourState.Recover; GetComponentInChildren<PredatorNaturalMotion>()?.Bite(); }
                 else if(attackElapsed>=1.3f || delta.magnitude<attackSpeed*dt*.5f) { State=BehaviourState.Recover; cooldown=recoveryDuration; }
                 else if(attackSpeed>0 && delta.sqrMagnitude>0) transform.rotation=Quaternion.LookRotation(direction);

@@ -9,6 +9,7 @@ namespace Anadromo.Systems
     {
         public float maximumVignette=.48f;
         PlayerEnergyController player;
+        Anadromo.Locomotion.ComfortVignette comfort;
         Volume volume;
         VolumeProfile profile;
         Vignette vignette;
@@ -20,6 +21,7 @@ namespace Anadromo.Systems
         protected virtual void Start()
         {
             player=GetComponent<PlayerEnergyController>();
+            comfort=GetComponent<Anadromo.Locomotion.ComfortVignette>();
             var camera=GetComponentInChildren<Camera>();
             if(!player || !camera) { enabled=false; return; }
             cameraData=camera.GetUniversalAdditionalCameraData();
@@ -45,7 +47,8 @@ namespace Anadromo.Systems
             // var shade = Color.Lerp(new Color(0.36f, 0.41f, 0.06f), new Color(1, 0.62f, 0.16f), recovery);
             shade =Color.Lerp(shade,Color.white,impact);
             vignette.color.Override(shade);
-            vignette.intensity.Override(Mathf.Clamp(exhaustion*maximumVignette+impact*.18f+recovery*.08f,0,.65f));
+            vignette.intensity.Override(Mathf.Max(comfort ? comfort.Intensity : 0f,
+                Mathf.Clamp(exhaustion*maximumVignette+impact*.18f+recovery*.08f,0,.65f)));
             color.saturation.Override(-100*exhaustion);
         }
         protected virtual void OnDisable() { if(volume) volume.enabled=false; }

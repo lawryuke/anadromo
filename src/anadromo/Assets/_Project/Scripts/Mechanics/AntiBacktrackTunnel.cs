@@ -47,14 +47,14 @@ namespace Anadromo.Mechanics
         public UnityEvent onSharkKill;
 
         private int state = 0; // 0 = Abierto, 1 = Bloqueado, 2 = Advertencia, 3 = Muerto
-        private Transform player;
+        private PlayerEnergyController player;
         private Esc2SharkInstakill spawnedShark;
 
         void Start()
         {
             // Busca automáticamente al jugador en la escena
             var p = FindAnyObjectByType<PlayerEnergyController>();
-            if (p != null) player = p.transform;
+            if (p != null) player = p;
         }
 
         void Update()
@@ -62,12 +62,12 @@ namespace Anadromo.Mechanics
             if (player == null || state == 3) return;
 
             // Estado 0: El túnel está limpio. Esperando que el jugador salga hacia la nueva zona (B).
-            if (state == 0 && checkoutZone != null && checkoutZone.Contains(player.position))
+            if (state == 0 && checkoutZone != null && checkoutZone.Contains(player.Position))
             {
                 state = 1; 
             }
             // La zona letal funciona también si se salta la advertencia o hay espacio entre zonas.
-            else if (state >= 1 && killZone != null && killZone.Contains(player.position))
+            else if (state >= 1 && killZone != null && killZone.Contains(player.Position))
             {
                 state = 3;
                 if (sharkInstakill != null)
@@ -88,7 +88,7 @@ namespace Anadromo.Mechanics
                 onSharkKill?.Invoke();
             }
             // Estado 1: El túnel está bloqueado. El jugador intentó devolverse y entró a la zona de advertencia.
-            else if (state == 1 && warningZone != null && warningZone.Contains(player.position))
+            else if (state == 1 && warningZone != null && warningZone.Contains(player.Position))
             {
                 BeginMedusaWarning();
                 state = 2; 
@@ -97,7 +97,7 @@ namespace Anadromo.Mechanics
             else if (state == 2)
             {
                 // Si el jugador hace caso y sale de la zona de advertencia hacia la zona segura (B)
-                if (warningZone != null && !warningZone.Contains(player.position))
+                if (warningZone != null && !warningZone.Contains(player.Position))
                 {
                     state = 1; // Se reinicia la trampa
                 }

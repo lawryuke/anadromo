@@ -36,7 +36,8 @@ namespace Anadromo.AI
         void Awake() { home=body?body.position:transform.position; homeRotation=body?body.rotation:transform.rotation; }
         void Start()
         {
-            if(target && !motion) motion=target.GetComponent<BlindFishMotionSensor>();
+            target=PiranhaPlayerTarget.Resolve(this,target);
+            if(target) motion=target.GetComponent<BlindFishMotionSensor>();
             if(!target || !motion || !body || !bodyRenderer)
             { Debug.LogError("Pez ciego: asigna Target, Motion, Body y Body Renderer.",this); enabled=false; return; }
             var camera=target.GetComponentInChildren<Camera>(); view=camera?camera.transform:target.transform;
@@ -92,7 +93,7 @@ namespace Anadromo.AI
             ApplyColor();
             if(!motion.MotionValid) return; // Lost tracking is not evidence of movement.
             StateTime+=dt;
-            bool nearby=Vector3.Distance(body.position,target.transform.position)<=detectionRadius && ClearPath(body.position,target.transform.position);
+            bool nearby=Vector3.Distance(body.position,target.Position)<=detectionRadius && ClearPath(body.position,target.Position);
             switch(State)
             {
                 case BehaviourState.Chill:
@@ -101,7 +102,7 @@ namespace Anadromo.AI
                     else if(!nearby || motion.IsStill) Agitation=Mathf.Max(0,Agitation-agitationFall*dt);
                     State=Agitation>0?BehaviourState.Perturbed:BehaviourState.Chill;
                     Patrol(dt);
-                    if(Agitation>=100) { trackedPosition=target.transform.position; SetState(BehaviourState.Critical); }
+                    if(Agitation>=100) { trackedPosition=target.Position; SetState(BehaviourState.Critical); }
                     break;
                 case BehaviourState.Critical:
                     // Approach the last detected position without touching the player during grace.
@@ -119,17 +120,17 @@ namespace Anadromo.AI
                     }
                     else
                     {
-                        Vector3 look=target.transform.position-body.position;
+                        Vector3 look=target.Position-body.position;
                         if(look.sqrMagnitude>.001f) body.rotation=FacingRotation(look);
                         if(StateTime>=inspectionDuration) BeginRetreat();
                     }
                     break;
                 case BehaviourState.Attack:
                     // Once the grace/inspection has been broken, stopping late cannot cancel the attack.
-                    if(Vector3.Distance(target.transform.position,home)>territoryRadius) { BeginRetreat(); break; }
-                    if(!ClearPath(body.position,target.transform.position))
+                    if(Vector3.Distance(target.Position,home)>territoryRadius) { BeginRetreat(); break; }
+                    if(!ClearPath(body.position,target.Position))
                     { lostTime+=dt; if(lostTime>2) BeginRetreat(); break; }
-                    lostTime=0; Move(target.transform.position,attackSpeed,dt,true);
+                    lostTime=0; Move(target.Position,attackSpeed,dt,true);
                     break;
                 case BehaviourState.Retreat:
                     Move(home,approachSpeed,dt,false);
@@ -140,7 +141,7 @@ namespace Anadromo.AI
         }
         void BeginInspection()
         {
-            Vector3 origin=target.transform.position,forward=view?view.forward:target.transform.forward;
+            Vector3 origin=target.Position,forward=view?view.forward:target.transform.forward;
             Vector3 desired=origin+forward*inspectionDistance;
             // Capture the viewing direction only once. Looking around does not move the inspection point.
             InspectionPoint=body.position;
@@ -171,7 +172,7 @@ namespace Anadromo.AI
                 if(IsWall(hit.collider)) distance=Mathf.Min(distance,Mathf.Max(0,hit.distance-.02f));
             body.position=start+direction*distance;
             if(direction.sqrMagnitude>.001f) body.rotation=Quaternion.Slerp(body.rotation,FacingRotation(direction),1-Mathf.Exp(-6*dt));
-            if(lethal && Esc2SharkPassage.SegmentDistance(target.transform.position,start,body.position)<=contactRadius && ClearPath(body.position,target.transform.position))
+            if(lethal && Esc2SharkPassage.SegmentDistance(target.Position,start,body.position)<=contactRadius && ClearPath(body.position,target.Position))
                 target.TakeDamage(target.maxHealth);
         }
         Quaternion FacingRotation(Vector3 direction) => Quaternion.LookRotation(direction)*Quaternion.Euler(bodyRotationOffset);

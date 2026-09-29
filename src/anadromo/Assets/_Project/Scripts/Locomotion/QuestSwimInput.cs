@@ -6,6 +6,8 @@ namespace Anadromo.Locomotion
 {
     public static class QuestSwimInput
     {
+        public static bool IsSprinting => InputDevices.GetDeviceAtXRNode(XRNode.LeftHand)
+            .TryGetFeatureValue(CommonUsages.primaryButton, out bool pressed) && pressed;
         public static Vector3 ReadVelocity(Transform head)
         {
             var right = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
@@ -13,8 +15,7 @@ namespace Anadromo.Locomotion
             float magnitude = Mathf.Min(stick.magnitude, 1f);
             if (magnitude <= 0.15f) return Vector3.zero;
             stick = stick.normalized * ((magnitude - 0.15f) / 0.85f);
-            var left = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
-            bool sprint = left.TryGetFeatureValue(CommonUsages.primaryButton, out bool pressed) && pressed;
+            bool sprint = IsSprinting;
             var settings = GameSettings.I;
             float speed = sprint ? (settings ? settings.playerSprintSpeed : 1.2f)
                                  : (settings ? settings.playerSpeed : 0.7f);

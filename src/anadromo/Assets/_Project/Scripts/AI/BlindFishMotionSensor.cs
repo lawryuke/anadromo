@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR;
+using UnityEngine.XR.Hands;
+using System.Collections.Generic;
 
 namespace Anadromo.AI
 {
@@ -23,6 +25,26 @@ namespace Anadromo.AI
         readonly bool[] tracked=new bool[3];
         readonly float[] linear=new float[3],angular=new float[3];
         static readonly XRNode[] nodes={XRNode.Head,XRNode.LeftHand,XRNode.RightHand};
+        readonly List<XRHandSubsystem> handSubsystems = new List<XRHandSubsystem>();
+        bool ReadTrackedPose(int index, out Vector3 p, out Quaternion r)
+        {
+            p=default; r=Quaternion.identity;
+            var device=InputDevices.GetDeviceAtXRNode(nodes[index]);
+            if(device.isValid && device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.isTracked,out bool isTracked) && isTracked &&
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.devicePosition,out p) &&
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.deviceRotation,out r)) return true;
+            if(index==0) return false;
+            // Quest hand tracking does not guarantee LeftHand/RightHand InputDevices.
+            SubsystemManager.GetSubsystems(handSubsystems);
+            foreach(var subsystem in handSubsystems)
+            {
+                if(!subsystem.running) continue;
+                var hand=index==1 ? subsystem.leftHand : subsystem.rightHand;
+                if(hand.isTracked && hand.GetJoint(XRHandJointID.Wrist).TryGetPose(out Pose pose))
+                { p=pose.position; r=pose.rotation; return true; }
+            }
+            return false;
+        }
         void Awake() { body=GetComponent<Rigidbody>(); previousPosition=transform.position; }
         void Update()
         {
@@ -38,10 +60,7 @@ namespace Anadromo.AI
                 float blend=1-Mathf.Exp(-dt/Mathf.Max(.01f,smoothingTime));
                 for(int i=0;i<nodes.Length;i++)
                 {
-                    var device=InputDevices.GetDeviceAtXRNode(nodes[i]);
-                    bool valid=device.isValid && device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.isTracked,out bool isTracked) && isTracked;
-                    Vector3 p=default; Quaternion r=Quaternion.identity;
-                    valid=valid && device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.devicePosition,out p) && device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.deviceRotation,out r);
+                    bool valid=ReadTrackedPose(i,out Vector3 p,out Quaternion r);
                     if(!valid) { tracked[i]=false; MotionValid=false; continue; }
                     if(tracked[i])
                     {

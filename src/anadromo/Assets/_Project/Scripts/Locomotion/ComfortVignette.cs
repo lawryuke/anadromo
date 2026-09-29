@@ -58,6 +58,7 @@ namespace Anadromo.Locomotion
 
         private Vignette vignette;
         private float currentIntensity;
+        public float Intensity => isActiveAndEnabled ? currentIntensity : 0f;
 
         private void Start()
         {
@@ -72,7 +73,7 @@ namespace Anadromo.Locomotion
 
         private void Update()
         {
-            if (vignette == null || targetRigidbody == null) return;
+            if (targetRigidbody == null) return;
 
             // Calcular contribución de velocidad lineal y angular
             float linearFactor = targetRigidbody.linearVelocity.magnitude / velocityForMaxVignette;
@@ -89,11 +90,12 @@ namespace Anadromo.Locomotion
             currentIntensity = Mathf.Lerp(currentIntensity, targetIntensity, Time.deltaTime * smoothSpeed);
 
             // Aplicar al Volume
-            vignette.intensity.Override(currentIntensity);
+            if (vignette != null) vignette.intensity.Override(currentIntensity);
         }
 
         private void OnDisable()
         {
+            currentIntensity = 0f;
             // Restaurar viñeta a 0 al desactivarse
             if (vignette != null)
             {

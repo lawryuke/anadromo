@@ -12,6 +12,8 @@ namespace Anadromo.Systems
         public float impactDuration=.35f, recoveryDuration=.45f;
         public float collisionDamage=12, collisionSpeedThreshold=1.5f;
         EnergySystem energy;
+        Transform trackedHead;
+        public Vector3 Position => trackedHead ? trackedHead.position : transform.position;
         float impactTimer,recoveryTimer,collisionReady;
         public EnergySystem Energy => energy ? energy : (energy=GetComponent<EnergySystem>());
         public float Current => Energy.CurrentEnergy;
@@ -24,7 +26,12 @@ namespace Anadromo.Systems
         public float CurrentMultiplier => Mathf.Lerp(1,exhaustedCurrentMultiplier,Fatigue);
         public float ImpactPulse => Mathf.Clamp01(impactTimer/Mathf.Max(.01f,impactDuration));
         public float RecoveryPulse => Mathf.Clamp01(recoveryTimer/Mathf.Max(.01f,recoveryDuration));
-        void Awake() { energy=GetComponent<EnergySystem>(); }
+        void Awake()
+        {
+            energy=GetComponent<EnergySystem>();
+            var origin=GetComponent<Unity.XR.CoreUtils.XROrigin>();
+            if(origin && origin.Camera) trackedHead=origin.Camera.transform;
+        }
         void Start() { if(!GetComponent<EnergyVisualFeedback>()) gameObject.AddComponent<EnergyVisualFeedback>(); }
         void Update()
         {

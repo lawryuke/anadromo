@@ -2,9 +2,11 @@ using UnityEngine;
 
 namespace Anadromo.AI
 {
+    [DefaultExecutionOrder(-50)]
     public sealed class PiranhaSchool : MonoBehaviour
     {
         public PiranhaPlayerTarget target;
+        void Awake() { target = PiranhaPlayerTarget.Resolve(this, target); }
         public Vector3 zoneSize = new Vector3(8,4,10);
         public LayerMask obstacleLayers = Physics.DefaultRaycastLayers;
         public float alertRadius = 20;
