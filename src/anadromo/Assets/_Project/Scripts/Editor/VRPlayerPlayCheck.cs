@@ -84,7 +84,7 @@ public static class VRPlayerPlayCheck
     static void Next() { stage++; since = Time.time; }
     static void Place(Vector3 position)
     {
-        Vector3 destination = body.position + position - target.Position;
+        Vector3 destination = body.transform.position + position - target.Position;
         body.transform.position = destination;
         body.position = destination;
         body.linearVelocity = Vector3.zero;
@@ -171,7 +171,7 @@ public static class VRPlayerPlayCheck
                 TestEnemies();
                 TestBlindFishAndPatrol();
                 TestZones();
-                target.Vital.ResetEnergy();
+                target.ResetEncounter();
                 swim.enabled = true;
                 target.TakeDamage(target.maxHealth);
                 Check(!target.Alive && !swim.enabled && body.linearVelocity == Vector3.zero,
@@ -182,8 +182,9 @@ public static class VRPlayerPlayCheck
             }
             else if (stage == 4 && Time.time - since > .1f)
             {
-                Check(vr.head.GetComponentsInChildren<UnityEngine.UI.Text>().Any(t => t.text.Contains("agotada")),
-                    "Death instructions render on a VR world-space canvas");
+                Check(vr.GetComponent<LampreyShakeController>().DeathVisible &&
+                    vr.head.GetComponentsInChildren<UnityEngine.UI.Text>(true).Count(t => t.gameObject.activeInHierarchy && t.text == "MORISTE") == 1,
+                    "MORISTE appears on the death screen");
                 target.ResetEncounter();
                 Check(target.Alive && swim.enabled && target.AttachedLampreyCount == 0,
                     "Encounter reset restores energy and VR locomotion");
@@ -300,11 +301,13 @@ public static class VRPlayerPlayCheck
         Invoke(fish, "Update");
         Invoke(fish, "Update");
         Check(!target.Alive, "Blind fish attacks VR head after sustained simulated tracking noise (state=" + fish.State + ", agitation=" + fish.Agitation + ")");
-        target.Vital.ResetEnergy();
+        target.ResetEncounter();
+        swim.enabled = false;
         var patrol = Object.FindFirstObjectByType<Esc2SharkPatrol>();
         patrol.transform.position = target.Position;
         Invoke(patrol, "Update");
         Check(!target.Alive, "Patrol shark hitbox kills VR player");
-        target.Vital.ResetEnergy();
+        target.ResetEncounter();
+        swim.enabled = false;
     }
 }

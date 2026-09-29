@@ -86,6 +86,9 @@ namespace Anadromo.AI
         void StickToPlayer() { if(cameraTransform) transform.SetPositionAndRotation(cameraTransform.position+cameraTransform.rotation*new Vector3((attachmentSlot%2==0?1:-1)*Mathf.Abs(attachOffset.x),attachOffset.y-(attachmentSlot/2)*.12f,attachOffset.z),cameraTransform.rotation); else if(Target) transform.position=Target.Position; }
         void Attach(PiranhaPlayerTarget player)
         {
+            if (!player || !player.Alive || State == BehaviourState.Attached) return;
+            var camera = player.GetComponentInChildren<Camera>();
+            cameraTransform = camera ? camera.transform : player.transform;
             State=BehaviourState.Attached; Grip=maxGrip; drainTimer=drainInterval; attachmentSlot=player.GetLampreySlot(); player.AddLamprey(this); StickToPlayer();
             UpdateFeedingAudio();
         }

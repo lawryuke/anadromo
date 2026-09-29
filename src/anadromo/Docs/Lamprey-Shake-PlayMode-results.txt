@@ -1,0 +1,1 @@
+PASS: raw gesture reversals, jitter/slow/jump rejection; saved Oculus rig and school references; attachment lock; heartbeat starts and stops; no capture overlay; no flap advance or virtual turn; slow visual sway; multiple lampreys; release/stun; timeout; MORISTE death screen; automatic scene restart and restored VR mode.

@@ -170,13 +170,7 @@ namespace Anadromo.AI
             if(shark) { if(waypoints!=null && waypoints.Length>0 && waypoints[0]) shark.position=waypoints[0].position; shark.gameObject.SetActive(false); }
         }
         void OnDisable() { StopPassageSound(); if(Application.isPlaying && shark) shark.gameObject.SetActive(false); }
-        void OnGUI()
-        {
-            if(State!=PassageState.Warning || !target || !target.Alive) return;
-            GUI.color=new Color(1,.65f,.15f);
-            GUI.Box(new Rect(Screen.width/2-220,90,440,60),"TIBURON EN EL PASO — "+Mathf.CeilToInt(WarningRemaining)+" s\nApartate del recorrido: cambia de altura o ve a un lateral");
-            GUI.color=Color.white;
-        }
+
         void OnDrawGizmosSelected()
         {
             if(waypoints==null) return;

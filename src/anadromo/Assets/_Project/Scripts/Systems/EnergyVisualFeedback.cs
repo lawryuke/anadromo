@@ -10,6 +10,7 @@ namespace Anadromo.Systems
         public float maximumVignette=.48f;
         PlayerEnergyController player;
         Anadromo.Locomotion.ComfortVignette comfort;
+        Anadromo.Mechanics.LampreyShakeController struggle;
         Volume volume;
         VolumeProfile profile;
         Vignette vignette;
@@ -22,6 +23,7 @@ namespace Anadromo.Systems
         {
             player=GetComponent<PlayerEnergyController>();
             comfort=GetComponent<Anadromo.Locomotion.ComfortVignette>();
+            struggle=GetComponent<Anadromo.Mechanics.LampreyShakeController>();
             var camera=GetComponentInChildren<Camera>();
             if(!player || !camera) { enabled=false; return; }
             cameraData=camera.GetUniversalAdditionalCameraData();
@@ -46,6 +48,13 @@ namespace Anadromo.Systems
             // color amarillo enfermizo, naranja para comer
             // var shade = Color.Lerp(new Color(0.36f, 0.41f, 0.06f), new Color(1, 0.62f, 0.16f), recovery);
             shade =Color.Lerp(shade,Color.white,impact);
+            if ((struggle && struggle.IsStruggling) || player.Current <= 0f)
+            {
+                vignette.intensity.Override(comfort ? comfort.Intensity : 0f);
+                vignette.color.Override(new Color(.015f, .035f, .07f));
+                color.saturation.Override(0f);
+                return;
+            }
             vignette.color.Override(shade);
             vignette.intensity.Override(Mathf.Max(comfort ? comfort.Intensity : 0f,
                 Mathf.Clamp(exhaustion*maximumVignette+impact*.18f+recovery*.08f,0,.65f)));

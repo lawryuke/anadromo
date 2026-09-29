@@ -14,6 +14,7 @@ namespace Anadromo.Locomotion
         [Header("Dependencias")]
         [Tooltip("Detector de aleteo en la escena (PoseBridge).")]
         [SerializeField] private FlapDetector flapDetector;
+        public FlapDetector Detector => flapDetector;
         
         [Tooltip("Asset de configuración de físicas de nado.")]
         [SerializeField] private SwimSettings settings;

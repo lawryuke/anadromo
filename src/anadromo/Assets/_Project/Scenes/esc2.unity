@@ -5489,6 +5489,7 @@ GameObject:
   - component: {fileID: 652773268}
   - component: {fileID: 652773267}
   - component: {fileID: 652773266}
+  - component: {fileID: 652773273}
   m_Layer: 0
   m_Name: VR_Player
   m_TagString: Player
@@ -5694,7 +5695,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Locomotion.VRPlayerGameplay
   head: {fileID: 863163181}
   hands: {fileID: 186648290}
-  restartHoldDuration: 1.5
 --- !u!136 &652773267
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -5812,6 +5812,28 @@ MonoBehaviour:
   OnEnergyDepleted:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &652773273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 652773255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a96b229d98454481ad4c6b8a058ae504, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.LampreyShakeController
+  escapeSeconds: 6
+  gripPerShake: 50
+  minimumTravel: 0.06
+  minimumSpeed: 0.25
+  reversalWindow: 0.8
+  rollDegrees: 2.5
+  rollFrequency: 0.25
+  heartbeatClip: {fileID: 8300000, guid: 2e953f6e29572a04e9955c0a72fe64b6, type: 3}
+  heartbeatVolume: 0.65
+  deathScreenSeconds: 3
 --- !u!1 &655448801
 GameObject:
   m_ObjectHideFlags: 0
@@ -15055,7 +15077,7 @@ Transform:
   m_GameObject: {fileID: 1900587007}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.080273464, z: -0, w: -0.9967729}
-  m_LocalPosition: {x: 0.29847035, y: -0.39, z: -1.0797626}
+  m_LocalPosition: {x: -1.744, y: -1.127, z: -3.821}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

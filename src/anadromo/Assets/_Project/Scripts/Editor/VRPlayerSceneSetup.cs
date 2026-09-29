@@ -10,9 +10,52 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+[InitializeOnLoad]
 public static partial class VRPlayerSceneSetup
 {
     const string ScenePath = "Assets/_Project/Scenes/esc2.unity";
+    static VRPlayerSceneSetup() { EditorApplication.update += ProcessRequest; }
+    static void ProcessRequest()
+    {
+        const string request = "Temp/vr-player-setup.request";
+        if (!System.IO.File.Exists(request) || EditorApplication.isCompiling || EditorApplication.isUpdating ||
+            EditorApplication.isPlayingOrWillChangePlaymode) return;
+        string command = System.IO.File.ReadAllText(request).Trim();
+        System.IO.File.Delete(request);
+        try
+        {
+            if (command == "refresh") AssetDatabase.Refresh();
+            else if (command == "shake") IntegrateShake();
+            else if (command == "validate") Validate();
+            System.IO.File.WriteAllText("Temp/vr-player-setup.result", "PASS: " + command);
+        }
+        catch (Exception e) { System.IO.File.WriteAllText("Temp/vr-player-setup.result", e.ToString()); }
+    }
+
+    [MenuItem("Tools/Anadromo/VR/Integrate lamprey shake")]
+    public static void IntegrateShake()
+    {
+        if (EditorApplication.isPlaying) throw new InvalidOperationException("Exit Play Mode first.");
+        var scene = SceneManager.GetSceneByPath(ScenePath);
+        if (!scene.IsValid() || !scene.isLoaded) throw new InvalidOperationException("Open esc2 first.");
+        System.IO.Directory.CreateDirectory("Library/ShakeIntegrationBackup");
+        const string backup = "Library/ShakeIntegrationBackup/esc2-before-shake.unity";
+        if (!System.IO.File.Exists(backup)) EditorSceneManager.SaveScene(scene, backup, true);
+        var vr = All<VRPlayerGameplay>(scene).Single();
+        var shake = vr.GetComponent<LampreyShakeController>();
+        if (!shake) shake = Undo.AddComponent<LampreyShakeController>(vr.gameObject);
+        shake.gripPerShake = 50f;
+        shake.minimumTravel = .06f;
+        shake.minimumSpeed = .25f;
+        shake.reversalWindow = .8f;
+        shake.rollFrequency = .25f;
+        shake.heartbeatClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/Ambient/heartbeat.wav");
+        if (!shake.heartbeatClip) throw new InvalidOperationException("Missing heartbeat.wav audio clip.");
+        EditorUtility.SetDirty(shake);
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        Validate();
+    }
     static IEnumerable<T> All<T>(Scene scene) where T : Component =>
         scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<T>(true));
 
@@ -58,6 +101,16 @@ public static partial class VRPlayerSceneSetup
         hull.center = vr.transform.InverseTransformPoint(camera.transform.position);
         var gameplay = vr.GetComponent<VRPlayerGameplay>();
         if (!gameplay) gameplay = Undo.AddComponent<VRPlayerGameplay>(vr);
+        var shake = vr.GetComponent<LampreyShakeController>();
+        if (!shake) shake = Undo.AddComponent<LampreyShakeController>(vr);
+        shake.gripPerShake = 50f;
+        shake.minimumTravel = .06f;
+        shake.minimumSpeed = .25f;
+        shake.reversalWindow = .8f;
+        shake.rollFrequency = .25f;
+        shake.heartbeatClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/Ambient/heartbeat.wav");
+        if (!shake.heartbeatClip) throw new InvalidOperationException("Missing heartbeat.wav audio clip.");
+        EditorUtility.SetDirty(shake);
         gameplay.head = camera.transform;
         gameplay.hands = All<FlapDetector>(scene).FirstOrDefault();
         map[km.GetComponent<PlayerFeeding>()] = feeding;
@@ -107,7 +160,8 @@ public static partial class VRPlayerSceneSetup
         var vr = All<VRPlayerGameplay>(scene).Single();
         var target = vr.GetComponent<PiranhaPlayerTarget>();
         if (!target || !vr.GetComponent<EnergySystem>() || !vr.GetComponent<PlayerEnergyController>() ||
-            !vr.head || !vr.hands || vr.GetComponent<CapsuleCollider>().isTrigger)
+            !vr.head || !vr.hands || !vr.GetComponent<LampreyShakeController>() ||
+            !vr.GetComponent<LampreyShakeController>().heartbeatClip || vr.GetComponent<CapsuleCollider>().isTrigger)
             throw new InvalidOperationException("Incomplete VR gameplay configuration.");
         foreach (var school in All<PiranhaSchool>(scene))
             if (school.target != target) throw new InvalidOperationException("Wrong school target: " + school.name);

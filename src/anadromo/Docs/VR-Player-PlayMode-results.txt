@@ -22,7 +22,7 @@ PASS: Kill box activates cinematic shark against VR player
 PASS: Cinematic shark kills VR player
 PASS: Lethal damage stops VR locomotion
 PASS: Feeding cannot revive a dead player
-PASS: Death instructions render on a VR world-space canvas
+PASS: MORISTE appears on the death screen
 PASS: Encounter reset restores energy and VR locomotion
 PASS: Solid collider blocks wall and applies impact damage
 PASS: VR restart reloads scene with full energy and enabled swimming

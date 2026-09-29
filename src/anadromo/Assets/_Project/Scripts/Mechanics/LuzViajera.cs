@@ -139,29 +139,7 @@ namespace Anadromo.Mechanics
             }
         }
 
-        void OnGUI()
-        {
-            if (!showDebug) return;
-            Camera camera = debugCamera ? debugCamera : Camera.main;
-            Transform first = waypoints != null && waypoints.Length > 0 ? waypoints[0] : null;
-            Transform target = waypoints != null && currentWaypointIndex < waypoints.Length ? waypoints[currentWaypointIndex] : null;
-            string details = $"MEDUSA — {routeStatus} | {Time.time - routeStartTime:F1} s | timeScale {Time.timeScale:F1}\n" +
-                $"Posición mundial: {transform.position:F2}\n" +
-                $"Inicio: {(first ? first.name + " " + first.position.ToString("F2") : "SIN ASIGNAR")}\n" +
-                $"Destino [{currentWaypointIndex}]: {(target ? target.name + " " + target.position.ToString("F2") : "ninguno")} | velocidad {speed:F2}\n";
-            if (camera)
-            {
-                Vector3 viewport = camera.WorldToViewportPoint(transform.position);
-                bool inside = viewport.z > 0 && viewport.x >= 0 && viewport.x <= 1 && viewport.y >= 0 && viewport.y <= 1;
-                details += $"Cámara: {camera.name} | distancia {Vector3.Distance(camera.transform.position, transform.position):F2} m | {(inside ? "EN PANTALLA" : "FUERA DE PANTALLA")}\n";
-                var glow = GetComponent<MedusaGlow>();
-                if (glow) details += glow.VisibilityDebug(camera);
-                else details += "ERROR: falta Medusa Glow";
-            }
-            else details += "ERROR: no hay cámara de debug ni MainCamera activa";
-            GUI.Box(new Rect(12, Screen.height - 190, 720, 178), GUIContent.none);
-            GUI.Label(new Rect(24, Screen.height - 182, 696, 164), details);
-        }
+
 
         private void OnDrawGizmos()
         {
