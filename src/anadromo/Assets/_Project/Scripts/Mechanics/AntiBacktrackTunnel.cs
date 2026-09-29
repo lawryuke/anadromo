@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using Anadromo.AI;
 using Anadromo.Systems; // Para encontrar al PlayerEnergyController
 
 namespace Anadromo.Mechanics
@@ -20,12 +21,19 @@ namespace Anadromo.Mechanics
         [Header("Castigos")]
         [Tooltip("La Medusa que asustará al jugador.")]
         public LuzViajera medusaWarning;
+
+        [Tooltip("Tiburón de la escena (oculto hasta atacar) o prefab con Shark Instakill Cinematic (se crea al activar Kill Zone).")]
+        public Esc2SharkInstakill sharkInstakill;
+
+        [Tooltip("Opcional. Posición y rotación de aparición. Si está vacío, usa Spawn Point del tiburón o su posición inicial.")]
+        public Transform sharkSpawnPoint;
         
         [Tooltip("Evento letal (ej. Encender el GameObject de un Tiburón o llamar a un script de muerte).")]
         public UnityEvent onSharkKill;
 
         private int state = 0; // 0 = Abierto, 1 = Bloqueado, 2 = Advertencia, 3 = Muerto
         private Transform player;
+        private Esc2SharkInstakill spawnedShark;
 
         void Start()
         {
@@ -43,6 +51,27 @@ namespace Anadromo.Mechanics
             {
                 state = 1; 
             }
+            // La zona letal funciona también si se salta la advertencia o hay espacio entre zonas.
+            else if (state >= 1 && killZone != null && killZone.Contains(player.position))
+            {
+                state = 3;
+                if (sharkInstakill != null)
+                {
+                    if (sharkInstakill.gameObject.scene.IsValid())
+                        spawnedShark = sharkInstakill;
+                    else
+                    {
+                        Transform spawn = sharkSpawnPoint != null ? sharkSpawnPoint : sharkInstakill.spawnPoint;
+                        Vector3 position = spawn != null ? spawn.position : sharkInstakill.transform.position;
+                        Quaternion rotation = spawn != null ? spawn.rotation : sharkInstakill.transform.rotation;
+                        spawnedShark = Instantiate(sharkInstakill, position, rotation);
+                        // Its internal spawn marker was cloned too; the instance is already positioned.
+                        spawnedShark.spawnPoint = null;
+                    }
+                    spawnedShark.TriggerInstakill(sharkSpawnPoint);
+                }
+                onSharkKill?.Invoke();
+            }
             // Estado 1: El túnel está bloqueado. El jugador intentó devolverse y entró a la zona de advertencia.
             else if (state == 1 && warningZone != null && warningZone.Contains(player.position))
             {
@@ -52,14 +81,8 @@ namespace Anadromo.Mechanics
             // Estado 2: Advertencia activa. El jugador está siendo perseguido por la medusa.
             else if (state == 2)
             {
-                // Si el jugador es terco y sigue nadando hacia el peligro
-                if (killZone != null && killZone.Contains(player.position))
-                {
-                    if (onSharkKill != null) onSharkKill.Invoke();
-                    state = 3; 
-                }
                 // Si el jugador hace caso y sale de la zona de advertencia hacia la zona segura (B)
-                else if (warningZone != null && !warningZone.Contains(player.position))
+                if (warningZone != null && !warningZone.Contains(player.position))
                 {
                     state = 1; // Se reinicia la trampa
                 }

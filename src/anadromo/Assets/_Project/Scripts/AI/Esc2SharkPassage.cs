@@ -6,13 +6,14 @@ namespace Anadromo.AI
     // A reusable crossing, independent from schools: never steers towards the player.
     public sealed class Esc2SharkPassage : MonoBehaviour
     {
-        public enum PassageState { Waiting, Warning, Crossing, Cooldown, Finished }
+        public enum PassageState { Waiting, Warning, Crossing, Cooldown }
         public PiranhaPlayerTarget target;
         public Transform shark;
         public Transform[] waypoints;
         public ZoneLimit activationZone;
-        public bool triggerOnlyOnce = true;
         public float travelSpeed=15, warningDuration=3, repeatDelay=18, activationRadius=4;
+        [Min(0f), Tooltip("Velocidad de giro en grados por segundo hacia el siguiente punto de ruta.")]
+        public float turnSpeed=180f;
         public float contactRadius=.5f, bodyHalfLength=.75f, obstacleRadius=.4f;
         public LayerMask obstacleLayers=Physics.DefaultRaycastLayers;
         public PassageState State { get; private set; }
@@ -73,11 +74,7 @@ namespace Anadromo.AI
                 return;
             }
             cooldown=Mathf.Max(0,cooldown-dt);
-            if(State==PassageState.Cooldown) { 
-                if(cooldown<=0) State = triggerOnlyOnce ? PassageState.Finished : PassageState.Waiting; 
-                return; 
-            }
-            if(State==PassageState.Finished) return;
+            if(State==PassageState.Cooldown) { if(cooldown<=0) State=PassageState.Waiting; return; }
             float budget=Mathf.Max(0,travelSpeed)*dt;
             while(budget>0 && waypoint<waypoints.Length)
             {
@@ -88,7 +85,10 @@ namespace Anadromo.AI
                 foreach(var hit in Physics.SphereCastAll(start,obstacleRadius,direction,step,obstacleLayers,QueryTriggerInteraction.Ignore))
                     if(IsWall(hit.collider)) allowed=Mathf.Min(allowed,Mathf.Max(0,hit.distance-.02f));
                 Vector3 end=start+direction*allowed;
-                shark.SetPositionAndRotation(end,Quaternion.LookRotation(direction));
+                // Share the frame's turn time across legs when crossing multiple waypoints.
+                float segmentTime=step/travelSpeed;
+                Quaternion rotation=Quaternion.RotateTowards(shark.rotation,Quaternion.LookRotation(direction),Mathf.Max(0f,turnSpeed)*segmentTime);
+                shark.SetPositionAndRotation(end,rotation);
                 // Sweep every leg, including frames that cross more than one waypoint.
                 if(SegmentDistance(target.transform.position,start-direction*bodyHalfLength,end+direction*bodyHalfLength)<=contactRadius && Clear(end,target.transform.position))
                     target.TakeDamage(target.maxHealth);

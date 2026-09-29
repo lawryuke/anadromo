@@ -50,7 +50,7 @@ namespace Anadromo.AI
             Vector3 segment = transform.position-previous;
             float t = segment.sqrMagnitude < .00001f ? 0 : Mathf.Clamp01(Vector3.Dot(target.transform.position-previous,segment)/segment.sqrMagnitude);
             if (State == BehaviourState.Attack && biteCooldown <= 0 && Vector3.Distance(previous+segment*t,target.transform.position) <= contactRadius && School.ClearPath(transform.position,target.transform.position))
-            { target.TakeDamage(damage); biteCooldown = biteInterval; }
+            { target.TakeDamage(damage); biteCooldown = biteInterval; GetComponentInChildren<PredatorNaturalMotion>()?.Bite(); }
             if (body)
             {
                 if (tint == null) tint = new MaterialPropertyBlock();

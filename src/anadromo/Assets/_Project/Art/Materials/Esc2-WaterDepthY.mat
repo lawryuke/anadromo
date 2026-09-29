@@ -28,15 +28,15 @@ Material:
     - _DeepLight: 0.09
     - _DeepY: -18
     - _Density: 0
-    - _LightVisibilityEnd: 7
-    - _LightVisibilityStart: 4
+    - _LightVisibilityEnd: 9
+    - _LightVisibilityStart: 6
     - _OpenWaterDistance: 60
     - _ShallowY: 7
     - _SurfaceY: 10
-    - _VisibilityEnd: 7
+    - _VisibilityEnd: 5.5
     - _VisibilityStart: 4
     m_Colors:
-    - _DeepColor: {r: 0.07450981, g: 0.3372549, b: 0.38823533, a: 1}
-    - _ShallowColor: {r: 0.0748042, g: 0.33901057, b: 0.38679248, a: 1}
+    - _DeepColor: {r: 0.08627451, g: 0.1882353, b: 0.23137255, a: 1}
+    - _ShallowColor: {r: 0.08627451, g: 0.1882353, b: 0.23137255, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

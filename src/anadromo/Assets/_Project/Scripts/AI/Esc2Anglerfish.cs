@@ -8,6 +8,7 @@ namespace Anadromo.AI
         public Renderer body;
         public Light lureLight;
         public Transform lure;
+        public bool animateLureInCode = false;
         public float detectionRadius=5, attackDelay=1.8f, attackSpeed=9, damage=25, recoveryDuration=2, contactRadius=.7f;
         public BehaviourState State { get; private set; }
         PiranhaSchool school;
@@ -41,14 +42,13 @@ namespace Anadromo.AI
                 delta=transform.position-previous;
                 float u=delta.sqrMagnitude<.00001f?0:Mathf.Clamp01(Vector3.Dot(player.transform.position-previous,delta)/delta.sqrMagnitude);
                 if(cooldown<=0 && Vector3.Distance(previous+delta*u,player.transform.position)<=contactRadius && school.ClearPath(transform.position,player.transform.position))
-                { player.TakeDamage(damage); cooldown=recoveryDuration; State=BehaviourState.Recover; }
+                { player.TakeDamage(damage); cooldown=recoveryDuration; State=BehaviourState.Recover; GetComponentInChildren<PredatorNaturalMotion>()?.Bite(); }
                 else if(attackElapsed>=1.3f || delta.magnitude<attackSpeed*dt*.5f) { State=BehaviourState.Recover; cooldown=recoveryDuration; }
                 else if(attackSpeed>0 && delta.sqrMagnitude>0) transform.rotation=Quaternion.LookRotation(direction);
             }
-            // The lure is an emissive mesh; it must never illuminate/reveal the ambush body.
-            if(lureLight) lureLight.enabled=false;
+            if(lureLight) lureLight.enabled=State==BehaviourState.Chill;
             if(lureRenderer) lureRenderer.enabled=State==BehaviourState.Chill;
-            if(lure) lure.localPosition=lureHome+Vector3.up*(State==BehaviourState.Chill?Mathf.Sin(Time.time*3)*.08f:0);
+            if(lure && animateLureInCode) lure.localPosition=lureHome+Vector3.up*(State==BehaviourState.Chill?Mathf.Sin(Time.time*3)*.08f:0);
             if(body)
             {
                 if(tint==null) tint=new MaterialPropertyBlock();
@@ -57,6 +57,6 @@ namespace Anadromo.AI
             }
             if(State==BehaviourState.Recover && cooldown<=0) { State=BehaviourState.Chill; timer=0; }
         }
-        public void ResetFish() { transform.SetPositionAndRotation(home,homeRotation); State=BehaviourState.Chill; timer=cooldown=attackElapsed=0; if(lureLight) lureLight.enabled=false; if(lureRenderer) lureRenderer.enabled=true; }
+        public void ResetFish() { transform.SetPositionAndRotation(home,homeRotation); State=BehaviourState.Chill; timer=cooldown=attackElapsed=0; if(lureLight) lureLight.enabled=true; if(lureRenderer) lureRenderer.enabled=true; }
     }
 }

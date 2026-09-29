@@ -53,6 +53,8 @@ MonoBehaviour:
   drainInterval: 2
   drainDamage: 5
   attachOffset: {x: 0.35, y: -0.25, z: 0.65}
+  feedingLoop: {fileID: 8300000, guid: 26be0c970150ca84d9ab408ef1694279, type: 3}
+  feedingVolume: 0.65
 --- !u!1 &6452607806562695367
 GameObject:
   m_ObjectHideFlags: 0
