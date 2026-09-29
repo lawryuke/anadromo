@@ -7,7 +7,7 @@ namespace Anadromo.AI
     public class Esc2SharkInstakill : MonoBehaviour
     {
         [Header("Configuración del Ataque")]
-        [Tooltip("El punto donde aparecerá el tiburón (ej. oculto en la oscuridad del túnel)")]
+        [Tooltip("Opcional. Si está vacío, el tiburón aparece donde lo colocaste en la escena.")]
         public Transform spawnPoint;
         
         [Tooltip("Qué tan rápido nada hacia el jugador")]
@@ -24,13 +24,28 @@ namespace Anadromo.AI
         private bool hasKilled = false;
         private PlayerEnergyController player;
         private Camera playerCamera;
+        private bool initialized;
+        private Vector3 initialPosition;
+        private Quaternion initialRotation;
 
-        void Start()
+        void Awake()
         {
-            // Ocultar al tiburón al iniciar el nivel
+            PrepareWaiting();
+        }
+
+        private void PrepareWaiting()
+        {
+            if (initialized) return;
+            initialized = true;
+            initialPosition = transform.position;
+            initialRotation = transform.rotation;
+            // Desactiva también colisiones y scripts, incluso sin Shark Mesh asignado.
             if (sharkMesh != null) sharkMesh.SetActive(false);
-            
-            // Buscar al jugador automáticamente
+            gameObject.SetActive(false);
+        }
+
+        private void FindPlayer()
+        {
             player = FindAnyObjectByType<PlayerEnergyController>();
             if (player != null)
             {
@@ -41,19 +56,27 @@ namespace Anadromo.AI
         // Esta es la función que conectarás en tu AntiBacktrackTunnel
         public void TriggerInstakill()
         {
-            if (isCharging || hasKilled || player == null) return;
+            TriggerInstakill(null);
+        }
 
-            // Teletransportar al tiburón al punto de spawn
-            if (spawnPoint != null)
-            {
-                transform.position = spawnPoint.position;
-                transform.rotation = spawnPoint.rotation;
-            }
+        public void TriggerInstakill(Transform spawnOverride)
+        {
+            if (isCharging || hasKilled) return;
+            // También funciona con instancias que ya estaban inactivas antes de Awake.
+            PrepareWaiting();
+            if (player == null) FindPlayer();
+            if (player == null || !player.HasEnergy) return;
+
+            Transform spawn = spawnOverride != null ? spawnOverride : spawnPoint;
+            Vector3 position = spawn != null ? spawn.position : initialPosition;
+            Quaternion rotation = spawn != null ? spawn.rotation : initialRotation;
+            transform.SetPositionAndRotation(position, rotation);
 
             // Hacer visible al tiburón
-            if (sharkMesh != null) sharkMesh.SetActive(true);
-            
             isCharging = true;
+            enabled = true;
+            gameObject.SetActive(true);
+            if (sharkMesh != null) sharkMesh.SetActive(true);
         }
 
         void Update()
@@ -97,7 +120,7 @@ namespace Anadromo.AI
             }
 
             // 2. Matar al jugador instantáneamente
-            player.TakeDamage(9999f);
+            player.TakeDamage(player.Maximum);
         }
     }
 }

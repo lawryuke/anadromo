@@ -8,6 +8,7 @@ namespace Anadromo.AI
         public Renderer body;
         public Light lureLight;
         public Transform lure;
+        public bool animateLureInCode = false;
         public float detectionRadius=5, attackDelay=1.8f, attackSpeed=9, damage=25, recoveryDuration=2, contactRadius=.7f;
         public BehaviourState State { get; private set; }
         PiranhaSchool school;
@@ -47,7 +48,7 @@ namespace Anadromo.AI
             }
             if(lureLight) lureLight.enabled=State==BehaviourState.Chill;
             if(lureRenderer) lureRenderer.enabled=State==BehaviourState.Chill;
-            if(lure) lure.localPosition=lureHome+Vector3.up*(State==BehaviourState.Chill?Mathf.Sin(Time.time*3)*.08f:0);
+            if(lure && animateLureInCode) lure.localPosition=lureHome+Vector3.up*(State==BehaviourState.Chill?Mathf.Sin(Time.time*3)*.08f:0);
             if(body)
             {
                 if(tint==null) tint=new MaterialPropertyBlock();

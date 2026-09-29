@@ -12,6 +12,8 @@ namespace Anadromo.AI
         public Transform[] waypoints;
         public ZoneLimit activationZone;
         public float travelSpeed=15, warningDuration=3, repeatDelay=18, activationRadius=4;
+        [Min(0f), Tooltip("Velocidad de giro en grados por segundo hacia el siguiente punto de ruta.")]
+        public float turnSpeed=180f;
         public float contactRadius=.5f, bodyHalfLength=.75f, obstacleRadius=.4f;
         public LayerMask obstacleLayers=Physics.DefaultRaycastLayers;
         public PassageState State { get; private set; }
@@ -83,7 +85,10 @@ namespace Anadromo.AI
                 foreach(var hit in Physics.SphereCastAll(start,obstacleRadius,direction,step,obstacleLayers,QueryTriggerInteraction.Ignore))
                     if(IsWall(hit.collider)) allowed=Mathf.Min(allowed,Mathf.Max(0,hit.distance-.02f));
                 Vector3 end=start+direction*allowed;
-                shark.SetPositionAndRotation(end,Quaternion.LookRotation(direction));
+                // Share the frame's turn time across legs when crossing multiple waypoints.
+                float segmentTime=step/travelSpeed;
+                Quaternion rotation=Quaternion.RotateTowards(shark.rotation,Quaternion.LookRotation(direction),Mathf.Max(0f,turnSpeed)*segmentTime);
+                shark.SetPositionAndRotation(end,rotation);
                 // Sweep every leg, including frames that cross more than one waypoint.
                 if(SegmentDistance(target.transform.position,start-direction*bodyHalfLength,end+direction*bodyHalfLength)<=contactRadius && Clear(end,target.transform.position))
                     target.TakeDamage(target.maxHealth);

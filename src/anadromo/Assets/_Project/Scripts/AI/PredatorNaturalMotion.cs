@@ -64,11 +64,12 @@ namespace Anadromo.AI
                           (angler && angler.State == Esc2Anglerfish.BehaviourState.Attack);
             bool attached = lamprey && lamprey.State == Esc2Lamprey.BehaviourState.Attached;
             bool stunned = lamprey && lamprey.State == Esc2Lamprey.BehaviourState.Stunned;
-            float frequency = species == Species.Angler ? .75f : species == Species.Lamprey ? 1.2f : 1.65f;
+            bool chill = lamprey && lamprey.State == Esc2Lamprey.BehaviourState.Chill;
+            float frequency = species == Species.Angler ? .75f : species == Species.Lamprey ? (chill ? 0.3f : 1.2f) : 1.65f;
             frequency += speed * (species == Species.Angler ? .09f : .18f);
             phase = Mathf.Repeat(phase + dt * frequency * Mathf.PI * 2, Mathf.PI * 2);
             breath = Mathf.Repeat(breath + dt * 2.1f, Mathf.PI * 2);
-            float strength = stunned ? .18f : attached ? .48f : .65f + Mathf.Clamp01(speed / 4) * .5f;
+            float strength = stunned ? .18f : attached ? .65f : chill ? 0.25f : .65f + Mathf.Clamp01(speed / 4) * .5f;
             biteRemaining = Mathf.Max(0, biteRemaining - dt);
             float bite = biteRemaining > 0 ? Mathf.Sin(Mathf.PI * (1 - biteRemaining / .32f)) : 0;
             float mouth = attack ? .65f : .06f + .04f * Mathf.Sin(breath);

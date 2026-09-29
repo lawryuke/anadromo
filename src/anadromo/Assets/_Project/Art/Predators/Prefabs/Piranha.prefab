@@ -170,6 +170,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6924431824287847592}
   - component: {fileID: 4846836331052406593}
+  - component: {fileID: 4813457433279458145}
   m_Layer: 0
   m_Name: Piranha
   m_TagString: Untagged
@@ -244,6 +245,30 @@ MonoBehaviour:
     amplitude: 5
     lag: 0.8
     channel: 2
+--- !u!114 &4813457433279458145
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4048073821331185225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcc6b1cf674f1f6458379569f77f2886, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.AI.Esc2Piranha
+  body: {fileID: 939299730891874512}
+  detectionRadius: 5
+  disturbanceDelay: 2.5
+  noiseThreshold: 6
+  normalSpeed: 1
+  attackSpeed: 9
+  calmTurn: 5
+  attackTurn: 0.5
+  damage: 8
+  biteInterval: 1
+  loseInterestDelay: 3
+  contactRadius: 0.45
 --- !u!1 &4174855264329017273
 GameObject:
   m_ObjectHideFlags: 0

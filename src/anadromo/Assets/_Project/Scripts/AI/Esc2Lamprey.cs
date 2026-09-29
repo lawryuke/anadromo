@@ -11,22 +11,48 @@ namespace Anadromo.AI
         public PiranhaPlayerTarget Target=>school?school.target:null;
         public float Grip { get; private set; }=100;
         public Vector3 attachOffset=new Vector3(.35f,-.25f,.65f);
+        [Header("Audio de succión")]
+        public AudioClip feedingLoop;
+        [Range(0f,1f)] public float feedingVolume=.65f;
         PiranhaSchool school;
         Transform cameraTransform;
         int attachmentSlot;
         public int AttachmentSlot => attachmentSlot;
         Vector3 home,previous;
         float stunTimer,drainTimer;
-        MaterialPropertyBlock tint;
+        AudioSource feedingSource;
         void Awake()
         {
             school=GetComponentInParent<PiranhaSchool>(); home=previous=transform.position;
-            tint=new MaterialPropertyBlock();
+            feedingSource=gameObject.AddComponent<AudioSource>();
+            feedingSource.playOnAwake=false;
+            feedingSource.loop=true;
+            feedingSource.spatialBlend=1f;
+            feedingSource.rolloffMode=AudioRolloffMode.Linear;
+            feedingSource.minDistance=1f;
+            feedingSource.maxDistance=8f;
+            feedingSource.dopplerLevel=0f;
+            feedingSource.clip=feedingLoop;
+            feedingSource.volume=feedingVolume;
             var cam=school && school.target ? school.target.transform.GetComponentInChildren<Camera>() : null;
             cameraTransform=cam?cam.transform:(school&&school.target?school.target.transform:null);
         }
         void OnTransformParentChanged() { school=GetComponentInParent<PiranhaSchool>(); }
-        void Update() { if(school && school.target && school.target.Alive) Tick(Time.deltaTime); }
+        void Update()
+        {
+            if(school && school.target && school.target.Alive) Tick(Time.deltaTime);
+            UpdateFeedingAudio();
+        }
+        void UpdateFeedingAudio()
+        {
+            if(!feedingSource) return;
+            bool feeding=State==BehaviourState.Attached && Target && Target.Alive && feedingLoop;
+            if(!feeding) { StopFeedingAudio(); return; }
+            feedingSource.volume=feedingVolume;
+            if(feedingSource.clip!=feedingLoop) feedingSource.clip=feedingLoop;
+            if(!feedingSource.isPlaying) feedingSource.Play();
+        }
+        void StopFeedingAudio() { if(feedingSource) feedingSource.Stop(); }
         void Tick(float dt)
         {
             var player=school.target; previous=transform.position;
@@ -55,18 +81,13 @@ namespace Anadromo.AI
                     if(Vector3.Distance(transform.position,target)<=.65f && school.ClearPath(transform.position,target)) Attach(player);
                 }
             }
-            if(body)
-            {
-                if(tint==null) tint=new MaterialPropertyBlock();
-                Color c=State==BehaviourState.Attached?new Color(1,.12f,.1f):State==BehaviourState.Chasing?new Color(1,.68f,.12f):State==BehaviourState.Stunned?Color.gray:new Color(.7f,.3f,.75f);
-                tint.SetColor("_BaseColor",c); tint.SetColor("_Color",c); body.SetPropertyBlock(tint);
-            }
         }
         void LateUpdate() { if(State==BehaviourState.Attached) StickToPlayer(); }
         void StickToPlayer() { if(cameraTransform) transform.SetPositionAndRotation(cameraTransform.position+cameraTransform.rotation*new Vector3((attachmentSlot%2==0?1:-1)*Mathf.Abs(attachOffset.x),attachOffset.y-(attachmentSlot/2)*.12f,attachOffset.z),cameraTransform.rotation); else if(Target) transform.position=Target.transform.position; }
         void Attach(PiranhaPlayerTarget player)
         {
             State=BehaviourState.Attached; Grip=maxGrip; drainTimer=drainInterval; attachmentSlot=player.GetLampreySlot(); player.AddLamprey(this); StickToPlayer();
+            UpdateFeedingAudio();
         }
         public void ReduceGrip(float amount)
         {
@@ -74,17 +95,20 @@ namespace Anadromo.AI
             Grip=Mathf.Max(0,Grip-amount);
             if(Grip>0) return;
             Target.RemoveLamprey(this); State=BehaviourState.Stunned; stunTimer=stunDuration; drainTimer=drainInterval;
+            StopFeedingAudio();
             Vector3 origin=Target.transform.position;
-            Vector3 destination=school.Clamp(origin+Target.transform.forward*1.5f);
+            Vector3 randomScatter = UnityEngine.Random.insideUnitSphere * 1.5f;
+            Vector3 destination=school.Clamp(origin+Target.transform.forward*1.5f + randomScatter);
             transform.position=school.MoveWithoutObstacles(origin,destination,.15f);
 
         }
         public void ResetLamprey()
         {
+            StopFeedingAudio();
             if(State==BehaviourState.Attached && Target) Target.RemoveLamprey(this);
             State=BehaviourState.Chill; Grip=maxGrip; stunTimer=0; drainTimer=drainInterval;
             transform.position=home;
         }
-        void OnDisable() { if(State==BehaviourState.Attached) ResetLamprey(); }
+        void OnDisable() { StopFeedingAudio(); if(State==BehaviourState.Attached) ResetLamprey(); }
     }
 }
