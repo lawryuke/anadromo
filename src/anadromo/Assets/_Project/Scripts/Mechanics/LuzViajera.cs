@@ -1,173 +1,224 @@
 using UnityEngine;
-using Anadromo.Config;
+using Anadromo.Logic;
+using Anadromo.Systems;
 
 namespace Anadromo.Mechanics
 {
     [AddComponentMenu("Anadromo/Efectos/Luz Viajera")]
     public class LuzViajera : MonoBehaviour
     {
-        [Header("Recorrido de la Luz")]
-        [Tooltip("Arrastra aquí los objetos vacíos que servirán como puntos del camino.")]
+        [Header("Visual")]
+        public GameObject visualPrefab;
+
+        [Header("Recorrido (una sola vez)")]
+        [Tooltip("Puntos en orden. Aparece en el primero y permanece visible en el ultimo.")]
         public Transform[] waypoints;
-        
-        [Tooltip("Velocidad a la que se mueve la luz (se sobreescribe con GameSettings).")]
-        public float speed = 2f;
-        
-        [Tooltip("¿Vuelve a empezar desde el principio cuando llega al final?")]
-        public bool loop = true;
-        
-        [Tooltip("Si loop es falso, ¿desaparece la medusa al llegar al final del camino?")]
-        public bool disappearOnFinish = true;
+        [Min(0.01f)] public float speed = 2f;
 
-        [Header("Activación")]
-        [Tooltip("Si es true, la medusa estará oculta y no iniciará su recorrido hasta que el jugador entre en Abysm_Mid (se sobreescribe con GameSettings).")]
-        public bool waitAbysmPhase = true;
-        private bool isMoving = false;
-        public bool IsMoving => isMoving;
+        [Header("Entrada del jugador")]
+        [Tooltip("Hitbox opcional. Si se asigna, tiene prioridad sobre Activation Zone.")]
+        public Collider activationHitbox;
+        [Tooltip("Zona fija que debe entrar el jugador para iniciar el viaje.")]
+        public ZoneLimit activationZone;
+        [Tooltip("Opcional. Sin asignar se usa la cabeza del jugador activo del nivel.")]
+        public Transform playerTarget;
 
-        /// <summary>Velocidad efectiva: prioriza GameSettings.I si existe.</summary>
-        float EffectiveSpeed => GameSettings.I ? GameSettings.I.jellyfishSpeed : speed;
-        /// <summary>Esperar al abismo: prioriza GameSettings.I si existe.</summary>
-        bool EffectiveWaitAbysm => GameSettings.I ? GameSettings.I.jellyfishWaitsForAbysm : waitAbysmPhase;
-
-        [Header("Debug del recorrido")]
+        [Header("Debug")]
         public bool showDebug = true;
         public bool logRouteEvents = true;
         public Camera debugCamera;
-        private float routeStartTime;
-        private string routeStatus = "Sin iniciar";
 
-        private int currentWaypointIndex = 0;
+        public bool IsMoving => state == RouteState.Travelling;
+        public bool HasFinished => state == RouteState.Finished;
+        enum RouteState { Waiting, Travelling, Finished, Invalid }
+        RouteState state;
+        GameObject spawnedVisual;
+        Vector3[] routePositions;
+        int nextPoint;
+        bool prepared;
+        bool warnedMissingPlayer;
+        PlayerEnergyController fallbackPlayer;
+        Renderer[] existingRenderers;
+        bool[] rendererStates;
+        Light[] existingLights;
+        bool[] lightStates;
+
+        void Awake()
+        {
+            if (visualPrefab != null)
+            {
+                spawnedVisual = Instantiate(visualPrefab, transform.position, transform.rotation, transform);
+                spawnedVisual.SetActive(false);
+                Log($"Visual creado: {spawnedVisual.name}");
+            }
+            else
+            {
+                existingRenderers = GetComponentsInChildren<Renderer>(true);
+                rendererStates = new bool[existingRenderers.Length];
+                for (int i = 0; i < existingRenderers.Length; i++) rendererStates[i] = existingRenderers[i].enabled;
+                existingLights = GetComponentsInChildren<Light>(true);
+                lightStates = new bool[existingLights.Length];
+                for (int i = 0; i < existingLights.Length; i++) lightStates[i] = existingLights[i].enabled;
+            }
+            SetVisible(false);
+        }
 
         void Start()
         {
-            // A dynamically created guide may have been started by its warning trigger already.
-            if (isMoving) return;
-            routeStartTime = Time.time;
-            
-            if (waypoints != null && waypoints.Length > 0 && waypoints[0] != null)
-            {
-                transform.position = waypoints[0].position;
-            }
-
-            if (EffectiveWaitAbysm)
-            {
-                routeStatus = "Esperando entrada a Abysm_Mid";
-                SetVisualsActive(false);
-            }
+            if (!PrepareRoute()) return;
+            if (state != RouteState.Waiting) return;
+            if (activationHitbox == null && activationZone == null)
+                Debug.LogWarning($"[MedusaDebug] {name}: asigna Activation Hitbox o Activation Zone. Esperando activacion externa.", this);
             else
-            {
-                BeginRoute();
-            }
+                Log($"ESPERANDO jugador en {(activationHitbox != null ? activationHitbox.name : activationZone.name)}; inicio={routePositions[0]:F3}; puntos={routePositions.Length}");
         }
 
-        private void SetVisualsActive(bool active)
+        bool PrepareRoute()
         {
-            var glow = GetComponent<MedusaGlow>();
-            if (glow != null) glow.enabled = active;
-            var light = GetComponent<Light>();
-            if (light != null) light.enabled = active;
+            if (prepared) return state != RouteState.Invalid;
+            prepared = true;
+            if (waypoints == null || waypoints.Length == 0)
+                return InvalidRoute("Faltan waypoints.");
+            routePositions = new Vector3[waypoints.Length];
+            // Snapshot BEFORE moving: child points must never travel with the medusa.
+            for (int i = 0; i < waypoints.Length; i++)
+            {
+                if (waypoints[i] == null) return InvalidRoute($"Waypoint {i} sin asignar.");
+                routePositions[i] = waypoints[i].position;
+            }
+            transform.position = routePositions[0];
+            return true;
         }
 
+        bool InvalidRoute(string reason)
+        {
+            state = RouteState.Invalid;
+            Debug.LogError($"[MedusaDebug] {name}: {reason}", this);
+            return false;
+        }
+
+        bool TryPlayerPosition(out Vector3 position)
+        {
+            if (playerTarget != null && playerTarget.gameObject.activeInHierarchy)
+            { position = playerTarget.position; return true; }
+            var level = LevelManager.Instance;
+            if (level != null && level.gameObject.scene == gameObject.scene && level.playerCamera != null && level.playerCamera.isActiveAndEnabled)
+            { position = level.playerCamera.transform.position; return true; }
+            if (fallbackPlayer == null || !fallbackPlayer.isActiveAndEnabled)
+            {
+                fallbackPlayer = null;
+                foreach (var candidate in FindObjectsByType<PlayerEnergyController>(FindObjectsSortMode.None))
+                    if (candidate.isActiveAndEnabled && candidate.gameObject.scene == gameObject.scene)
+                    { fallbackPlayer = candidate; break; }
+            }
+            if (fallbackPlayer != null) { position = fallbackPlayer.Position; return true; }
+            position = default;
+            return false;
+        }
+
+        bool PlayerInside(Vector3 position)
+        {
+            if (activationHitbox != null)
+                return activationHitbox.enabled && activationHitbox.gameObject.activeInHierarchy &&
+                    (activationHitbox.ClosestPoint(position) - position).sqrMagnitude < 0.000001f;
+            return activationZone != null && activationZone.Contains(position);
+        }
+
+        // Public for existing UnityEvents / ZoneLimitMedusaWakeup. Never restarts a finished route.
         public void BeginRoute()
         {
-            if (isMoving) return;
+            if (state != RouteState.Waiting || !PrepareRoute()) return;
             enabled = true;
-            currentWaypointIndex = 0;
-            isMoving = true;
-            routeStartTime = Time.time;
-            SetVisualsActive(true);
-
-            if (waypoints != null && waypoints.Length > 0 && waypoints[0] != null)
-            {
-                transform.position = waypoints[0].position;
-                routeStatus = "Recorriendo";
-                if (logRouteEvents) Debug.Log($"[{name}] Inicio en {waypoints[0].name}: {transform.position:F3}. Velocidad {speed:F2} m/s.", this);
-            }
-            else
-            {
-                routeStatus = "ERROR: falta el punto inicial";
-                Debug.LogWarning($"[{name}] {routeStatus}", this);
-            }
+            state = RouteState.Travelling;
+            nextPoint = 1;
+            SetVisible(true);
+            Log($"INICIO: punto 0 en {transform.position:F3}; velocidad={speed:F2} m/s");
+            if (nextPoint >= routePositions.Length) FinishRoute();
         }
 
         void Update()
         {
-            if (EffectiveWaitAbysm && !isMoving)
+            if (state == RouteState.Invalid || state == RouteState.Finished || !PrepareRoute()) return;
+            if (state == RouteState.Waiting)
             {
-                if (Anadromo.Logic.LevelManager.Instance != null && Anadromo.Logic.LevelManager.Instance.isPlayerInAbysm)
+                if (activationHitbox == null && activationZone == null) return;
+                if (!TryPlayerPosition(out Vector3 position))
                 {
+                    if (!warnedMissingPlayer)
+                        Debug.LogWarning($"[MedusaDebug] {name}: no hay jugador activo; asigna Player Target.", this);
+                    warnedMissingPlayer = true;
+                    return;
+                }
+                if (PlayerInside(position))
+                {
+                    Log($"ENTRADA jugador en hitbox; posicion={position:F3}");
                     BeginRoute();
                 }
                 return;
             }
 
-            if (!isMoving || waypoints == null || waypoints.Length == 0) return;
-
-            Transform target = waypoints[currentWaypointIndex];
-            if (target == null) { routeStatus = "ERROR: destino vacío"; return; }
-            
-            // Moverse lentamente hacia el punto objetivo
-            transform.position = Vector3.MoveTowards(transform.position, target.position, EffectiveSpeed * Time.deltaTime);
-
-            // Si está muy cerca del punto, pasamos al siguiente
-            if (Vector3.Distance(transform.position, target.position) < 0.1f)
-            {
-                if (logRouteEvents) Debug.Log($"[{name}] Llegó a {target.name}: {transform.position:F3}", this);
-                currentWaypointIndex++;
-                
-                // Si llegamos al final del arreglo de puntos
-                if (currentWaypointIndex >= waypoints.Length)
-                {
-                    if (loop) 
-                    {
-                        currentWaypointIndex = 0;
-                        // Opcional: Descomenta la siguiente línea si quieres que se teletransporte al inicio en lugar de devolverse volando.
-                        // transform.position = waypoints[0].position; 
-                    }
-                    else 
-                    {
-                        routeStatus = "Recorrido terminado";
-                        isMoving = false;
-                        enabled = false; // Detener el script para que se quede quieta
-                        if (disappearOnFinish)
-                        {
-                            SetVisualsActive(false);
-                        }
-                    }
-                }
-            }
+            // Consume the frame's distance across short/duplicate segments without overshooting.
+            AdvanceRoute(Time.deltaTime);
         }
 
-
-
-        private void OnDrawGizmos()
+        void AdvanceRoute(float deltaTime)
         {
-            if (showDebug)
+            if (state != RouteState.Travelling) return;
+            float travel = Mathf.Max(0f, speed) * Mathf.Max(0f, deltaTime);
+            while (nextPoint < routePositions.Length)
             {
-                Gizmos.color = Color.magenta;
-                Gizmos.DrawWireSphere(transform.position, 0.6f);
-                if (waypoints != null && waypoints.Length > 0 && waypoints[0])
+                Vector3 target = routePositions[nextPoint];
+                float distance = Vector3.Distance(transform.position, target);
+                if (distance > travel)
                 {
-                    Gizmos.color = Color.green;
-                    Gizmos.DrawWireSphere(waypoints[0].position, 0.7f);
+                    transform.position = Vector3.MoveTowards(transform.position, target, travel);
+                    return;
                 }
+                transform.position = target;
+                travel -= distance;
+                Log($"LLEGADA punto {nextPoint}: {target:F3}");
+                nextPoint++;
             }
-            // Dibuja una línea en el editor para que veas el camino de la luz
-            if (waypoints == null || waypoints.Length < 2) return;
-            
+            FinishRoute();
+        }
+
+        void FinishRoute()
+        {
+            state = RouteState.Finished;
+            Log($"FIN: visible y quieta en ultimo waypoint {transform.position:F3}");
+        }
+
+        void SetVisible(bool visible)
+        {
+            if (spawnedVisual != null) { spawnedVisual.SetActive(visible); return; }
+            if (existingRenderers != null)
+                for (int i = 0; i < existingRenderers.Length; i++)
+                    if (existingRenderers[i] != null) existingRenderers[i].enabled = visible && rendererStates[i];
+            if (existingLights != null)
+                for (int i = 0; i < existingLights.Length; i++)
+                    if (existingLights[i] != null) existingLights[i].enabled = visible && lightStates[i];
+        }
+
+        void Log(string message)
+        {
+            if (logRouteEvents) Debug.Log($"[MedusaDebug] {name}: {message}", this);
+        }
+
+        void OnDrawGizmos()
+        {
+            if (!showDebug) return;
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawWireSphere(transform.position, 0.3f);
             Gizmos.color = Color.yellow;
-            for (int i = 0; i < waypoints.Length - 1; i++)
+            bool cached = Application.isPlaying && routePositions != null;
+            int count = cached ? routePositions.Length : (waypoints != null ? waypoints.Length : 0);
+            for (int i = 0; i < count; i++)
             {
-                if (waypoints[i] != null && waypoints[i+1] != null)
-                {
-                    Gizmos.DrawLine(waypoints[i].position, waypoints[i+1].position);
-                }
-            }
-            
-            if (loop && waypoints[0] != null && waypoints[waypoints.Length - 1] != null)
-            {
-                Gizmos.DrawLine(waypoints[waypoints.Length - 1].position, waypoints[0].position);
+                if (!cached && waypoints[i] == null) continue;
+                Vector3 point = cached ? routePositions[i] : waypoints[i].position;
+                Gizmos.DrawWireSphere(point, 0.2f);
+                if (i > 0 && (cached || waypoints[i - 1] != null))
+                    Gizmos.DrawLine(cached ? routePositions[i - 1] : waypoints[i - 1].position, point);
             }
         }
     }

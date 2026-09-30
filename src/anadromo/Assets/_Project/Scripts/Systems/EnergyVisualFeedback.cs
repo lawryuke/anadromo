@@ -25,7 +25,7 @@ namespace Anadromo.Systems
             comfort=GetComponent<Anadromo.Locomotion.ComfortVignette>();
             struggle=GetComponent<Anadromo.Mechanics.LampreyShakeController>();
             var camera=GetComponentInChildren<Camera>();
-            if(!player || !camera) { enabled=false; return; }
+            if(!player || !camera) { Debug.LogError($"[EnergyVisualFeedback] Falla: player={player!=null}, camera={camera!=null}", this); enabled=false; return; }
             cameraData=camera.GetUniversalAdditionalCameraData();
             previousPostProcessing=cameraData.renderPostProcessing; cameraData.renderPostProcessing=true;
             var go=new GameObject("Energy Vital Feedback (Runtime)"); go.transform.SetParent(transform,false);

@@ -26,6 +26,10 @@ namespace Anadromo.Logic
         public bool UsesVRPlayer { get; private set; }
         public Transform targetMid, topReference, orcaLimit, firstBloopLimit, secondBloopLimit;
         public ZoneLimit initialZone, abysmZone, caveZone;
+        [Tooltip("La caza Scary requiere salir de esta zona y terminar los kriles de Kril_Group_Mid.")]
+        public ZoneLimit firstFoodPlayerZone;
+        public ZoneLimit swimNormalLeft, swimNormalRight;
+        public bool debugSalmonProgression = true;
         public LevelEndingEffects endingEffects;
         [Min(1)] public int requiredAbysmMeals = 5;
         public bool countMealsFromStart;
@@ -54,6 +58,18 @@ namespace Anadromo.Logic
         Rigidbody playerBody;
         bool bodyWasKinematic;
         bool sceneTransitionStarted;
+        string lastFeedingDebugState;
+
+        public bool ControlsSalmon(SwimGroupController group)
+            => group != null && (group == salmonesLeft || group == salmonesRight || group == salmonesTop);
+
+        public ZoneLimit SalmonWaitingZone(SwimGroupController group)
+            => group == salmonesLeft ? swimNormalLeft : swimNormalRight;
+
+        public void LogSalmon(string message, Object context = null)
+        {
+            if (debugSalmonProgression) Debug.Log("[SalmonDebug] " + message, context != null ? context : this);
+        }
 
         void Awake()
         {
@@ -83,6 +99,14 @@ namespace Anadromo.Logic
             yield return null;
             if (playerCamera == null && playerFeeding != null)
                 playerCamera = playerFeeding.GetComponentInChildren<Camera>();
+            foreach (var root in gameObject.scene.GetRootGameObjects())
+                foreach (var zone in root.GetComponentsInChildren<ZoneLimit>(true))
+                {
+                    if (firstFoodPlayerZone == null && (zone.name == "First_Food_Player" || zone.name == "First_Food-Player"))
+                        firstFoodPlayerZone = zone;
+                    if (swimNormalLeft == null && zone.name == "Swim_Normal_Left") swimNormalLeft = zone;
+                    if (swimNormalRight == null && zone.name == "Swim_Normal_Right") swimNormalRight = zone;
+                }
             if (!ValidateConfiguration(out string error))
             {
                 ConfigurationError = error;
@@ -117,6 +141,9 @@ namespace Anadromo.Logic
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
             IsReady = true;
+            LogSalmon($"LISTO: escena={gameObject.scene.name}; zona={firstFoodPlayerZone.name}; " +
+                $"grupo central={krillFirstMid.name}; iniciales={krillFirstMid.InitialPopulation}; " +
+                $"jugador observado={playerCamera.name}. Requiere grupo central vacio Y salida de zona.");
             if (swimIntro != null) swimIntro.Prepare(this, salmon);
             if (autoStart || (UsesVRPlayer && openingSlideshow == null)) StartGame();
         }
@@ -187,6 +214,10 @@ namespace Anadromo.Logic
         public bool ValidateConfiguration(out string error)
         {
             error = null;
+            if (swimNormalLeft == null || swimNormalRight == null)
+            { error = "Falta Zone Limit en Swim_Normal_Left o Swim_Normal_Right."; return false; }
+            if (firstFoodPlayerZone == null)
+            { error = "Falta el Zone Limit de First_Food_Player (First Food Player Zone)."; return false; }
             foreach (var group in new[] { salmonesLeft, salmonesRight, salmonesTop })
                 if (group == null) { error = "Falta un cardumen de salmones."; return false; }
             foreach (var root in new[] { krillNormalLeft, krillNormalRight1, krillNormalRight2,
@@ -245,13 +276,28 @@ namespace Anadromo.Logic
                 playerFeeding.ConsumedWithTag("Food_PlayerOnly") - abysmMealBaseline;
             bool allAbove = true;
             foreach (var group in orcaGroups) allAbove &= group != null && group.AllAbove(orcaLimit.position.y);
-            var scaryMidBehaviour = krillScaryMid.GetComponent<Anadromo.AI.ScaredKrillBehavior>();
+            bool insideFood = Contains(firstFoodPlayerZone, point);
+            int remaining = krillFirstMid.AliveCount;
+            bool depleted = krillFirstMid.IsInitialized && krillFirstMid.InitialPopulation > 0 && remaining == 0;
             bool changed = progress.Tick(!Contains(initialZone, point) || legacyLeft,
-                krillFirstMid.IsInitialized && krillFirstMid.InitialPopulation > 0 && krillFirstMid.AliveCount == 0,
+                depleted,
                 isPlayerInAbysm, meals, EffectiveRequiredMeals, Contains(caveZone, point) || legacyCave,
                 allAbove, EffectiveBloopTimeout > 0 && phaseTime >= EffectiveBloopTimeout, bloopMovement.transform.position.y,
                 FirstLimit, SecondLimit, endingEffects.IsComplete,
-                scaryMidBehaviour != null && scaryMidBehaviour.IsScared);
+                insideFood);
+            if (debugSalmonProgression && (currentPhase == GamePhase.Init || currentPhase == GamePhase.KrillFeeding))
+            {
+                int eaten = playerFeeding.ConsumedWithTag("Food_PlayerOnly_First");
+                string state = $"fase={progress.Phase}; zona={firstFoodPlayerZone.name}; dentro={insideFood}; " +
+                    $"entro={progress.EnteredFirstFoodZone}; salio={progress.ExitedFirstFoodZone}; " +
+                    $"grupo={krillFirstMid.name}; restantes={remaining}/{krillFirstMid.InitialPopulation}; comidosJugador={eaten}; " +
+                    $"cazaScary={(depleted && progress.ExitedFirstFoodZone ? "AUTORIZADA" : "BLOQUEADA")}";
+                if (state != lastFeedingDebugState)
+                {
+                    LogSalmon(state + $"; posicionCamara={point}");
+                    lastFeedingDebugState = state;
+                }
+            }
             if (changed) EnterPhase();
         }
 
@@ -273,6 +319,8 @@ namespace Anadromo.Logic
                     salmonesTop.Hunt(krillNormalRight2.GetComponent<BoxObjectSpawner>(), "Food_Krill");
                     break;
                 case GamePhase.AbysmDescent:
+                    LogSalmon($"INICIO CAZA SCARY: {krillFirstMid.name} restantes={krillFirstMid.AliveCount}; " +
+                        $"salioZona={progress.ExitedFirstFoodZone}");
                     abysmMealBaseline = playerFeeding.ConsumedWithTag("Food_PlayerOnly");
                     // Leftover first-group krill remain edible, but only Scary meals
                     // count toward the abysm requirement when countMealsFromStart is false.
@@ -286,7 +334,7 @@ namespace Anadromo.Logic
                     foreach (var group in orcaGroups) group.BeginAscent(topReference.position.y);
                     break;
                 case GamePhase.BloopAwakening:
-                    bloopMovement.BeginAscent(topReference.position.y);
+                    foreach (var group in orcaGroups) if (group != null) group.StopAscent(); bloopMovement.BeginAscent(topReference.position.y);
                     break;
                 case GamePhase.Trembling:
                     endingEffects.StartTrembling(playerCamera);

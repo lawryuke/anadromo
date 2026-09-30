@@ -7,6 +7,7 @@ namespace Anadromo.Systems
     {
         [Header("Settings")]
         [SerializeField, Range(0f, 100f)] private float maxEnergy = 100f;
+        [SerializeField, Range(0f, 100f)] private float startingEnergy = 50f;
         [SerializeField] private float passiveDecayRate = 1f; // Energy lost per second
         [SerializeField] private float sprintDecayMultiplier = 3f;
 
@@ -19,10 +20,11 @@ namespace Anadromo.Systems
 
         public float CurrentEnergy => currentEnergy;
         public float MaxEnergy => maxEnergy;
+        public float StartingEnergy => startingEnergy;
 
         private void Awake()
         {
-            currentEnergy = maxEnergy;
+            currentEnergy = startingEnergy;
             OnEnergyChanged?.Invoke(GetEnergyPercentage());
         }
 

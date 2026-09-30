@@ -19,6 +19,17 @@ namespace Anadromo.Mechanics
             return Mathf.Abs(local.x) <= half.x && Mathf.Abs(local.y) <= half.y && Mathf.Abs(local.z) <= half.z;
         }
 
+        public Vector3 GetRandomPointInside()
+        {
+            Vector3 half = size * 0.5f;
+            Vector3 randomLocal = new Vector3(
+                Random.Range(-half.x, half.x),
+                Random.Range(-half.y, half.y),
+                Random.Range(-half.z, half.z)
+            ) + center;
+            return transform.TransformPoint(randomLocal);
+        }
+
         private void OnDrawGizmos()
         {
             Gizmos.color = new Color(0, 1, 1, 0.3f);

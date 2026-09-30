@@ -74,6 +74,9 @@ namespace Anadromo.Mechanics
 
         private void ActivateHunt()
         {
+            var level = Anadromo.Logic.LevelManager.Instance;
+            if (level != null)
+                level.LogSalmon($"TRIGGER ANTIGUO {name}: TriggerHuntOnGroupEmpty activado; tag={newPreyTag}", this);
             if (swimGroups != null)
             {
                 for (int i = 0; i < swimGroups.Length; i++)

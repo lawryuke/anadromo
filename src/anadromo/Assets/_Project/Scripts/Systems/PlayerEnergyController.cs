@@ -53,7 +53,7 @@ namespace Anadromo.Systems
             if(Current>before) { recoveryTimer=recoveryDuration; impactTimer=0; }
         }
         public void ResetEnergy()
-        { impactTimer=recoveryTimer=collisionReady=0; Energy.SetSprinting(false); Energy.SetEnergy(Maximum); }
+        { impactTimer=recoveryTimer=collisionReady=0; Energy.SetSprinting(false); Energy.SetEnergy(Energy.StartingEnergy); }
         void OnCollisionEnter(Collision collision)
         {
             if(collisionReady>0 || collision.relativeVelocity.magnitude<collisionSpeedThreshold) return;

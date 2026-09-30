@@ -10,6 +10,10 @@ namespace Anadromo.Logic
     public sealed class LevelProgression
     {
         public GamePhase Phase { get; private set; } = GamePhase.WaitingForStart;
+        bool enteredFirstFoodZone;
+        bool exitedFirstFoodZone;
+        public bool EnteredFirstFoodZone => enteredFirstFoodZone;
+        public bool ExitedFirstFoodZone => exitedFirstFoodZone;
         public bool Start()
         {
             if (Phase != GamePhase.WaitingForStart) return false;
@@ -19,8 +23,13 @@ namespace Anadromo.Logic
 
         public bool Tick(bool outsideInitial, bool firstKrillDepleted, bool inAbysm, int meals, int requiredMeals,
             bool inCave, bool allOrcasAbove, bool timeout, float bloopHeight, float firstLimit, float secondLimit, bool endingDone,
-            bool scaryMidActivated = false)
+            bool insideFirstFoodZone = false)
         {
+            if (Phase == GamePhase.Init || Phase == GamePhase.KrillFeeding)
+            {
+                if (insideFirstFoodZone) enteredFirstFoodZone = true;
+                else if (enteredFirstFoodZone) exitedFirstFoodZone = true;
+            }
             GamePhase next = Phase;
             switch (Phase)
             {
@@ -28,13 +37,13 @@ namespace Anadromo.Logic
                     if (outsideInitial) next = GamePhase.KrillFeeding;
                     break;
                 case GamePhase.KrillFeeding:
-                    if (firstKrillDepleted || scaryMidActivated) next = GamePhase.AbysmDescent;
+                    if (firstKrillDepleted && exitedFirstFoodZone) next = GamePhase.AbysmDescent;
                     break;
                 case GamePhase.AbysmDescent:
                     if (inAbysm && meals >= requiredMeals) next = GamePhase.OrcaAscent;
                     break;
                 case GamePhase.OrcaAscent:
-                    if ((inCave && allOrcasAbove) || timeout) next = GamePhase.BloopAwakening;
+                    if (inCave || timeout) next = GamePhase.BloopAwakening;
                     break;
                 case GamePhase.BloopAwakening:
                     if (bloopHeight >= secondLimit) next = GamePhase.Rockfall;

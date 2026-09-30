@@ -55,6 +55,9 @@ namespace Anadromo.Mechanics
 
         public void Hunt(BoxObjectSpawner target, string preyTag)
         {
+            var level = Anadromo.Logic.LevelManager.Instance;
+            if (level != null && level.ControlsSalmon(this))
+                level.LogSalmon($"{name}: orden Hunt; objetivo={(target != null ? target.name : "ninguno")}; tag={preyTag}; fase={level.currentPhase}", this);
             normalZone = null;
             if (target == null) { NormalInSpawnBox(); return; }
             levelMotion = LevelMotion.Hunt;
@@ -69,6 +72,8 @@ namespace Anadromo.Mechanics
         public void NormalInSpawnBox()
         {
             normalZone = null;
+            facingTarget = null;
+            huntSpawner = null;
             levelMotion = LevelMotion.Normal;
             useFishStartSequence = false;
             individualHunting = false;
@@ -85,6 +90,7 @@ namespace Anadromo.Mechanics
         /// </summary>
         public void NormalAtWaypoint(Transform destination)
         {
+            facingTarget = null;
             normalZone = destination != null ? destination.GetComponent<ZoneLimit>() : null;
             levelMotion = normalZone != null ? LevelMotion.Normal : LevelMotion.Legacy;
             useFishStartSequence = false;
@@ -350,6 +356,14 @@ namespace Anadromo.Mechanics
             if (levelMotion == LevelMotion.Hunt && (huntSpawner == null ||
                 (huntSpawner.IsInitialized && huntSpawner.AliveCount == 0)))
             {
+                var level = Anadromo.Logic.LevelManager.Instance;
+                if (level != null && level.ControlsSalmon(this) && level.currentPhase == Anadromo.Logic.GamePhase.KrillFeeding)
+                {
+                    var waitingZone = level.SalmonWaitingZone(this);
+                    level.LogSalmon($"{name}: comida propia agotada. NADO NORMAL en {waitingZone.name}; esperando al jugador sin caza Scary.", this);
+                    NormalAtWaypoint(waitingZone.transform);
+                    return;
+                }
                 if (postHuntDestination != null)
                     NormalAtWaypoint(postHuntDestination);
                 else

@@ -12,8 +12,8 @@ public static class LevelProgressionChecks
 
     static bool Tick(LevelProgression p, bool outside = false, bool empty = false,
         bool abysm = false, int meals = 0, bool cave = false, bool orcas = false,
-        bool timeout = false, float bloop = -19, bool done = false, bool scary = false)
-        => p.Tick(outside, empty, abysm, meals, 5, cave, orcas, timeout, bloop, -5, 12, done, scary);
+        bool timeout = false, float bloop = -19, bool done = false, bool insideFood = false)
+        => p.Tick(outside, empty, abysm, meals, 5, cave, orcas, timeout, bloop, -5, 12, done, insideFood);
 
     public static int Run()
     {
@@ -24,14 +24,15 @@ public static class LevelProgressionChecks
         Check(!p.Start(), "Start is idempotent");
         Check(!Tick(p, empty: true, abysm: true, meals: 99, cave: true, orcas: true), "Stay in initial zone");
         Check(Tick(p, outside: true) && p.Phase == GamePhase.KrillFeeding, "Exit begins normal hunt");
-        Check(!Tick(p, abysm: true, meals: 99), "Wait until depletion OR Scary activation");
-        Check(Tick(p, empty: true) && p.Phase == GamePhase.AbysmDescent, "Depletion begins Scary hunt");
+        Check(!Tick(p, abysm: true, meals: 99), "Abysm entry cannot bypass food zone visit");
+        Check(!Tick(p, empty: true), "Starting outside food zone is not an exit");
+        Check(!Tick(p, empty: true, insideFood: true), "Eating all krill inside still waits for exit");
+        Check(!Tick(p, empty: true, insideFood: true), "Staying inside does not unlock Scary hunt");
+        Check(Tick(p, empty: true) && p.Phase == GamePhase.AbysmDescent, "Food zone exit begins Scary hunt");
         Check(!Tick(p, meals: 5), "Five meals outside abysm do not launch orcas");
         Check(!Tick(p, abysm: true, meals: 4), "Four meals inside abysm do not launch orcas");
         Check(Tick(p, abysm: true, meals: 5) && p.Phase == GamePhase.OrcaAscent, "Five meals inside abysm launch orcas");
-        Check(!Tick(p, cave: true), "Early cave entry waits for all orcas");
-        Check(!Tick(p, orcas: true), "Leaving cave before orcas finish does not launch Bloop");
-        Check(Tick(p, cave: true, orcas: true) && p.Phase == GamePhase.BloopAwakening, "Conditions reevaluated while inside cave");
+        Check(Tick(p, cave: true) && p.Phase == GamePhase.BloopAwakening, "Cave entry launches Bloop");
         Check(!Tick(p, bloop: -6), "No tremor below first limit");
         Check(Tick(p, bloop: -5) && p.Phase == GamePhase.Trembling, "First limit starts tremor");
         Check(!Tick(p, bloop: 11), "Continue tremor between limits");
@@ -41,20 +42,21 @@ public static class LevelProgressionChecks
         Check(!Tick(p, true, true, true, 99, true, true, true, 99, true), "Final state is terminal");
 
         var q = new LevelProgression();
-        q.Start(); Tick(q, outside: true); Tick(q, empty: true); Tick(q, abysm: true, meals: 5);
+        q.Start(); Tick(q, outside: true, insideFood: true); Tick(q, empty: true); Tick(q, abysm: true, meals: 5);
         Check(Tick(q, timeout: true) && q.Phase == GamePhase.BloopAwakening, "Timeout alternative launches Bloop");
         Check(Tick(q, bloop: 20) && q.Phase == GamePhase.Rockfall, "Crossing both thresholds in one frame still collapses");
         var r = new LevelProgression();
-        Check(!Tick(r, scary: true), "Scary activation cannot bypass start button");
+        Check(!Tick(r, insideFood: true), "Food zone entry before start is ignored");
         r.Start();
-        Check(!Tick(r, scary: true), "Scary activation cannot bypass initial exit");
         Tick(r, outside: true);
-        Check(Tick(r, empty: false, scary: true) && r.Phase == GamePhase.AbysmDescent,
-            "Scary activation unlocks abysm with first krill remaining");
-        Check(!Tick(r, abysm: true, meals: 4, scary: true), "Scary activation keeps minimum meal requirement");
-        Check(Tick(r, abysm: true, meals: 5, scary: true) && r.Phase == GamePhase.OrcaAscent,
-            "Scary route reaches orcas without emptying first group");
-        Check(!Tick(r, empty: true, scary: true), "Later depletion does not restart abysm phase");
+        Check(!Tick(r, empty: true), "Pre-start visit cannot unlock hunt");
+        Check(!Tick(r, insideFood: true), "Entry alone cannot unlock hunt");
+        Check(!Tick(r) && r.Phase == GamePhase.KrillFeeding, "Exit must wait while first krill remain");
+        Check(!Tick(r, abysm: true, meals: 99) && r.Phase == GamePhase.KrillFeeding, "Meals and abysm cannot bypass remaining first krill");
+        Check(Tick(r, empty: true) && r.Phase == GamePhase.AbysmDescent, "Depletion after exit unlocks hunt");
+        Check(!Tick(r, abysm: true, meals: 4), "Minimum abysm meal requirement remains");
+        Check(Tick(r, abysm: true, meals: 5) && r.Phase == GamePhase.OrcaAscent, "Five abysm meals launch orcas");
+        Check(!Tick(r, empty: true, insideFood: true), "Reentry does not restart abysm phase");
         return checks;
     }
 
@@ -66,3 +68,4 @@ public static class LevelProgressionChecks
     }
 #endif
 }
+

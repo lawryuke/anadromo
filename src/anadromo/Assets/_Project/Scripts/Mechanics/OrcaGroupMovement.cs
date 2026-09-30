@@ -92,4 +92,10 @@ public sealed class OrcaGroupMovement : MonoBehaviour
             if (path == null || !path.gameObject.activeInHierarchy || path.transform.position.y < height) return false;
         return true;
     }
+
+    public void StopAscent()
+    {
+        // Cancelar los lanzamientos pendientes
+        launched = pod.Count;
+    }
 }

@@ -422,6 +422,78 @@ Transform:
   - {fileID: 768065909}
   m_Father: {fileID: 263232669}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &75970346
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 75970349}
+  - component: {fileID: 75970348}
+  - component: {fileID: 75970347}
+  m_Layer: 0
+  m_Name: Medusa_Right
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &75970347
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 75970346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbd85b9754cb6bc4b966d489f956026c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.ZoneLimit
+  center: {x: 0, y: 0, z: 0}
+  size: {x: 1, y: 1, z: 1}
+--- !u!114 &75970348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 75970346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5457e49cea13e8e4591c993c578737f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.LuzViajera
+  visualPrefab: {fileID: 5696213550233693452, guid: c6371f63c1f55b248b143c2ba86c1e08, type: 3}
+  waypoints:
+  - {fileID: 926070261}
+  - {fileID: 1088044930}
+  speed: 2
+  activationHitbox: {fileID: 0}
+  activationZone: {fileID: 1171905212}
+  playerTarget: {fileID: 0}
+  showDebug: 1
+  logRouteEvents: 1
+  debugCamera: {fileID: 0}
+--- !u!4 &75970349
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 75970346}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.000000029802322, z: -0, w: 1}
+  m_LocalPosition: {x: -16.305605, y: -0.9826, z: 17.400116}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 926070261}
+  - {fileID: 1088044930}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &88480905 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 74a42210367d8e84c9956abbd18b0305, type: 3}
@@ -1547,7 +1619,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.ZoneLimit
   center: {x: 0, y: 0, z: 0}
-  size: {x: 20, y: 40, z: 20}
+  size: {x: 30, y: 40, z: 20}
 --- !u!1001 &322406013
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2099,6 +2171,10 @@ MonoBehaviour:
   initialZone: {fileID: 1119295917}
   abysmZone: {fileID: 1171905212}
   caveZone: {fileID: 744617479}
+  firstFoodPlayerZone: {fileID: 2011165715}
+  swimNormalLeft: {fileID: 2147068344}
+  swimNormalRight: {fileID: 1195135612}
+  debugSalmonProgression: 1
   endingEffects: {fileID: 436716695}
   requiredAbysmMeals: 5
   countMealsFromStart: 0
@@ -2467,7 +2543,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1631879731339628706, guid: ffab090c1dfe4744eb1f8c9400b82452, type: 3}
   m_PrefabInstance: {fileID: 1479131524}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &562096653
+--- !u!1 &537830170
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2475,44 +2551,29 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 562096654}
-  - component: {fileID: 562096655}
+  - component: {fileID: 537830171}
   m_Layer: 0
-  m_Name: Trigger_Wakeup_Medusa
+  m_Name: Point0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &562096654
+--- !u!4 &537830171
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 562096653}
+  m_GameObject: {fileID: 537830170}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.9695609, z: -0, w: -0.2448502}
-  m_LocalPosition: {x: -0.134331, y: 2.3055496, z: -0.4898885}
+  m_LocalRotation: {x: -0, y: 0.99732125, z: -0, w: -0.073146075}
+  m_LocalPosition: {x: 41.02, y: 6.27645, z: -15}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1593104702}
+  m_Father: {fileID: 763535427}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &562096655
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 562096653}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0207d9b1819665b43ba2e4d1b385ed66, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.ZoneLimitMedusaWakeup
-  activationZone: {fileID: 1171905212}
-  medusaToWake: {fileID: 1208873274}
 --- !u!1 &578578981
 GameObject:
   m_ObjectHideFlags: 0
@@ -2808,37 +2869,6 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
---- !u!1 &633226338
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 633226339}
-  m_Layer: 0
-  m_Name: Point0
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &633226339
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 633226338}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.04, y: 8.72, z: 14.07}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1593104702}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &641884480
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2954,8 +2984,11 @@ GameObject:
   - component: {fileID: 652773264}
   - component: {fileID: 652773267}
   - component: {fileID: 652773266}
+  - component: {fileID: 652773268}
+  - component: {fileID: 652773270}
+  - component: {fileID: 652773269}
   m_Layer: 0
-  m_Name: Player
+  m_Name: VR_Player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3181,6 +3214,63 @@ CapsuleCollider:
   m_Height: 0.56
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &652773268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 652773255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d183ae189a87fd44eb99d4db83251731, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SimpleFlyCamera
+  movementSpeed: 10
+  fastMovementSpeed: 25
+  mouseSensitivity: 0.2
+--- !u!114 &652773269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 652773255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4eb8470bed69a5e48a11cd9883d2926c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Systems.PlayerEnergyController
+  criticalThreshold: 0.3
+  exhaustedSwimMultiplier: 0.55
+  exhaustedTurnMultiplier: 0.7
+  exhaustedCurrentMultiplier: 1.5
+  impactDuration: 0.35
+  recoveryDuration: 0.45
+  collisionDamage: 12
+  collisionSpeedThreshold: 1.5
+--- !u!114 &652773270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 652773255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1067dd669950f10ebf817c98f1dbc7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Systems.EnergySystem
+  maxEnergy: 100
+  startingEnergy: 50
+  passiveDecayRate: 1
+  sprintDecayMultiplier: 3
+  OnEnergyChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnEnergyDepleted:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &662708773
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3538,6 +3628,78 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.ZoneLimit
   center: {x: 0, y: 0, z: 0}
   size: {x: 3, y: 3, z: 6}
+--- !u!1 &763535426
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 763535427}
+  - component: {fileID: 763535428}
+  - component: {fileID: 763535429}
+  m_Layer: 0
+  m_Name: Medusa_Left
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &763535427
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 763535426}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.000000029802322, z: -0, w: 1}
+  m_LocalPosition: {x: -16.305605, y: -0.9826, z: 17.400116}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 537830171}
+  - {fileID: 2019808208}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &763535428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 763535426}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5457e49cea13e8e4591c993c578737f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.LuzViajera
+  visualPrefab: {fileID: 5696213550233693452, guid: c6371f63c1f55b248b143c2ba86c1e08, type: 3}
+  waypoints:
+  - {fileID: 537830171}
+  - {fileID: 2019808208}
+  speed: 2
+  activationHitbox: {fileID: 0}
+  activationZone: {fileID: 1171905212}
+  playerTarget: {fileID: 0}
+  showDebug: 1
+  logRouteEvents: 1
+  debugCamera: {fileID: 0}
+--- !u!114 &763535429
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 763535426}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbd85b9754cb6bc4b966d489f956026c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.ZoneLimit
+  center: {x: 0, y: 0, z: 0}
+  size: {x: 1, y: 1, z: 1}
 --- !u!1 &768065901
 GameObject:
   m_ObjectHideFlags: 0
@@ -4294,71 +4456,6 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!1 &898002506
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 898002507}
-  - component: {fileID: 898002509}
-  - component: {fileID: 898002508}
-  m_Layer: 2
-  m_Name: Coral_Zone
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &898002507
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 898002506}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 6.3983, y: 3.3344002, z: 13.9}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1223404665}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &898002508
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 898002506}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fbd85b9754cb6bc4b966d489f956026c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.ZoneLimit
-  center: {x: 0, y: 0, z: 0}
-  size: {x: 30, y: 30, z: 40}
---- !u!114 &898002509
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 898002506}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 10e634f090deb4e4ea597522acbaf980, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.TriggerHuntOnExit
-  targetTag: Player
-  triggerOnlyOnce: 1
-  swimGroups:
-  - {fileID: 1991546648}
-  - {fileID: 206300351}
-  - {fileID: 2147090877}
 --- !u!1 &902775675 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7841898233694566802, guid: ffab090c1dfe4744eb1f8c9400b82452, type: 3}
@@ -4452,6 +4549,37 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 99bcc6ae4fb632d48b2683ecf688ad6d, type: 3}
+--- !u!1 &926070260
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 926070261}
+  m_Layer: 0
+  m_Name: Point0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &926070261
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 926070260}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.99732125, z: -0, w: -0.073146075}
+  m_LocalPosition: {x: 23.07, y: 7.13, z: -23.04}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 75970349}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &939245465
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5173,6 +5301,37 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1904834012}
   m_SourcePrefab: {fileID: 100100000, guid: 0634b5066cd10ff4faf5cb29a40fc274, type: 3}
+--- !u!1 &1088044929
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1088044930}
+  m_Layer: 0
+  m_Name: Point1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1088044930
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1088044929}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.99732125, z: -0, w: -0.073146075}
+  m_LocalPosition: {x: 25.559, y: 3.75, z: 17.135}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 75970349}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1090766739
 GameObject:
   m_ObjectHideFlags: 0
@@ -5800,7 +5959,7 @@ MonoBehaviour:
   audioSource: {fileID: 1103379268}
   triggerTag: Player
   playOnlyOnce: 1
---- !u!1 &1208873273
+--- !u!1 &1195135607
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5808,185 +5967,44 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1208873275}
-  - component: {fileID: 1208873279}
-  - component: {fileID: 1208873278}
-  - component: {fileID: 1208873274}
-  - component: {fileID: 1208873277}
-  - component: {fileID: 1208873276}
+  - component: {fileID: 1195135608}
+  - component: {fileID: 1195135612}
   m_Layer: 0
-  m_Name: Medusa_Body
+  m_Name: Swim_Normal_Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1208873274
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1208873273}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5457e49cea13e8e4591c993c578737f7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.LuzViajera
-  waypoints:
-  - {fileID: 633226339}
-  - {fileID: 2064227255}
-  speed: 2.5
-  loop: 0
-  disappearOnFinish: 0
-  waitAbysmPhase: 1
-  showDebug: 0
-  logRouteEvents: 1
-  debugCamera: {fileID: 863163185}
---- !u!4 &1208873275
+--- !u!4 &1195135608
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1208873273}
+  m_GameObject: {fileID: 1195135607}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -7.85, y: 6.24, z: 6.16}
+  m_LocalRotation: {x: -0, y: -0.056614444, z: -0, w: 0.99839616}
+  m_LocalPosition: {x: 11.04, y: 6.4, z: 1.71}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1593104702}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1208873276
+  m_Father: {fileID: 2144689108}
+  m_LocalEulerAnglesHint: {x: 0, y: -6.491, z: 0}
+--- !u!114 &1195135612
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1208873273}
+  m_GameObject: {fileID: 1195135607}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6eca05fa0003d2c46be52dafbbc5e272, type: 3}
+  m_Script: {fileID: 11500000, guid: fbd85b9754cb6bc4b966d489f956026c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.WaterRevealLight
-  radius: 3
-  strength: 1
---- !u!114 &1208873277
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1208873273}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 380cce2b71f74ba19a90068c083ca634, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  glowShader: {fileID: 4800000, guid: d3e4568af90e4e1a867db0e637c78c42, type: 3}
-  waterSettings: {fileID: 2100000, guid: d128757a28f33494cb0f7eb53ce4a81e, type: 2}
-  bodyDiameter: 0.24
-  haloDiameter: 1.2
-  brightness: 1
-  haloOpacity: 0.367
-  pulseAmount: 0.106
-  pulseSpeed: 1
-  debugIgnoreDistanceFade: 0
---- !u!114 &1208873278
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1208873273}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
-  m_UsePipelineSettings: 1
-  m_AdditionalLightsShadowResolutionTier: 2
-  m_CustomShadowLayers: 0
-  m_LightCookieSize: {x: 1, y: 1}
-  m_LightCookieOffset: {x: 0, y: 0}
-  m_SoftShadowQuality: 0
-  m_RenderingLayersMask:
-    serializedVersion: 0
-    m_Bits: 1
-  m_ShadowRenderingLayersMask:
-    serializedVersion: 0
-    m_Bits: 1
-  m_Version: 4
-  m_LightLayerMask: 1
-  m_ShadowLayerMask: 1
-  m_RenderingLayers: 1
-  m_ShadowRenderingLayers: 1
---- !u!108 &1208873279
-Light:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1208873273}
-  m_Enabled: 1
-  serializedVersion: 12
-  m_Type: 2
-  m_Color: {r: 0.7028302, g: 0.9886093, b: 1, a: 1}
-  m_Intensity: 20
-  m_Range: 1.5
-  m_SpotAngle: 30
-  m_InnerSpotAngle: 21.80208
-  m_CookieSize2D: {x: 0.5, y: 0.5}
-  m_Shadows:
-    m_Type: 2
-    m_Resolution: -1
-    m_CustomResolution: -1
-    m_Strength: 1
-    m_Bias: 0.05
-    m_NormalBias: 0.4
-    m_NearPlane: 0.2
-    m_CullingMatrixOverride:
-      e00: 1
-      e01: 0
-      e02: 0
-      e03: 0
-      e10: 0
-      e11: 1
-      e12: 0
-      e13: 0
-      e20: 0
-      e21: 0
-      e22: 1
-      e23: 0
-      e30: 0
-      e31: 0
-      e32: 0
-      e33: 1
-    m_UseCullingMatrixOverride: 0
-  m_Cookie: {fileID: 0}
-  m_DrawHalo: 0
-  m_Flare: {fileID: 0}
-  m_RenderMode: 0
-  m_CullingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_RenderingLayerMask: 1
-  m_Lightmapping: 4
-  m_LightShadowCasterMode: 0
-  m_AreaSize: {x: 1, y: 1}
-  m_BounceIntensity: 1
-  m_ColorTemperature: 6570
-  m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 5.5e-43, y: 2.06e-43, z: 0, w: -3.6638294e-28}
-  m_UseBoundingSphereOverride: 0
-  m_UseViewFrustumForShadowCasterCull: 1
-  m_ForceVisible: 0
-  m_ShadowRadius: 0
-  m_ShadowAngle: 0
-  m_LightUnit: 1
-  m_LuxAtDistance: 1
-  m_EnableSpotReflector: 1
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.ZoneLimit
+  center: {x: 0, y: 0, z: 0}
+  size: {x: 3, y: 3, z: 5}
 --- !u!1 &1223404664
 GameObject:
   m_ObjectHideFlags: 0
@@ -6017,7 +6035,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1119295916}
-  - {fileID: 898002507}
   - {fileID: 1171905210}
   - {fileID: 1181022239}
   - {fileID: 744617478}
@@ -6026,6 +6043,7 @@ Transform:
   - {fileID: 2200000031}
   - {fileID: 2200000041}
   - {fileID: 320012347}
+  - {fileID: 2011165714}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1297350885
@@ -7310,41 +7328,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 341498220}
   m_SourcePrefab: {fileID: 100100000, guid: 99bcc6ae4fb632d48b2683ecf688ad6d, type: 3}
---- !u!1 &1593104701
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1593104702}
-  m_Layer: 0
-  m_Name: Medusa
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1593104702
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1593104701}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.9695609, z: -0, w: -0.2448502}
-  m_LocalPosition: {x: 22.23, y: -2.3055496, z: 13.54}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 562096654}
-  - {fileID: 1208873275}
-  - {fileID: 633226339}
-  - {fileID: 2064227255}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 188.389, z: 0}
 --- !u!1 &1620888493 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: e6507c77a30339f4fa697cefa90c95f1, type: 3}
@@ -8612,7 +8595,7 @@ MonoBehaviour:
   attemptsPerObject: 100
   generated: []
   lastGenerationMessage: 
---- !u!1 &2064227254
+--- !u!1 &2011165713
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8620,7 +8603,53 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2064227255}
+  - component: {fileID: 2011165714}
+  - component: {fileID: 2011165715}
+  m_Layer: 0
+  m_Name: First_Food_Player
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2011165714
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2011165713}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 5.51, y: 0.54, z: -4.95}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1223404665}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2011165715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2011165713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbd85b9754cb6bc4b966d489f956026c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.ZoneLimit
+  center: {x: 0, y: 0, z: 0}
+  size: {x: 15, y: 4, z: 10}
+--- !u!1 &2019808207
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2019808208}
   m_Layer: 0
   m_Name: Point1
   m_TagString: Untagged
@@ -8628,20 +8657,20 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2064227255
+--- !u!4 &2019808208
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2064227254}
+  m_GameObject: {fileID: 2019808207}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 17.201, y: 4.78, z: -10.633}
+  m_LocalRotation: {x: -0, y: 0.99732125, z: -0, w: -0.073146075}
+  m_LocalPosition: {x: 27.6, y: 4.12, z: 3.99}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1593104702}
+  m_Father: {fileID: 763535427}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2080851872
 GameObject:
@@ -9122,9 +9151,57 @@ Transform:
   - {fileID: 338222354}
   - {fileID: 722025791}
   - {fileID: 1570781053}
+  - {fileID: 2147068340}
+  - {fileID: 1195135608}
   - {fileID: 469095471}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2147068339
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2147068340}
+  - component: {fileID: 2147068344}
+  m_Layer: 0
+  m_Name: Swim_Normal_Left
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2147068340
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2147068339}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.056614444, z: -0, w: 0.99839616}
+  m_LocalPosition: {x: 4.64, y: 6.23, z: 1.82}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2144689108}
+  m_LocalEulerAnglesHint: {x: 0, y: -6.491, z: 0}
+--- !u!114 &2147068344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2147068339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbd85b9754cb6bc4b966d489f956026c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.ZoneLimit
+  center: {x: 0, y: 0, z: 0}
+  size: {x: 3, y: 3, z: 5}
 --- !u!1 &2147090875
 GameObject:
   m_ObjectHideFlags: 0
@@ -14791,4 +14868,5 @@ SceneRoots:
   - {fileID: 210964980}
   - {fileID: 263232669}
   - {fileID: 581070285}
-  - {fileID: 1593104702}
+  - {fileID: 763535427}
+  - {fileID: 75970349}

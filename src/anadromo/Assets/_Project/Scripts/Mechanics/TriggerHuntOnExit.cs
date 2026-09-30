@@ -60,6 +60,9 @@ namespace Anadromo.Mechanics
 
         private void ExecuteTrigger()
         {
+            var level = Anadromo.Logic.LevelManager.Instance;
+            if (level != null)
+                level.LogSalmon($"TRIGGER ANTIGUO {name}: TriggerHuntOnExit activado; jugador={(targetTransform != null ? targetTransform.name : "collider")}", this);
             hasTriggered = true;
             
             // Recorremos todos los grupos asignados
