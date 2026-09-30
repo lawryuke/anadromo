@@ -41,6 +41,7 @@ namespace Anadromo.Logic
         public bool showStartButton = true;
         public bool autoStart;
         public DiegeticSwimIntro swimIntro;
+        public Anadromo.UI.OpeningSlideshow openingSlideshow;
         public bool IsReady { get; private set; }
         public string ConfigurationError { get; private set; }
         readonly LevelProgression progress = new LevelProgression();
@@ -60,6 +61,7 @@ namespace Anadromo.Logic
             { enabled = false; return; }
             Instance = this;
             BindActivePlayer();
+            if (openingSlideshow != null) openingSlideshow.Initialize(playerCamera);
             currentPhase = GamePhase.WaitingForStart;
             playerEatenCount = 0;
             isPlayerInAbysm = false;
@@ -116,7 +118,7 @@ namespace Anadromo.Logic
             Cursor.visible = true;
             IsReady = true;
             if (swimIntro != null) swimIntro.Prepare(this, salmon);
-            if (autoStart || UsesVRPlayer) StartGame();
+            if (autoStart || (UsesVRPlayer && openingSlideshow == null)) StartGame();
         }
 
         void BindActivePlayer()
@@ -210,6 +212,8 @@ namespace Anadromo.Logic
 
         public void StartGame()
         {
+            if (openingSlideshow != null &&
+                (openingSlideshow.IsPlaying || openingSlideshow.CompletedFrame == Time.frameCount)) return;
             if (swimIntro != null && !swimIntro.Revealed) return;
             if (!IsReady || !progress.Start()) return;
             if (swimIntro == null) SetPlayerMovement(true);
@@ -224,6 +228,14 @@ namespace Anadromo.Logic
 
         void Update()
         {
+            if (autoStart && openingSlideshow != null && IsReady &&
+                currentPhase == GamePhase.WaitingForStart && !openingSlideshow.IsPlaying &&
+                openingSlideshow.CompletedFrame != Time.frameCount)
+                StartGame();
+            if (UsesVRPlayer && openingSlideshow != null && IsReady &&
+                currentPhase == GamePhase.WaitingForStart && !openingSlideshow.IsPlaying &&
+                openingSlideshow.CompletedFrame != Time.frameCount && openingSlideshow.ClickedThisFrame)
+                StartGame();
             if (!IsReady || progress.Phase == GamePhase.WaitingForStart) return;
             phaseTime += Time.deltaTime;
             playerEatenCount = playerFeeding.TotalConsumed;
@@ -335,6 +347,7 @@ namespace Anadromo.Logic
         void OnGUI()
         {
             if (!IsReady || progress.Phase != GamePhase.WaitingForStart || !showStartButton) return;
+            if (openingSlideshow != null && openingSlideshow.IsPlaying) return;
             if (swimIntro != null && !swimIntro.Revealed) return;
             if (GUI.Button(new Rect((Screen.width - 220) * .5f, (Screen.height - 64) * .5f, 220, 64), "Iniciar partida"))
                 StartGame();

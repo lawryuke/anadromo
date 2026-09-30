@@ -105,7 +105,7 @@ namespace Anadromo.Mechanics
             }
             curtain.alpha = 0;
             Revealed = true;
-            if (manager.autoStart || manager.UsesVRPlayer) manager.StartGame();
+            if (manager.autoStart || (manager.UsesVRPlayer && manager.openingSlideshow == null)) manager.StartGame();
         }
 
         public void Launch()

@@ -2054,6 +2054,7 @@ GameObject:
   - component: {fileID: 436716693}
   - component: {fileID: 436716695}
   - component: {fileID: 436716696}
+  - component: {fileID: 436716697}
   m_Layer: 0
   m_Name: LevelManager
   m_TagString: Untagged
@@ -2109,6 +2110,7 @@ MonoBehaviour:
   showStartButton: 1
   autoStart: 0
   swimIntro: {fileID: 436716696}
+  openingSlideshow: {fileID: 436716697}
 --- !u!4 &436716694
 Transform:
   m_ObjectHideFlags: 0
@@ -2166,6 +2168,33 @@ MonoBehaviour:
   revealDuration: 3
   warmupSeconds: 2
   coastDuration: 3
+--- !u!114 &436716697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 436716692}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7f6d0a1e94c4c5e8aef9d0b6c1a7320, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.UI.OpeningSlideshow
+  slides:
+  - {fileID: 21300000, guid: b7f6d0a1e94c4c5e8aef9d0b6c1a7311, type: 3}
+  - {fileID: 21300000, guid: b7f6d0a1e94c4c5e8aef9d0b6c1a7312, type: 3}
+  - {fileID: 21300000, guid: b7f6d0a1e94c4c5e8aef9d0b6c1a7313, type: 3}
+  - {fileID: 21300000, guid: b7f6d0a1e94c4c5e8aef9d0b6c1a7314, type: 3}
+  - {fileID: 21300000, guid: b7f6d0a1e94c4c5e8aef9d0b6c1a7315, type: 3}
+  - {fileID: 21300000, guid: b7f6d0a1e94c4c5e8aef9d0b6c1a7316, type: 3}
+  - {fileID: 21300000, guid: b7f6d0a1e94c4c5e8aef9d0b6c1a7317, type: 3}
+  music: {fileID: 8300000, guid: b7f6d0a1e94c4c5e8aef9d0b6c1a7322, type: 3}
+  backgroundMusic:
+  - {fileID: 1747641773}
+  - {fileID: 838342641}
+  secondsPerSlide: 6
+  fadeSeconds: 0.35
+  idleSeconds: 45
 --- !u!1 &448203257
 GameObject:
   m_ObjectHideFlags: 0

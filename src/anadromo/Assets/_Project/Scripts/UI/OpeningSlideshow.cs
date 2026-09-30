@@ -1,0 +1,186 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
+using UnityEngine.XR.Hands;
+
+namespace Anadromo.UI
+{
+    [DefaultExecutionOrder(-250)]
+    [AddComponentMenu("Anadromo/UI/Opening Slideshow")]
+    public sealed class OpeningSlideshow : MonoBehaviour
+    {
+        [SerializeField] Sprite[] slides = new Sprite[0];
+        [SerializeField] AudioClip music;
+        [SerializeField] AudioSource[] backgroundMusic = new AudioSource[0];
+        [SerializeField, Min(1f)] float secondsPerSlide = 6f;
+        [SerializeField, Min(0f)] float fadeSeconds = .35f;
+        [SerializeField, Min(1f)] float idleSeconds = 45f;
+
+        public bool IsPlaying { get; private set; }
+        public int CompletedFrame { get; private set; } = -1;
+        public bool ClickedThisFrame { get; private set; }
+
+        Canvas canvas;
+        Image slideImage;
+        AudioSource audioSource;
+        Camera viewer;
+        XRHandSubsystem hands;
+        readonly List<XRHandSubsystem> subsystems = new List<XRHandSubsystem>();
+        float slideTime;
+        float idleTime;
+        int slideIndex;
+        bool leftPinched, rightPinched;
+        Vector3 leftWrist, rightWrist;
+        bool leftWristValid, rightWristValid;
+
+        public void Initialize(Camera viewer)
+        {
+            this.viewer = viewer;
+            if (viewer == null || slides == null || slides.Length == 0 || slides[0] == null)
+            {
+                Debug.LogWarning("Opening Slideshow necesita una cámara y las imágenes de introducción.", this);
+                enabled = false;
+                return;
+            }
+
+            var root = new GameObject("Opening slideshow", typeof(RectTransform), typeof(Canvas));
+            root.transform.SetParent(transform, false);
+            canvas = root.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.worldCamera = viewer;
+            canvas.planeDistance = viewer.nearClipPlane + .04f;
+            canvas.sortingOrder = 32760;
+
+            var background = new GameObject("Black background", typeof(RectTransform), typeof(Image));
+            background.transform.SetParent(root.transform, false);
+            Stretch(background.GetComponent<RectTransform>());
+            var black = background.GetComponent<Image>();
+            black.color = Color.black;
+            black.raycastTarget = false;
+
+            var picture = new GameObject("Story image", typeof(RectTransform), typeof(Image));
+            picture.transform.SetParent(root.transform, false);
+            Stretch(picture.GetComponent<RectTransform>());
+            slideImage = picture.GetComponent<Image>();
+            slideImage.preserveAspect = true;
+            slideImage.raycastTarget = false;
+
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+            audioSource.loop = false;
+            audioSource.spatialBlend = 0;
+            audioSource.clip = music;
+            Play();
+        }
+
+        static void Stretch(RectTransform rect)
+        {
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+        }
+
+        void Play()
+        {
+            foreach (var source in backgroundMusic) if (source != null) source.Pause();
+            slideIndex = 0;
+            slideTime = 0;
+            IsPlaying = true;
+            canvas.gameObject.SetActive(true);
+            slideImage.sprite = slides[0];
+            slideImage.color = Color.white;
+            if (music != null) audioSource.Play();
+        }
+
+        void Finish()
+        {
+            IsPlaying = false;
+            CompletedFrame = Time.frameCount;
+            canvas.gameObject.SetActive(false);
+            audioSource.Stop();
+            foreach (var source in backgroundMusic) if (source != null) source.UnPause();
+            idleTime = 0;
+        }
+
+        void Update()
+        {
+            bool click = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
+            bool handActivity = false;
+            click |= SampleHand(true, ref leftPinched, ref leftWrist, ref leftWristValid, ref handActivity);
+            click |= SampleHand(false, ref rightPinched, ref rightWrist, ref rightWristValid, ref handActivity);
+            ClickedThisFrame = click;
+            bool activity = click || handActivity || OtherActivity();
+            if (IsPlaying)
+            {
+                if (click) { Finish(); return; }
+                slideTime += Time.unscaledDeltaTime;
+                if (slideTime >= secondsPerSlide)
+                {
+                    slideTime = 0;
+                    slideIndex++;
+                    if (slideIndex >= slides.Length) { Finish(); return; }
+                    slideImage.sprite = slides[slideIndex];
+                }
+                float fade = Mathf.Min(slideTime, secondsPerSlide - slideTime);
+                slideImage.color = new Color(1, 1, 1, fadeSeconds <= 0 ? 1 : Mathf.Clamp01(fade / fadeSeconds));
+                return;
+            }
+
+            var manager = Anadromo.Logic.LevelManager.Instance;
+            if (manager == null || !manager.IsReady || manager.currentPhase != Anadromo.Logic.GamePhase.WaitingForStart)
+                return;
+            idleTime = activity ? 0 : idleTime + Time.unscaledDeltaTime;
+            if (idleTime >= idleSeconds) Play();
+        }
+
+        bool SampleHand(bool isLeft, ref bool pinched, ref Vector3 wristPosition,
+            ref bool wristValid, ref bool activity)
+        {
+            if (hands == null || !hands.running)
+            {
+                hands = null;
+                SubsystemManager.GetSubsystems(subsystems);
+                foreach (var subsystem in subsystems)
+                    if (subsystem.running) { hands = subsystem; break; }
+            }
+            if (hands == null) { pinched = false; wristValid = false; return false; }
+            var hand = isLeft ? hands.leftHand : hands.rightHand;
+            if (!hand.isTracked ||
+                !hand.GetJoint(XRHandJointID.Wrist).TryGetPose(out Pose wrist) ||
+                !hand.GetJoint(XRHandJointID.ThumbTip).TryGetPose(out Pose thumb) ||
+                !hand.GetJoint(XRHandJointID.IndexTip).TryGetPose(out Pose indexTip) ||
+                !hand.GetJoint(XRHandJointID.MiddleProximal).TryGetPose(out Pose middle) ||
+                !hand.GetJoint(XRHandJointID.IndexProximal).TryGetPose(out Pose index) ||
+                !hand.GetJoint(XRHandJointID.LittleProximal).TryGetPose(out Pose little))
+            { pinched = false; wristValid = false; return false; }
+
+            if (wristValid && Vector3.Distance(wristPosition, wrist.position) > .015f) activity = true;
+            wristPosition = wrist.position;
+            wristValid = true;
+            Vector3 palm = Vector3.Cross(middle.position - wrist.position,
+                index.position - little.position) * (isLeft ? -1f : 1f);
+            Transform trackingSpace = viewer.transform.parent;
+            Vector3 forward = trackingSpace != null
+                ? trackingSpace.InverseTransformDirection(viewer.transform.forward)
+                : viewer.transform.forward;
+            bool facingForward = palm.sqrMagnitude > .000001f &&
+                Vector3.Dot(palm.normalized, forward) > .5f;
+            float distance = Vector3.Distance(thumb.position, indexTip.position);
+            bool nowPinched = facingForward && distance < (pinched ? .04f : .025f);
+            bool clicked = nowPinched && !pinched;
+            pinched = nowPinched;
+            activity |= nowPinched;
+            return clicked;
+        }
+
+        static bool OtherActivity()
+        {
+            if (Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame) return true;
+            if (Mouse.current != null && (Mouse.current.delta.ReadValue().sqrMagnitude > 1 ||
+                Mouse.current.rightButton.wasPressedThisFrame || Mouse.current.middleButton.wasPressedThisFrame)) return true;
+            return false;
+        }
+    }
+}
