@@ -95,6 +95,7 @@ public sealed class OrcaGroupMovement : MonoBehaviour
         if (pod.Count == 0) { Debug.LogError("El grupo no tiene orcas generadas.", this); return; }
         puntoFin.y = height;
         started = true;
+        Debug.Log($"<color=red>ORCAS: El grupo {gameObject.name} inició su ascenso. Orcas en el grupo: {pod.Count}</color>", this);
         duration = Mathf.Max(0, spawnSeconds);
         IsSpawning = duration > 0;
         elapsed = 0;

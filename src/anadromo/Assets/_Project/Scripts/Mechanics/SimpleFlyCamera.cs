@@ -55,6 +55,13 @@ public class SimpleFlyCamera : MonoBehaviour
             Cursor.visible = true;
         }
 
+        // Volver a bloquear el cursor al hacer click en el juego
+        if (mouse.leftButton.wasPressedThisFrame && Cursor.lockState == CursorLockMode.None && !menuLook)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
         // Camera Rotation (Siempre activa si el cursor está bloqueado)
         if (Cursor.lockState == CursorLockMode.Locked || (menuLook && mouse.rightButton.isPressed))
         {

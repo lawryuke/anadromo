@@ -295,6 +295,15 @@ namespace Anadromo.Logic
                 allAbove, phaseTime >= Mathf.Max(0, orcaSpawnDuration), bloopMovement.transform.position.y,
                 FirstLimit, SecondLimit, endingEffects.IsComplete,
                 insideFood);
+            if (debugSalmonProgression && currentPhase == GamePhase.AbysmDescent)
+            {
+                string stateAbysm = $"ABISMO - enZonaAbismo={isPlayerInAbysm}; comidasAbismo={meals}/{EffectiveRequiredMeals}";
+                if (stateAbysm != lastFeedingDebugState)
+                {
+                    Debug.Log($"<color=orange>{stateAbysm}</color>", this);
+                    lastFeedingDebugState = stateAbysm;
+                }
+            }
             if (debugSalmonProgression && (currentPhase == GamePhase.Init || currentPhase == GamePhase.KrillFeeding))
             {
                 int eaten = playerFeeding.ConsumedWithTag("Food_PlayerOnly_First");
@@ -340,6 +349,7 @@ namespace Anadromo.Logic
                     salmonesTop.Hunt(krillScaryRight.GetComponent<BoxObjectSpawner>(), "Food_Krill_Scary");
                     break;
                 case GamePhase.OrcaAscent:
+                    Debug.Log("<color=red>LEVEL MANAGER: Entrando a fase OrcaAscent. Iniciando ascenso de orcas...</color>", this);
                     foreach (var group in salmon) group.NormalAtWaypoint(group.postHuntDestination);
                     foreach (var group in orcaGroups) group.BeginAscent(topReference.position.y, orcaSpawnDuration);
                     break;
