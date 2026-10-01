@@ -121,7 +121,6 @@ namespace Anadromo.Mechanics
         {
             return activationZone != null && activationZone.Contains(position);
         }
-        }
 
         // Public for existing UnityEvents / ZoneLimitMedusaWakeup. Never restarts a finished route.
         public void BeginRoute()
