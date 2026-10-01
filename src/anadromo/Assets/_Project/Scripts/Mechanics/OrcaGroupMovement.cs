@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Anadromo.Mechanics;
 
-/// <summary>One vertical pass, using only spawned animals (never the reference model).</summary>
+/// <summary>Continuous vertical passes, recycling the spawned pod without growing it.</summary>
 public sealed class OrcaGroupMovement : MonoBehaviour
 {
     public Vector3 puntoInicio;
@@ -15,11 +15,19 @@ public sealed class OrcaGroupMovement : MonoBehaviour
     public float delayMaximo = 1.5f;
     public KeyCode teclaParaIniciar = KeyCode.Alpha4;
     public bool allowKeyboard = true;
-    readonly List<NaturalSwimPath> pod = new List<NaturalSwimPath>();
-    readonly List<float> launchTimes = new List<float>();
+    sealed class Member
+    {
+        public NaturalSwimPath path;
+        public Vector3 spawnPosition;
+        public Quaternion spawnRotation;
+        public float launchAt;
+        public bool swimming;
+    }
+    readonly List<Member> pod = new List<Member>();
     bool prepared, started;
-    float elapsed;
-    int launched;
+    float elapsed, duration;
+    public bool IsSpawning { get; private set; }
+    public int TotalLaunches { get; private set; }
     public int MemberCount => pod.Count;
 
     public void Prepare()
@@ -47,7 +55,7 @@ public sealed class OrcaGroupMovement : MonoBehaviour
         path.maxBankAngle = 0;
         path.orientToCourse = true;
         if (!child.GetComponent<OrcaSwimAnimation>()) child.gameObject.AddComponent<OrcaSwimAnimation>();
-        pod.Add(path);
+        pod.Add(new Member { path = path, spawnPosition = child.localPosition, spawnRotation = child.localRotation });
     }
 
     void Update()
@@ -55,47 +63,63 @@ public sealed class OrcaGroupMovement : MonoBehaviour
         if (allowKeyboard && Input.GetKeyDown(teclaParaIniciar)) IniciarGrupo();
         if (!started) return;
         elapsed += Time.deltaTime;
-        while (launched < pod.Count && elapsed >= launchTimes[launched])
+        if (elapsed >= duration) StopAscent();
+        foreach (var member in pod)
         {
-            var path = pod[launched++];
+            var path = member.path;
             if (path == null) continue;
+            if (member.swimming)
+            {
+                if (path.IsSwimming) continue;
+                member.swimming = false;
+                path.gameObject.SetActive(false);
+                member.launchAt = elapsed + Random.Range(Mathf.Max(.05f, delayMinimo), Mathf.Max(.05f, delayMinimo, delayMaximo));
+            }
+            if (!IsSpawning || elapsed < member.launchAt) continue;
+            path.transform.SetLocalPositionAndRotation(member.spawnPosition, member.spawnRotation);
+            path.gameObject.SetActive(true);
             Vector3 target = path.transform.position;
             target.y = Mathf.Max(target.y, puntoFin.y);
             path.Begin(target, Mathf.Max(.1f, velocidad) * Random.Range(1 - variacionVelocidad, 1 + variacionVelocidad));
+            member.swimming = true;
+            TotalLaunches++;
         }
     }
 
     public void IniciarGrupo() => BeginAscent(puntoFin.y);
 
-    public void BeginAscent(float height)
+    public void BeginAscent(float height, float spawnSeconds = float.PositiveInfinity)
     {
         if (started) return;
         Prepare();
         if (pod.Count == 0) { Debug.LogError("El grupo no tiene orcas generadas.", this); return; }
         puntoFin.y = height;
         started = true;
+        duration = Mathf.Max(0, spawnSeconds);
+        IsSpawning = duration > 0;
         elapsed = 0;
         float delay = 0;
         for (int i = 0; i < pod.Count; i++)
         {
             int j = Random.Range(i, pod.Count);
             var swap = pod[i]; pod[i] = pod[j]; pod[j] = swap;
-            launchTimes.Add(delay);
+            pod[i].launchAt = delay;
+            pod[i].path.gameObject.SetActive(false);
             delay += Random.Range(Mathf.Max(0, delayMinimo), Mathf.Max(delayMinimo, delayMaximo));
         }
     }
 
     public bool AllAbove(float height)
     {
-        if (!started || pod.Count == 0 || launched < pod.Count) return false;
-        foreach (var path in pod)
-            if (path == null || !path.gameObject.activeInHierarchy || path.transform.position.y < height) return false;
+        if (!started || IsSpawning || pod.Count == 0) return false;
+        foreach (var member in pod)
+            if (member.swimming && member.path && member.path.transform.position.y < height) return false;
         return true;
     }
 
     public void StopAscent()
     {
-        // Cancelar los lanzamientos pendientes
-        launched = pod.Count;
+        // Animals already ascending finish their pass; no pending or recycled launches.
+        IsSpawning = false;
     }
 }

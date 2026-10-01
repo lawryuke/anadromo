@@ -43,7 +43,7 @@ namespace Anadromo.Logic
                     if (inAbysm && meals >= requiredMeals) next = GamePhase.OrcaAscent;
                     break;
                 case GamePhase.OrcaAscent:
-                    if (inCave || timeout) next = GamePhase.BloopAwakening;
+                    if (timeout) next = GamePhase.BloopAwakening;
                     break;
                 case GamePhase.BloopAwakening:
                     if (bloopHeight >= secondLimit) next = GamePhase.Rockfall;

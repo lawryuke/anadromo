@@ -20,4 +20,3 @@ MonoBehaviour:
   jellyfishSpeed: 2
   jellyfishWaitsForAbysm: 1
   cameraPitchLimit: 85
-  bloopTimeout: 30

@@ -33,13 +33,14 @@ namespace Anadromo.Logic
         public LevelEndingEffects endingEffects;
         [Min(1)] public int requiredAbysmMeals = 5;
         public bool countMealsFromStart;
-        [Tooltip("0 desactiva el tiempo alternativo. Se cuenta desde la subida de orcas.")]
-        [Min(0)] public float bloopTimeout = 30;
+        [UnityEngine.Serialization.FormerlySerializedAs("bloopTimeout")]
+        [InspectorName("Duración de orcas (segundos)")]
+        [Tooltip("N: aparición continua desde el inicio de la fase de orcas. Al terminar sale el Bloop. 0 lo hace salir inmediatamente.")]
+        [Min(0)] public float orcaSpawnDuration = 30;
         public float firstLimitBloop = -5;
         public float secondLimitBloop = 12;
 
         int EffectiveRequiredMeals => GameSettings.I ? GameSettings.I.requiredAbysmMeals : requiredAbysmMeals;
-        float EffectiveBloopTimeout => GameSettings.I ? GameSettings.I.bloopTimeout : bloopTimeout;
         public int playerEatenCount;
         public bool isPlayerInAbysm;
         public bool showStartButton = true;
@@ -59,6 +60,7 @@ namespace Anadromo.Logic
         Anadromo.Systems.EnergySystem playerEnergy;
         bool bodyWasKinematic;
         bool sceneTransitionStarted;
+        public bool IsRestarting { get; private set; }
         string lastFeedingDebugState;
 
         public bool ControlsSalmon(SwimGroupController group)
@@ -264,6 +266,7 @@ namespace Anadromo.Logic
 
         void Update()
         {
+            if (IsRestarting) return;
             if (autoStart && openingSlideshow != null && IsReady &&
                 currentPhase == GamePhase.WaitingForStart && !openingSlideshow.IsPlaying &&
                 openingSlideshow.CompletedFrame != Time.frameCount)
@@ -287,7 +290,7 @@ namespace Anadromo.Logic
             bool changed = progress.Tick(!Contains(initialZone, point) || legacyLeft,
                 depleted,
                 isPlayerInAbysm, meals, EffectiveRequiredMeals, Contains(caveZone, point) || legacyCave,
-                allAbove, EffectiveBloopTimeout > 0 && phaseTime >= EffectiveBloopTimeout, bloopMovement.transform.position.y,
+                allAbove, phaseTime >= Mathf.Max(0, orcaSpawnDuration), bloopMovement.transform.position.y,
                 FirstLimit, SecondLimit, endingEffects.IsComplete,
                 insideFood);
             if (debugSalmonProgression && (currentPhase == GamePhase.Init || currentPhase == GamePhase.KrillFeeding))
@@ -336,7 +339,7 @@ namespace Anadromo.Logic
                     break;
                 case GamePhase.OrcaAscent:
                     foreach (var group in salmon) group.NormalAtWaypoint(group.postHuntDestination);
-                    foreach (var group in orcaGroups) group.BeginAscent(topReference.position.y);
+                    foreach (var group in orcaGroups) group.BeginAscent(topReference.position.y, orcaSpawnDuration);
                     break;
                 case GamePhase.BloopAwakening:
                     foreach (var group in orcaGroups) if (group != null) group.StopAscent(); bloopMovement.BeginAscent(topReference.position.y);
@@ -371,6 +374,30 @@ namespace Anadromo.Logic
             }
             SceneTransitionBridge.ExpectArrival();
             yield return SceneManager.LoadSceneAsync(destination, LoadSceneMode.Single);
+        }
+
+        public bool KillPlayerFromBloop(Collider contact)
+        {
+            if (!IsReady || IsRestarting || sceneTransitionStarted || !bloopMovement.HasStarted ||
+                contact == null || contact.isTrigger || contact.attachedRigidbody == null ||
+                contact.attachedRigidbody.transform != PlayerRoot) return false;
+            IsRestarting = true;
+            // Cancel the ending before it can send a dead player to esc2.
+            StopAllCoroutines();
+            foreach (var group in orcaGroups) if (group) group.StopAscent();
+            if (endingEffects) endingEffects.enabled = false;
+            if (swimIntro) swimIntro.enabled = false;
+            SetPlayerMovement(false);
+            playerFeeding.consumptionEnabled = false;
+            if (playerEnergy) playerEnergy.SetEnergy(0);
+            StartCoroutine(RestartAfterBloop());
+            return true;
+        }
+
+        IEnumerator RestartAfterBloop()
+        {
+            yield return new WaitForSecondsRealtime(.35f);
+            yield return SceneManager.LoadSceneAsync(gameObject.scene.path, LoadSceneMode.Single);
         }
 
         public static bool Contains(ZoneLimit zone, Vector3 worldPoint)

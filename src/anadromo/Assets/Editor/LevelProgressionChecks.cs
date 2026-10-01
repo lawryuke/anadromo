@@ -32,7 +32,8 @@ public static class LevelProgressionChecks
         Check(!Tick(p, meals: 5), "Five meals outside abysm do not launch orcas");
         Check(!Tick(p, abysm: true, meals: 4), "Four meals inside abysm do not launch orcas");
         Check(Tick(p, abysm: true, meals: 5) && p.Phase == GamePhase.OrcaAscent, "Five meals inside abysm launch orcas");
-        Check(Tick(p, cave: true) && p.Phase == GamePhase.BloopAwakening, "Cave entry launches Bloop");
+        Check(!Tick(p, cave: true, orcas: true) && p.Phase == GamePhase.OrcaAscent, "Cave and orca height cannot bypass the duration");
+        Check(Tick(p, timeout: true) && p.Phase == GamePhase.BloopAwakening, "Duration expires and launches Bloop");
         Check(!Tick(p, bloop: -6), "No tremor below first limit");
         Check(Tick(p, bloop: -5) && p.Phase == GamePhase.Trembling, "First limit starts tremor");
         Check(!Tick(p, bloop: 11), "Continue tremor between limits");
@@ -43,7 +44,7 @@ public static class LevelProgressionChecks
 
         var q = new LevelProgression();
         q.Start(); Tick(q, outside: true, insideFood: true); Tick(q, empty: true); Tick(q, abysm: true, meals: 5);
-        Check(Tick(q, timeout: true) && q.Phase == GamePhase.BloopAwakening, "Timeout alternative launches Bloop");
+        Check(Tick(q, timeout: true) && q.Phase == GamePhase.BloopAwakening, "Elapsed duration launches Bloop outside cave too");
         Check(Tick(q, bloop: 20) && q.Phase == GamePhase.Rockfall, "Crossing both thresholds in one frame still collapses");
         var r = new LevelProgression();
         Check(!Tick(r, insideFood: true), "Food zone entry before start is ignored");

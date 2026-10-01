@@ -66,8 +66,5 @@ namespace Anadromo.Config
         [Range(30f, 90f)]
         public float cameraPitchLimit = 85f;
 
-        [Tooltip("Tiempo de espera antes de activar el Bloop como alternativa (0 = desactivado).")]
-        [Min(0)]
-        public float bloopTimeout = 30f;
     }
 }
