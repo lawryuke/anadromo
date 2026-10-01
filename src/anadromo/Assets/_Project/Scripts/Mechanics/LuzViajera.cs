@@ -11,13 +11,13 @@ namespace Anadromo.Mechanics
         public GameObject visualPrefab;
 
         [Header("Recorrido (una sola vez)")]
+        [Tooltip("Si se marca, el visual aparece inmediatamente en el primer waypoint y espera allí.")]
+        public bool spawnOnStart = false;
         [Tooltip("Puntos en orden. Aparece en el primero y permanece visible en el ultimo.")]
         public Transform[] waypoints;
         [Min(0.01f)] public float speed = 2f;
 
         [Header("Entrada del jugador")]
-        [Tooltip("Hitbox opcional. Si se asigna, tiene prioridad sobre Activation Zone.")]
-        public Collider activationHitbox;
         [Tooltip("Zona fija que debe entrar el jugador para iniciar el viaje.")]
         public ZoneLimit activationZone;
         [Tooltip("Opcional. Sin asignar se usa la cabeza del jugador activo del nivel.")]
@@ -66,11 +66,12 @@ namespace Anadromo.Mechanics
         void Start()
         {
             if (!PrepareRoute()) return;
+            if (spawnOnStart) SetVisible(true);
             if (state != RouteState.Waiting) return;
-            if (activationHitbox == null && activationZone == null)
-                Debug.LogWarning($"[MedusaDebug] {name}: asigna Activation Hitbox o Activation Zone. Esperando activacion externa.", this);
+            if (activationZone == null)
+                Debug.LogWarning($"[MedusaDebug] {name}: asigna Activation Zone. Esperando activacion externa.", this);
             else
-                Log($"ESPERANDO jugador en {(activationHitbox != null ? activationHitbox.name : activationZone.name)}; inicio={routePositions[0]:F3}; puntos={routePositions.Length}");
+                Log($"ESPERANDO jugador en {activationZone.name}; inicio={routePositions[0]:F3}; puntos={routePositions.Length}");
         }
 
         bool PrepareRoute()
@@ -118,10 +119,8 @@ namespace Anadromo.Mechanics
 
         bool PlayerInside(Vector3 position)
         {
-            if (activationHitbox != null)
-                return activationHitbox.enabled && activationHitbox.gameObject.activeInHierarchy &&
-                    (activationHitbox.ClosestPoint(position) - position).sqrMagnitude < 0.000001f;
             return activationZone != null && activationZone.Contains(position);
+        }
         }
 
         // Public for existing UnityEvents / ZoneLimitMedusaWakeup. Never restarts a finished route.
@@ -141,7 +140,7 @@ namespace Anadromo.Mechanics
             if (state == RouteState.Invalid || state == RouteState.Finished || !PrepareRoute()) return;
             if (state == RouteState.Waiting)
             {
-                if (activationHitbox == null && activationZone == null) return;
+                if (activationZone == null) return;
                 if (!TryPlayerPosition(out Vector3 position))
                 {
                     if (!warnedMissingPlayer)
