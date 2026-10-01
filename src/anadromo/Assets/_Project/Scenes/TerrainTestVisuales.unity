@@ -5502,12 +5502,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.MapBoundaryLimiter
   mapLimit: {fileID: 1147630711}
-  referencePoint: {fileID: 992201942}
+  referencePoint: {fileID: 0}
   limitSound: {fileID: 8300000, guid: b397e92e67fcadf4683393ec03f6afcd, type: 3}
   soundVolume: 1
   soundDistance: 10
-  playerCamera: {fileID: 590722188}
-  rigToRotate: {fileID: 590722188}
+  playerCamera: {fileID: 863163181}
+  rigToRotate: {fileID: 652773262}
+  returnDistance: 3
+  returnSpeed: 3
+  interiorMargin: 0.75
+  warningDuration: 0.35
+  recoveryDuration: 0.4
 --- !u!4 &1096775475
 Transform:
   m_ObjectHideFlags: 0
