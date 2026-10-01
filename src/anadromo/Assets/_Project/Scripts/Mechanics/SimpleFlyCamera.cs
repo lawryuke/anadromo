@@ -17,6 +17,7 @@ public class SimpleFlyCamera : MonoBehaviour
     private float yaw = 0f;
     private Rigidbody rb;
     private Anadromo.Systems.PlayerEnergyController energy;
+    private Anadromo.Mechanics.PlayerOrcaImpact orcaImpact;
 
     private void Start()
     {
@@ -86,6 +87,8 @@ public class SimpleFlyCamera : MonoBehaviour
         direction.Normalize();
         if(energy) energy.Energy.SetSprinting(keyboard.leftShiftKey.isPressed && direction.sqrMagnitude>0);
         Vector3 current=externalVelocity*(energy ? energy.CurrentMultiplier : 1f);
+        if (!orcaImpact) TryGetComponent(out orcaImpact);
+        if (orcaImpact) current += orcaImpact.PushVelocity;
 
         if (rb != null && !rb.isKinematic)
         {

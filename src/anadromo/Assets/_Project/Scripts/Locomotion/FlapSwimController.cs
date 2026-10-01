@@ -31,6 +31,7 @@ namespace Anadromo.Locomotion
         private Rigidbody rb;
         private Anadromo.Systems.PlayerEnergyController vital;
         private Anadromo.AI.PiranhaPlayerTarget target;
+        private Anadromo.Mechanics.PlayerOrcaImpact orcaImpact;
         float SwimMultiplier => (vital ? vital.SwimMultiplier : 1f) * (target ? target.SpeedMultiplier : 1f);
         float TurnMultiplier => vital ? vital.TurnMultiplier : 1f;
         [Header("Controles adicionales Quest")]
@@ -171,7 +172,7 @@ namespace Anadromo.Locomotion
             Vector3 deltaVelocity = salmonBody.forward *
                 (intensity * settings.forwardForceMultiplier * SwimMultiplier / rb.mass);
             Vector3 cappedVelocity = Vector3.ClampMagnitude(
-                rb.linearVelocity + deltaVelocity, settings.maxLinearVelocity * SwimMultiplier);
+                rb.linearVelocity + deltaVelocity, MaximumSwimSpeed());
             rb.AddForce((cappedVelocity - rb.linearVelocity) * rb.mass, ForceMode.Impulse);
         }
 
@@ -248,10 +249,16 @@ namespace Anadromo.Locomotion
             salmonBody.localRotation = Quaternion.Euler(newPitch, newYaw, 0f);
         }
 
+        private float MaximumSwimSpeed()
+        {
+            if (!orcaImpact) TryGetComponent(out orcaImpact);
+            return settings.maxLinearVelocity * SwimMultiplier + (orcaImpact ? orcaImpact.PushVelocity.magnitude : 0);
+        }
+
         private void LimitVelocities()
         {
             // Limitar velocidad lineal
-            float maxSpeed = settings.maxLinearVelocity * SwimMultiplier;
+            float maxSpeed = MaximumSwimSpeed();
             if (rb.linearVelocity.sqrMagnitude > maxSpeed * maxSpeed)
             {
                 rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;

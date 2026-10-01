@@ -11,6 +11,7 @@ namespace Anadromo.Systems
         PlayerEnergyController player;
         Anadromo.Locomotion.ComfortVignette comfort;
         Anadromo.Mechanics.LampreyShakeController struggle;
+        Anadromo.Mechanics.PlayerOrcaImpact orcaImpact;
         Volume volume;
         VolumeProfile profile;
         Vignette vignette;
@@ -59,6 +60,12 @@ namespace Anadromo.Systems
             vignette.intensity.Override(Mathf.Max(comfort ? comfort.Intensity : 0f,
                 Mathf.Clamp(exhaustion*maximumVignette+impact*.18f+recovery*.08f,0,.65f)));
             color.saturation.Override(-100*exhaustion);
+            if (!orcaImpact) TryGetComponent(out orcaImpact);
+            if (orcaImpact && orcaImpact.Strength > 0)
+            {
+                vignette.color.Override(Color.Lerp(shade, Color.black, Mathf.Clamp01(orcaImpact.Strength * 4)));
+                vignette.intensity.Override(Mathf.Max(vignette.intensity.value, .5f * orcaImpact.Strength));
+            }
         }
         protected virtual void OnDisable() { if(volume) volume.enabled=false; }
         protected virtual void OnEnable() { if(volume) volume.enabled=true; }

@@ -2912,6 +2912,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5729645120034633812}
   - component: {fileID: 8114221691778697769}
+  - component: {fileID: 114008301}
   m_Layer: 0
   m_Name: Orca
   m_TagString: Untagged
@@ -2939,6 +2940,22 @@ Transform:
   - {fileID: 7189678869446298532}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114008301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8789392246485274957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83ae3419b24b4a74a35406a3c70819ea, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.OrcaPlayerPush
+  pushSpeed: 3
+  effectSeconds: 2
+  pushClip: {fileID: 8300000, guid: f3e097c16ccdb9f4caa37e34bb727f04, type: 3}
+  volume: 1
 --- !u!114 &8114221691778697769
 MonoBehaviour:
   m_ObjectHideFlags: 0

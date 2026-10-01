@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3300001}
   - component: {fileID: 2300001}
   - component: {fileID: 11400001}
+  - component: {fileID: 114008301}
   - component: {fileID: 4029711797827320495}
   m_Layer: 0
   m_Name: Orca
@@ -105,6 +106,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a783da9eb606a887e22ca09606648e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OrcaSwimAnimation
+--- !u!114 &114008301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83ae3419b24b4a74a35406a3c70819ea, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.OrcaPlayerPush
+  pushSpeed: 3
+  effectSeconds: 2
+  pushClip: {fileID: 8300000, guid: f3e097c16ccdb9f4caa37e34bb727f04, type: 3}
+  volume: 1
 --- !u!82 &4029711797827320495
 AudioSource:
   m_ObjectHideFlags: 0
