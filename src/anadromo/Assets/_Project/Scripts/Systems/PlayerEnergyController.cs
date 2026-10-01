@@ -41,7 +41,7 @@ namespace Anadromo.Systems
         }
         public void TakeDamage(float amount)
         {
-            if(!HasEnergy || amount<=0) return;
+            if(Energy.ConsumptionPaused || !HasEnergy || amount<=0) return;
             impactTimer=impactDuration; recoveryTimer=0;
             Energy.ConsumeEnergy(amount);
         }

@@ -21,6 +21,13 @@ namespace Anadromo.Systems
         public float CurrentEnergy => currentEnergy;
         public float MaxEnergy => maxEnergy;
         public float StartingEnergy => startingEnergy;
+        public bool ConsumptionPaused { get; private set; }
+
+        public void SetConsumptionPaused(bool paused)
+        {
+            ConsumptionPaused = paused;
+            if (paused) isSprinting = false;
+        }
 
         private void Awake()
         {
@@ -30,6 +37,7 @@ namespace Anadromo.Systems
 
         private void Update()
         {
+            if (ConsumptionPaused) return;
             float decay = passiveDecayRate * (isSprinting ? sprintDecayMultiplier : 1f) * Time.deltaTime;
             ConsumeEnergy(decay);
         }
@@ -49,7 +57,7 @@ namespace Anadromo.Systems
 
         public void ConsumeEnergy(float amount)
         {
-            if (currentEnergy <= 0f || amount <= 0f) return;
+            if (ConsumptionPaused || currentEnergy <= 0f || amount <= 0f) return;
             SetEnergy(currentEnergy-amount);
         }
 

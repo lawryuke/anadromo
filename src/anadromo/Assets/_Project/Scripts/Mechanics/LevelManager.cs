@@ -56,6 +56,7 @@ namespace Anadromo.Logic
         int abysmMealBaseline;
         bool legacyLeft, legacyCave;
         Rigidbody playerBody;
+        Anadromo.Systems.EnergySystem playerEnergy;
         bool bodyWasKinematic;
         bool sceneTransitionStarted;
         string lastFeedingDebugState;
@@ -77,6 +78,10 @@ namespace Anadromo.Logic
             { enabled = false; return; }
             Instance = this;
             BindActivePlayer();
+            if (PlayerRoot != null)
+                playerEnergy = PlayerRoot.GetComponent<Anadromo.Systems.EnergySystem>();
+            // Story, idle menu and scripted swimming must not exhaust the player.
+            if (playerEnergy != null) playerEnergy.SetConsumptionPaused(true);
             if (openingSlideshow != null) openingSlideshow.Initialize(playerCamera);
             currentPhase = GamePhase.WaitingForStart;
             playerEatenCount = 0;
@@ -386,6 +391,8 @@ namespace Anadromo.Logic
 
         void SetPlayerMovement(bool active)
         {
+            // Resume energy only when handing over control, including scenes without an intro.
+            if (playerEnergy != null) playerEnergy.SetConsumptionPaused(!active);
             foreach (var component in movementControls) if (component != null) component.enabled = active;
             if (playerBody == null) return;
             if (!playerBody.isKinematic) { playerBody.linearVelocity = Vector3.zero; playerBody.angularVelocity = Vector3.zero; }

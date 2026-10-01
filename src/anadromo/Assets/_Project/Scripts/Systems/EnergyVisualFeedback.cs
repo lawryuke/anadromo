@@ -48,7 +48,7 @@ namespace Anadromo.Systems
             // color amarillo enfermizo, naranja para comer
             // var shade = Color.Lerp(new Color(0.36f, 0.41f, 0.06f), new Color(1, 0.62f, 0.16f), recovery);
             shade =Color.Lerp(shade,Color.white,impact);
-            if ((struggle && struggle.IsStruggling) || player.Current <= 0f)
+            if (struggle && struggle.IsStruggling)
             {
                 vignette.intensity.Override(comfort ? comfort.Intensity : 0f);
                 vignette.color.Override(new Color(.015f, .035f, .07f));
