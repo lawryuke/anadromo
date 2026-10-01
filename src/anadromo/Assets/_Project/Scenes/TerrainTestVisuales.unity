@@ -2174,6 +2174,8 @@ MonoBehaviour:
   secondsPerSlide: 6
   fadeSeconds: 0.35
   idleSeconds: 45
+  screenDistance: 3
+  screenWidth: 3.2
 --- !u!1 &448203257
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using UnityEngine.XR;
 using UnityEngine.XR.Hands;
 
 namespace Anadromo.UI
@@ -16,6 +17,10 @@ namespace Anadromo.UI
         [SerializeField, Min(1f)] float secondsPerSlide = 6f;
         [SerializeField, Min(0f)] float fadeSeconds = .35f;
         [SerializeField, Min(1f)] float idleSeconds = 45f;
+
+        [Header("Pantalla de introduccion")]
+        [SerializeField, Min(1f)] float screenDistance = 3f;
+        [SerializeField, Min(.5f)] float screenWidth = 3.2f;
 
         public bool IsPlaying { get; private set; }
         public int CompletedFrame { get; private set; } = -1;
@@ -34,6 +39,8 @@ namespace Anadromo.UI
         Vector3 leftWrist, rightWrist;
         bool leftWristValid, rightWristValid;
         bool presentationEnabled;
+        bool placementPending;
+        bool waitingForHeadTracking;
 
         public void Initialize(Camera viewer, bool enableIntro = true)
         {
@@ -49,15 +56,22 @@ namespace Anadromo.UI
             }
 
             var root = new GameObject("Opening slideshow", typeof(RectTransform), typeof(Canvas));
-            root.transform.SetParent(transform, false);
+            // A single physical screen shared by both eyes, independent of the moving rig.
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(root, gameObject.scene);
             canvas = root.GetComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.renderMode = RenderMode.WorldSpace;
             canvas.worldCamera = viewer;
-            canvas.planeDistance = viewer.nearClipPlane + .04f;
             canvas.sortingOrder = 32760;
+            var screenRect = (RectTransform)root.transform;
+            screenRect.sizeDelta = new Vector2(1600, 900);
+            screenRect.localScale = Vector3.one * (Mathf.Max(.5f, screenWidth) / 1600f);
+            // Use a layer that the selected player camera actually renders.
+            for (int layer = 0; layer < 32; layer++)
+                if ((viewer.cullingMask & (1 << layer)) != 0) { root.layer = layer; break; }
 
             var background = new GameObject("Black background", typeof(RectTransform), typeof(Image));
             background.transform.SetParent(root.transform, false);
+            background.layer = root.layer;
             Stretch(background.GetComponent<RectTransform>());
             var black = background.GetComponent<Image>();
             black.color = Color.black;
@@ -65,6 +79,7 @@ namespace Anadromo.UI
 
             var picture = new GameObject("Story image", typeof(RectTransform), typeof(Image));
             picture.transform.SetParent(root.transform, false);
+            picture.layer = root.layer;
             Stretch(picture.GetComponent<RectTransform>());
             slideImage = picture.GetComponent<Image>();
             slideImage.preserveAspect = true;
@@ -92,10 +107,44 @@ namespace Anadromo.UI
             slideIndex = 0;
             slideTime = 0;
             IsPlaying = true;
+            // Defer placement until after the camera's first tracked pose, also on idle replay.
+            placementPending = true;
+            waitingForHeadTracking = true;
+            canvas.enabled = false;
             canvas.gameObject.SetActive(true);
             slideImage.sprite = slides[0];
             slideImage.color = Color.white;
             if (music != null) audioSource.Play();
+        }
+
+        void LateUpdate()
+        {
+            if (!IsPlaying || !canvas || !viewer) return;
+            bool tracked = false;
+            if (waitingForHeadTracking)
+            {
+                var head = InputDevices.GetDeviceAtXRNode(XRNode.Head);
+                tracked = head.isValid && head.TryGetFeatureValue(UnityEngine.XR.CommonUsages.isTracked, out bool isTracked) && isTracked;
+            }
+            if (!placementPending && !tracked) return;
+
+            // Keep the screen upright: head pitch and roll must not tilt the presentation.
+            Vector3 forward = Vector3.ProjectOnPlane(viewer.transform.forward, Vector3.up);
+            if (forward.sqrMagnitude < .001f)
+                forward = Vector3.ProjectOnPlane(viewer.transform.up, Vector3.up);
+            forward.Normalize();
+            float distance = Mathf.Max(1f, screenDistance, viewer.nearClipPlane + .5f);
+            canvas.transform.SetPositionAndRotation(viewer.transform.position + forward * distance,
+                Quaternion.LookRotation(forward, Vector3.up));
+            canvas.enabled = true;
+            placementPending = false;
+            if (tracked) waitingForHeadTracking = false;
+            // No following or billboarding after placement: users can look away naturally.
+        }
+
+        void OnDestroy()
+        {
+            if (canvas) Destroy(canvas.gameObject);
         }
 
         void Finish()
