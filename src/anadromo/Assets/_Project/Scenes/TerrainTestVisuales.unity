@@ -472,7 +472,6 @@ MonoBehaviour:
   - {fileID: 926070261}
   - {fileID: 1088044930}
   speed: 2
-  activationHitbox: {fileID: 0}
   activationZone: {fileID: 1171905212}
   playerTarget: {fileID: 0}
   showDebug: 1
@@ -3700,7 +3699,6 @@ MonoBehaviour:
   - {fileID: 537830171}
   - {fileID: 2019808208}
   speed: 2
-  activationHitbox: {fileID: 0}
   activationZone: {fileID: 1171905212}
   playerTarget: {fileID: 0}
   showDebug: 1
@@ -5346,7 +5344,7 @@ Transform:
   m_GameObject: {fileID: 1088044929}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.99732125, z: -0, w: -0.073146075}
-  m_LocalPosition: {x: 2.6333945, y: -0.90260005, z: 19.425117}
+  m_LocalPosition: {x: 2.55, y: -0.90260005, z: 18.83}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5828,7 +5826,7 @@ Transform:
   m_GameObject: {fileID: 1171905209}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 8.47, y: -0.49, z: 12.97}
+  m_LocalPosition: {x: 7.83, y: -0.49, z: 16.78}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5890,7 +5888,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1171905209}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 585b00a4bb292e74180d6258802bc37b, type: 3}
   m_Name: 
@@ -5909,7 +5907,6 @@ GameObject:
   - component: {fileID: 1181022239}
   - component: {fileID: 1181022240}
   - component: {fileID: 1181022241}
-  - component: {fileID: 1181022242}
   m_Layer: 0
   m_Name: Swim_Salmones_Abysm
   m_TagString: Untagged
@@ -5964,21 +5961,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.ZoneLimit
   center: {x: 0, y: 0, z: 0}
   size: {x: 14, y: 5, z: 18}
---- !u!114 &1181022242
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1181022238}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 585b00a4bb292e74180d6258802bc37b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AudioPlayTrigger
-  audioSource: {fileID: 1103379268}
-  triggerTag: Player
-  playOnlyOnce: 1
 --- !u!1 &1195135607
 GameObject:
   m_ObjectHideFlags: 0

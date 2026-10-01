@@ -33,8 +33,8 @@ Material:
     - _OpenWaterDistance: 60
     - _ShallowY: 7
     - _SurfaceY: 10
-    - _VisibilityEnd: 100
-    - _VisibilityStart: 100
+    - _VisibilityEnd: 11
+    - _VisibilityStart: 8
     m_Colors:
     - _DeepColor: {r: 0.04774832, g: 0.30522984, b: 0.3490566, a: 1}
     - _ShallowColor: {r: 0.053221796, g: 0.42445946, b: 0.49056602, a: 1}

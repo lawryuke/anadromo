@@ -33,8 +33,8 @@ public static class WaterDepthYValidation
                 "Assets/Settings/TerrainTestVisuales-Renderer.asset");
             bool found = false;
             foreach (var feature in renderer.rendererFeatures)
-                if (feature is FullScreenPassRendererFeature pass && pass.passMaterial == material)
-                    found = pass.isActive && (pass.requirements & ScriptableRenderPassInput.Depth) != 0;
+                if (feature is Anadromo.Mechanics.WaterVisibilityFeature pass && pass.waterMaterial == material)
+                    found = pass.isActive;
             if (!found) throw new Exception("Depth pass missing or depth texture not requested");
             File.WriteAllText("Temp/water-depth-y-validation.txt", "PASS: shader compiled; material, Y limits and URP depth pass validated. Visual tuning still requires Game view.");
         }

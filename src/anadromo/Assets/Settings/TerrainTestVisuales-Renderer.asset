@@ -115,14 +115,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b00045f12942b46c698459096c89274e, type: 3}
-  m_Name: Water depth by world Y
-  m_EditorClassIdentifier: 
+  m_Script: {fileID: 11500000, guid: d9c27c13d9f66c147ae78d6407cb799c, type: 3}
+  m_Name: Water visibility and local lights
+  m_EditorClassIdentifier: Assembly-CSharp::Anadromo.Mechanics.WaterVisibilityFeature
   m_Active: 1
-  injectionPoint: 450
-  fetchColorBuffer: 1
-  requirements: 1
-  passMaterial: {fileID: 2100000, guid: ee653ce812e34f619ef2a87d4c915103, type: 2}
-  passIndex: 0
-  bindDepthStencilAttachment: 0
-  m_Version: 1
+  waterMaterial: {fileID: 2100000, guid: ee653ce812e34f619ef2a87d4c915103, type: 2}
