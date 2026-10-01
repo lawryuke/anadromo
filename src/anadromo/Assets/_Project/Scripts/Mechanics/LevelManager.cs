@@ -40,7 +40,7 @@ namespace Anadromo.Logic
         public float firstLimitBloop = -5;
         public float secondLimitBloop = 12;
 
-        int EffectiveRequiredMeals => GameSettings.I ? GameSettings.I.requiredAbysmMeals : requiredAbysmMeals;
+        int EffectiveRequiredMeals => requiredAbysmMeals;
         public int playerEatenCount;
         public bool isPlayerInAbysm;
         public bool showStartButton = true;
