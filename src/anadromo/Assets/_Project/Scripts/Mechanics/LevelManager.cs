@@ -260,7 +260,7 @@ namespace Anadromo.Logic
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
             playerFeeding.consumptionEnabled = swimIntro == null;
-            playerFeeding.edibleTags = new[] { "Food_PlayerOnly_First" };
+            playerFeeding.edibleTags = new[] { "Food_PlayerOnly_First", "Food_PlayerOnly", "Food_Krill", "Food_Krill_Scary" };
             if (swimIntro != null) swimIntro.Launch();
             else foreach (var group in salmon) group.HoldFacing(targetMid);
             EnterPhase();
@@ -334,7 +334,7 @@ namespace Anadromo.Logic
                     abysmMealBaseline = playerFeeding.ConsumedWithTag("Food_PlayerOnly");
                     // Leftover first-group krill remain edible, but only Scary meals
                     // count toward the abysm requirement when countMealsFromStart is false.
-                    playerFeeding.edibleTags = new[] { "Food_PlayerOnly_First", "Food_PlayerOnly" };
+                    playerFeeding.edibleTags = new[] { "Food_PlayerOnly_First", "Food_PlayerOnly", "Food_Krill", "Food_Krill_Scary" };
                     salmonesLeft.Hunt(krillScaryLeft.GetComponent<BoxObjectSpawner>(), "Food_Krill_Scary");
                     salmonesRight.Hunt(krillScaryRight.GetComponent<BoxObjectSpawner>(), "Food_Krill_Scary");
                     salmonesTop.Hunt(krillScaryRight.GetComponent<BoxObjectSpawner>(), "Food_Krill_Scary");
