@@ -37,7 +37,7 @@ namespace Anadromo.Logic
                     if (outsideInitial) next = GamePhase.KrillFeeding;
                     break;
                 case GamePhase.KrillFeeding:
-                    if (firstKrillDepleted && exitedFirstFoodZone) next = GamePhase.AbysmDescent;
+                    if (exitedFirstFoodZone) next = GamePhase.AbysmDescent;
                     break;
                 case GamePhase.AbysmDescent:
                     if (inAbysm && meals >= requiredMeals) next = GamePhase.OrcaAscent;

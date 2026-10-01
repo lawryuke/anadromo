@@ -33,10 +33,14 @@ namespace Anadromo.UI
         bool leftPinched, rightPinched;
         Vector3 leftWrist, rightWrist;
         bool leftWristValid, rightWristValid;
+        bool presentationEnabled;
 
-        public void Initialize(Camera viewer)
+        public void Initialize(Camera viewer, bool enableIntro = true)
         {
             this.viewer = viewer;
+            presentationEnabled = enableIntro;
+            // Keep sampling the start gesture in VR without creating or playing the story.
+            if (!presentationEnabled) return;
             if (viewer == null || slides == null || slides.Length == 0 || slides[0] == null)
             {
                 Debug.LogWarning("Opening Slideshow necesita una cámara y las imágenes de introducción.", this);
@@ -129,7 +133,7 @@ namespace Anadromo.UI
             }
 
             var manager = Anadromo.Logic.LevelManager.Instance;
-            if (manager == null || !manager.IsReady || manager.currentPhase != Anadromo.Logic.GamePhase.WaitingForStart)
+            if (!presentationEnabled || manager == null || !manager.IsReady || manager.currentPhase != Anadromo.Logic.GamePhase.WaitingForStart)
                 return;
             idleTime = activity ? 0 : idleTime + Time.unscaledDeltaTime;
             if (idleTime >= idleSeconds) Play();

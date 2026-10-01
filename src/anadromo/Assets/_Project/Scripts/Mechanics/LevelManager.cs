@@ -31,7 +31,7 @@ namespace Anadromo.Logic
         public ZoneLimit swimNormalLeft, swimNormalRight;
         public bool debugSalmonProgression = true;
         public LevelEndingEffects endingEffects;
-        [Min(1)] public int requiredAbysmMeals = 5;
+        [Min(0)] public int requiredAbysmMeals = 5;
         public bool countMealsFromStart;
         [UnityEngine.Serialization.FormerlySerializedAs("bloopTimeout")]
         [InspectorName("Duración de orcas (segundos)")]
@@ -45,6 +45,8 @@ namespace Anadromo.Logic
         public bool isPlayerInAbysm;
         public bool showStartButton = true;
         public bool autoStart;
+        [Tooltip("Desactívalo para saltar las diapositivas y el fundido inicial e ir directamente al botón Iniciar partida. Auto Start sigue controlando el inicio automático.")]
+        public bool enableIntro = true;
         public DiegeticSwimIntro swimIntro;
         public Anadromo.UI.OpeningSlideshow openingSlideshow;
         public bool IsReady { get; private set; }
@@ -84,7 +86,7 @@ namespace Anadromo.Logic
                 playerEnergy = PlayerRoot.GetComponent<Anadromo.Systems.EnergySystem>();
             // Story, idle menu and scripted swimming must not exhaust the player.
             if (playerEnergy != null) playerEnergy.SetConsumptionPaused(true);
-            if (openingSlideshow != null) openingSlideshow.Initialize(playerCamera);
+            if (openingSlideshow != null) openingSlideshow.Initialize(playerCamera, enableIntro);
             currentPhase = GamePhase.WaitingForStart;
             playerEatenCount = 0;
             isPlayerInAbysm = false;
@@ -299,7 +301,7 @@ namespace Anadromo.Logic
                 string state = $"fase={progress.Phase}; zona={firstFoodPlayerZone.name}; dentro={insideFood}; " +
                     $"entro={progress.EnteredFirstFoodZone}; salio={progress.ExitedFirstFoodZone}; " +
                     $"grupo={krillFirstMid.name}; restantes={remaining}/{krillFirstMid.InitialPopulation}; comidosJugador={eaten}; " +
-                    $"cazaScary={(depleted && progress.ExitedFirstFoodZone ? "AUTORIZADA" : "BLOQUEADA")}";
+                    $"cazaScary={(progress.ExitedFirstFoodZone ? "AUTORIZADA" : "BLOQUEADA")}";
                 if (state != lastFeedingDebugState)
                 {
                     LogSalmon(state + $"; posicionCamara={point}");

@@ -89,7 +89,12 @@ namespace Anadromo.Mechanics
             debris.SetVector3(IntroVelocity, Vector3.back * SprintSpeed);
             debris.Reinit();
             debris.Simulate(1f / 30f, (uint)Mathf.CeilToInt(warmupSeconds * 30));
-            StartCoroutine(Reveal());
+            if (owner.enableIntro) StartCoroutine(Reveal());
+            else
+            {
+                curtain.alpha = 0;
+                Revealed = true;
+            }
         }
 
         IEnumerator Reveal()
