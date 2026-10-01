@@ -262,9 +262,9 @@ MonoBehaviour:
   disturbanceDelay: 2.5
   noiseThreshold: 6
   normalSpeed: 1
-  attackSpeed: 9
+  attackSpeed: 2
   calmTurn: 5
-  attackTurn: 0.5
+  attackTurn: 3
   damage: 8
   biteInterval: 1
   loseInterestDelay: 3

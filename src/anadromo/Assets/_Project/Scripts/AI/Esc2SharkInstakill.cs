@@ -100,6 +100,7 @@ namespace Anadromo.AI
             // Comprobar si ya está lo suficientemente cerca para comérselo
             if (Vector3.Distance(transform.position, targetPos) <= eatDistance)
             {
+                Debug.Log($"<color=red>[Shark] MORDISCO!</color> Distancia: {eatDistance}m | <color=orange>Tiburón: {transform.position}</color> | <color=yellow>Player: {targetPos}</color>");
                 ExecuteCinematicDeath();
             }
         }
